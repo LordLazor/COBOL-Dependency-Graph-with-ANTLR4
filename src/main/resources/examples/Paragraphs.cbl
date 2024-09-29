@@ -14,6 +14,8 @@ PARA-1.
   DISPLAY "Hier passiert was".
   PARA-2.
 
+
 PARA-2.
   DISPLAY "Hier passiert auch was".
   STOP RUN.
+
