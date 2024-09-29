@@ -18,9 +18,25 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
   /**
    * Get the program name from the program unit context by traversing through the parents of the current context.
    */
+
+  // ParagraphNameContext
+
   private String getProgramName(Cobol85Parser.ParagraphNameContext ctx)
       throws ProgramNameNotFoundException {
     Object parent = ctx.getParent();
+    return getProgramName(parent);
+  }
+
+  // ProcedureCopyStatementContext
+  private String getProgramName(Cobol85Parser.ProcedureCopyStatementContext ctx)
+      throws ProgramNameNotFoundException {
+    Object parent = ctx.getParent();
+    return getProgramName(parent);
+  }
+
+  private String getProgramName(Object parent)
+      throws ProgramNameNotFoundException {
+
     while (!(parent instanceof Cobol85Parser.ProgramUnitContext)) {
       parent = ((ParserRuleContext) parent).getParent();
     }
@@ -79,10 +95,39 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
       String programName = getProgramName(ctx);
       String paragraphName = ctx.children.get(0).getText();
       jsonUtilities.addNode(programName, 1); // TODO: change groups
+      jsonUtilities.addNode(paragraphName, 1); // TODO: change groups
       jsonUtilities.addLink(programName, paragraphName, 1); // TODO: change values
     } catch (ProgramNameNotFoundException e) {
       e.printStackTrace();
     }
     return super.visitParagraphName(ctx);
+  }
+
+  @Override
+  public Object visitProcedureCopyStatement(Cobol85Parser.ProcedureCopyStatementContext ctx) {
+    try {
+      String programName = getProgramName(ctx);
+      String copyName = ctx.children.get(1).getText();
+      jsonUtilities.addNode(programName, 1); // TODO: change groups
+      jsonUtilities.addNode(copyName, 1); // TODO: change groups
+      jsonUtilities.addLink(programName, copyName, 1); // TODO: change values
+    } catch (ProgramNameNotFoundException e) {
+      e.printStackTrace();
+    }
+    return super.visitProcedureCopyStatement(ctx);
+  }
+
+  @Override
+  public Object visitCopyStatement(Cobol85Parser.CopyStatementContext ctx) {
+    try {
+      String programName = getProgramName(ctx);
+      String copyName = ctx.children.get(1).getText();
+      jsonUtilities.addNode(programName, 1); // TODO: change groups
+      jsonUtilities.addNode(copyName, 1); // TODO: change groups
+      jsonUtilities.addLink(programName, copyName, 1); // TODO: change values
+    } catch (ProgramNameNotFoundException e) {
+      e.printStackTrace();
+    }
+    return super.visitCopyStatement(ctx);
   }
 }
