@@ -4,9 +4,16 @@ import de.lordlazor.bachelorarbeit.exceptions.ProgramNameNotFoundException;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.IdentificationDivisionContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProgramIdParagraphContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProgramUnitContext;
+import de.lordlazor.bachelorarbeit.utils.JsonUtilities;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 public class Visitor extends Cobol85BaseVisitor<Object> {
+
+  private JsonUtilities jsonUtilities;
+
+  public Visitor(JsonUtilities jsonUtilities) {
+    this.jsonUtilities = jsonUtilities;
+  }
 
   /**
    * Get the program name from the program unit context by traversing through the parents of the current context.
@@ -68,13 +75,11 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
 
   @Override
   public Object visitParagraphName(Cobol85Parser.ParagraphNameContext ctx) {
-
     try {
       String programName = getProgramName(ctx);
       String paragraphName = ctx.children.get(0).getText();
-
-      System.out.println("Paragraph name: " + paragraphName + " in program: " + programName);
-
+      jsonUtilities.addNode(programName, 1); // TODO: change groups
+      jsonUtilities.addLink(programName, paragraphName, 1); // TODO: change values
     } catch (ProgramNameNotFoundException e) {
       e.printStackTrace();
     }
