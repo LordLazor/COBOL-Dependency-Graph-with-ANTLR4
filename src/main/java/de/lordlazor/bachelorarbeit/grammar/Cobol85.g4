@@ -46,6 +46,7 @@ identificationDivision
 
 identificationDivisionBody
     : authorParagraph
+    | copyStatement
     | installationParagraph
     | dateWrittenParagraph
     | dateCompiledParagraph
@@ -105,6 +106,7 @@ environmentDivision
 
 environmentDivisionBody
     : configurationSection
+    | copyStatement
     | specialNamesParagraph
     | inputOutputSection
     ;
@@ -448,6 +450,7 @@ dataDivision
 dataDivisionSection
     : fileSection
     | dataBaseSection
+    | copyStatement
     | workingStorageSection
     | linkageSection
     | communicationSection
@@ -1446,6 +1449,7 @@ sentence
 
 statement
     : acceptStatement
+    | procedureCopyStatement
     | addStatement
     | alterStatement
     | callStatement
@@ -1495,6 +1499,25 @@ statement
     | unstringStatement
     | writeStatement
     ;
+
+// copy
+copyStatement
+    : COPY copySource DOT_FS
+    ;
+
+procedureCopyStatement
+    : COPY copySource
+    ;
+
+copySource
+    : (literal | cobolWord | fileName) ((OF | IN) copyLibrary)?
+    ;
+
+copyLibrary
+    : literal
+    | cobolWord
+    ;
+
 
 // accept statement
 
@@ -1735,6 +1758,7 @@ displayUpon
 displayWith
     : WITH? NO ADVANCING
     ;
+
 
 // divide statement
 
