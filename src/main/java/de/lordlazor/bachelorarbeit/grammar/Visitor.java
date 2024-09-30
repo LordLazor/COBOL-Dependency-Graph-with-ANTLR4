@@ -1,7 +1,11 @@
 package de.lordlazor.bachelorarbeit.grammar;
 
+import de.lordlazor.bachelorarbeit.exceptions.ContextNotFoundException;
 import de.lordlazor.bachelorarbeit.exceptions.ProgramNameNotFoundException;
+import de.lordlazor.bachelorarbeit.exceptions.VisitorFileNotFoundException;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.AssignClauseContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.IdentificationDivisionContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.LiteralContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProgramIdParagraphContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProgramUnitContext;
 import de.lordlazor.bachelorarbeit.utils.JsonUtilities;
@@ -151,6 +155,7 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
       String programName = getProgramName(ctx);
       String calledProgramName = ctx.children.get(1).getText();
       calledProgramName = calledProgramName.replace("'", "");
+      calledProgramName = calledProgramName.replace("\"", "");
       jsonUtilities.addNode(programName, 1); // TODO: change groups
       jsonUtilities.addNode(calledProgramName, 1); // TODO: change groups
       jsonUtilities.addLink(programName, calledProgramName, 1); // TODO: change values
@@ -158,6 +163,53 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
       e.printStackTrace();
     }
     return super.visitCallStatement(ctx);
+  }
+
+  @Override
+  public Object visitFileControlClause(Cobol85Parser.FileControlClauseContext ctx) {
+    try {
+      String programName = getProgramName(ctx);
+
+      AssignClauseContext assignClauseContext = null;
+
+      for (int i = 0; i < ctx.children.size(); i++){
+        if (ctx.children.get(i) instanceof Cobol85Parser.AssignClauseContext) {
+          assignClauseContext = (AssignClauseContext) ctx.children.get(i);
+        }
+      }
+
+      if (assignClauseContext == null) {
+        throw new ContextNotFoundException("assignClauseContext is null");
+      }
+
+      LiteralContext literalContext = null;
+
+      for (int i = 0; i < assignClauseContext.children.size(); i++){
+        if (assignClauseContext.children.get(i) instanceof Cobol85Parser.LiteralContext) {
+          literalContext = (LiteralContext) assignClauseContext.children.get(i);
+        }
+      }
+
+      if (literalContext == null) {
+        throw new ContextNotFoundException("literalContext is null");
+      }
+
+      String fileControlClause = literalContext.children.get(0).getText();
+
+      if (fileControlClause == null) {
+        throw new VisitorFileNotFoundException("fileControlClause is null");
+      }
+
+      fileControlClause = fileControlClause.replace("'", "");
+      fileControlClause = fileControlClause.replace("\"", "");
+      jsonUtilities.addNode(programName, 1); // TODO: change groups
+      jsonUtilities.addNode(fileControlClause, 1); // TODO: change groups
+      jsonUtilities.addLink(programName, fileControlClause, 1); // TODO: change values
+    } catch (ProgramNameNotFoundException | VisitorFileNotFoundException |
+             ContextNotFoundException e) {
+      e.printStackTrace();
+    }
+    return super.visitFileControlClause(ctx);
   }
 
 }
