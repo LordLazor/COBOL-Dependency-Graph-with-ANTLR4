@@ -41,6 +41,13 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
     return getProgramName(parent);
   }
 
+  // CallStatementContext
+  public String getProgramName(Cobol85Parser.CallStatementContext ctx)
+      throws ProgramNameNotFoundException {
+    Object parent = ctx.getParent();
+    return getProgramName(parent);
+  }
+
   private String getProgramName(Object parent)
       throws ProgramNameNotFoundException {
 
@@ -137,4 +144,20 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
     }
     return super.visitCopyStatement(ctx);
   }
+
+  @Override
+  public Object visitCallStatement(Cobol85Parser.CallStatementContext ctx) {
+    try {
+      String programName = getProgramName(ctx);
+      String calledProgramName = ctx.children.get(1).getText();
+      calledProgramName = calledProgramName.replace("'", "");
+      jsonUtilities.addNode(programName, 1); // TODO: change groups
+      jsonUtilities.addNode(calledProgramName, 1); // TODO: change groups
+      jsonUtilities.addLink(programName, calledProgramName, 1); // TODO: change values
+    } catch (ProgramNameNotFoundException e) {
+      e.printStackTrace();
+    }
+    return super.visitCallStatement(ctx);
+  }
+
 }
