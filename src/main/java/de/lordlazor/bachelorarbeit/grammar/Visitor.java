@@ -21,14 +21,21 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
 
   // ParagraphNameContext
 
-  private String getProgramName(Cobol85Parser.ParagraphNameContext ctx)
+  public String getProgramName(Cobol85Parser.ParagraphNameContext ctx)
+      throws ProgramNameNotFoundException {
+    Object parent = ctx.getParent();
+    return getProgramName(parent);
+  }
+
+  // CopyStatementContext
+  public String getProgramName(Cobol85Parser.CopyStatementContext ctx)
       throws ProgramNameNotFoundException {
     Object parent = ctx.getParent();
     return getProgramName(parent);
   }
 
   // ProcedureCopyStatementContext
-  private String getProgramName(Cobol85Parser.ProcedureCopyStatementContext ctx)
+  public String getProgramName(Cobol85Parser.ProcedureCopyStatementContext ctx)
       throws ProgramNameNotFoundException {
     Object parent = ctx.getParent();
     return getProgramName(parent);
