@@ -132,4 +132,39 @@ public class VisitorTests {
     assertThat(jsonUtilities.getNodes().get(1).get("id")).isEqualTo("Somebookname");
   }
 
+  @Test
+  public void testGetProgramNameAndCall(){
+    CharStream callStream = CharStreams.fromString("""
+        IDENTIFICATION DIVISION.
+        PROGRAM-ID. CallProg.
+        ENVIRONMENT DIVISION.
+        CONFIGURATION SECTION.
+        INPUT-OUTPUT SECTION.
+        DATA DIVISION.
+        FILE SECTION.
+        WORKING-STORAGE SECTION.
+        LINKAGE SECTION.
+                
+        PROCEDURE DIVISION.
+        CALL 'SUMME' USING Num1, Num2, Num3.
+        
+        """);
+
+    Cobol85Lexer lexer = new Cobol85Lexer(callStream);
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    Cobol85Parser parser = new Cobol85Parser(tokens);
+
+    jsonUtilities = new JsonUtilities();
+    visitor = new Visitor(jsonUtilities);
+
+    ParseTree tree = parser.startRule();
+
+    visitor.visit(tree);
+
+    assertThat(jsonUtilities.getNodes()).isNotNull();
+    assertThat(jsonUtilities.getNodes().size()).isEqualTo(2);
+    assertThat(jsonUtilities.getNodes().get(0).get("id")).isEqualTo("CallProg");
+    assertThat(jsonUtilities.getNodes().get(1).get("id")).isEqualTo("SUMME");
+  }
+
 }
