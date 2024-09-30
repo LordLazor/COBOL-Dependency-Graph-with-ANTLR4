@@ -12,6 +12,30 @@ public class JsonUtilities {
   private ArrayList<HashMap<String, Object>> nodes = new ArrayList<>();
   private ArrayList<HashMap<String, Object>> links = new ArrayList<>();
 
+  public HashMap<String, Object> getJsonMap() {
+    return jsonMap;
+  }
+
+  public void setJsonMap(HashMap<String, Object> jsonMap) {
+    this.jsonMap = jsonMap;
+  }
+
+  public ArrayList<HashMap<String, Object>> getNodes() {
+    return nodes;
+  }
+
+  public void setNodes(ArrayList<HashMap<String, Object>> nodes) {
+    this.nodes = nodes;
+  }
+
+  public ArrayList<HashMap<String, Object>> getLinks() {
+    return links;
+  }
+
+  public void setLinks(ArrayList<HashMap<String, Object>> links) {
+    this.links = links;
+  }
+
   public void addNode(String id, int group) {
     // If node already exist in nodes list, do not add it again
     for (HashMap<String, Object> node : nodes) {
