@@ -167,4 +167,41 @@ public class VisitorTests {
     assertThat(jsonUtilities.getNodes().get(1).get("id")).isEqualTo("SUMME");
   }
 
+  @Test
+  public void testGetProgramNameAndFileName(){
+    CharStream fileStream = CharStreams.fromString("""
+      IDENTIFICATION DIVISION.
+      PROGRAM-ID. FileProg.
+      ENVIRONMENT DIVISION.
+      CONFIGURATION SECTION.
+      INPUT-OUTPUT SECTION.
+      FILE-CONTROL.
+          SELECT InputFile ASSIGN TO 'input.txt'.
+      DATA DIVISION.
+      FILE SECTION.
+      WORKING-STORAGE SECTION.
+      
+      LINKAGE SECTION.
+      
+      PROCEDURE DIVISION.
+
+        """);
+
+    Cobol85Lexer lexer = new Cobol85Lexer(fileStream);
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    Cobol85Parser parser = new Cobol85Parser(tokens);
+
+    jsonUtilities = new JsonUtilities();
+    visitor = new Visitor(jsonUtilities);
+
+    ParseTree tree = parser.startRule();
+
+    visitor.visit(tree);
+
+    assertThat(jsonUtilities.getNodes()).isNotNull();
+    assertThat(jsonUtilities.getNodes().size()).isEqualTo(2);
+    assertThat(jsonUtilities.getNodes().get(0).get("id")).isEqualTo("FileProg");
+    assertThat(jsonUtilities.getNodes().get(1).get("id")).isEqualTo("input.txt");
+  }
+
 }
