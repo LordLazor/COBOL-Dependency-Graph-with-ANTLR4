@@ -17,7 +17,7 @@ public class BachelorarbeitApplication {
 
   public static void main(String[] args) throws IOException {
 
-    String filePath = "src/main/resources/examples/ProcedureXCopyXParagraph.cbl"; // TODO: Can be filename or folder name; selected by frontend
+    String filePath = "src/main/resources/examples/X-Cobol/cloudflare_cobweb_hello.cob"; // TODO: Can be filename or folder name; selected by frontend
     CharStream stream = CharStreams.fromFileName(filePath); // TODO: Can be filename or folder name; selected by frontend
 
     Cobol85Lexer lexer = new Cobol85Lexer(stream); // TODO: Can be filename or folder name; selected by frontend
