@@ -71,14 +71,13 @@
   <hr>
 
   <div th:if="${jsonData != null}">
-    <p><span style="color: #1f77b4" class="mt-5">■</span> Program
-    <span style="color: #aec7e8" class="mt-5">■</span> COPYBOOK
-    <span style="color: #ffbb78" class="mt-5">■</span> Paragraph
-    <span style="color: #ff7f0e" class="mt-5">■</span> CALL</p>
+    <p id="legend"></p>
     <svg style="border: 1px solid black;"></svg>
     <script src="https://d3js.org/d3.v4.min.js"></script>
     <script th:inline="javascript">
       /*<![CDATA[*/
+
+
       var width = 1200;
       var height = 600;
 
@@ -95,6 +94,30 @@
       var jsonString = /*[[${jsonData}]]*/;
       var graph = JSON.parse(jsonString);
 
+      var group_colors = {};
+
+      graph.nodes.forEach(function(node) {
+        var groupColor = color(node.group);
+        group_colors[node.group] = groupColor;
+      });
+
+      var group_names = {
+        1: "Program",
+        2: "Paragraph",
+        3: "COPYBOOK",
+        4: "CALL",
+        5: "FILE"
+      };
+
+      Object.keys(group_names).forEach(function(key) {
+        if (!group_colors.hasOwnProperty(key)) {
+          return;
+        }
+        var color = group_colors[key];
+        var name = group_names[key];
+        document.getElementById("legend").innerHTML += '<span style="color: ' + color + '">■</span>' + name + ' ';
+      });
+
       var link = svg.append("g")
       .attr("class", "links")
       .selectAll("line")
@@ -110,7 +133,7 @@
 
       var circles = node.append("circle")
       .attr("r", 10)
-      .attr("fill", function(d) { return color(d.group); });
+      .attr("fill", function(d) { return group_colors[d.group]; });
 
       var drag_handler = d3.drag()
       .on("start", dragstarted)
