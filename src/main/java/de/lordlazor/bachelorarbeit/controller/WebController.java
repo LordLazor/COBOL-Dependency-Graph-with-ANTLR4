@@ -21,7 +21,6 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.Mapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,8 +29,22 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 public class WebController {
 
-  private static String UPLOADED_FOLDER = "src/main/resources/uploads/";
+  private static String OUTPUT_FOLDER = "src/main/resources/out/";
 
+  private List<String> allFiles(){
+    List<String> files = new ArrayList<>();
+    File folder = new File(OUTPUT_FOLDER);
+    File[] listOfFiles = folder.listFiles();
+
+    assert listOfFiles != null;
+    for (File file : listOfFiles) {
+      if (file.isFile()) {
+        files.add(file.getName());
+      }
+    }
+
+    return files;
+  }
 
 
   @GetMapping("/")
@@ -46,6 +59,18 @@ public class WebController {
 
   @GetMapping("/view")
   public String view(Model model){
+    model.addAttribute("filenames", allFiles());
+    return "view";
+  }
+
+  @PostMapping("/view/viewgraph")
+  public String viewGraph(@RequestParam("filename") String filename, Model model)
+      throws IOException {
+    filename = OUTPUT_FOLDER + filename;
+    String jsonData = JsonUtilities.readJsonFile(filename);
+
+    model.addAttribute("jsonData", jsonData);
+    model.addAttribute("filenames", allFiles());
     return "view";
   }
 
@@ -62,7 +87,7 @@ public class WebController {
 
       CharStream stream = CharStreams.fromStream(inputStream);
 
-      Cobol85Lexer lexer = new Cobol85Lexer(stream); // TODO: Can be filename or folder name; selected by frontend
+      Cobol85Lexer lexer = new Cobol85Lexer(stream);
       CommonTokenStream tokens = new CommonTokenStream(lexer);
       Cobol85Parser parser = new Cobol85Parser(tokens);
 

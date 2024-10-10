@@ -72,4 +72,12 @@ public class JsonUtilities {
     ObjectMapper objectMapper = new ObjectMapper();
     objectMapper.writeValue(new File(filePath), jsonMap);
   }
+
+  public static String readJsonFile(String filePath) throws IOException {
+    ObjectMapper objectMapper = new ObjectMapper();
+    File file = new File(filePath);
+    Object json = objectMapper.readValue(file, Object.class);
+    return objectMapper.writeValueAsString(json);
+
+  }
 }
