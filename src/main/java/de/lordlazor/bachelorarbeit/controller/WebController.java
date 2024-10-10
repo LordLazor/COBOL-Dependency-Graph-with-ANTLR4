@@ -64,14 +64,14 @@ public class WebController {
   }
 
   @PostMapping("/view/viewgraph")
-  public String viewGraph(@RequestParam("filename") String filename, Model model)
+  public String viewGraph(@RequestParam("filename") String filename, RedirectAttributes redirectAttributes)
       throws IOException {
     filename = OUTPUT_FOLDER + filename;
     String jsonData = JsonUtilities.readJsonFile(filename);
 
-    model.addAttribute("jsonData", jsonData);
-    model.addAttribute("filenames", allFiles());
-    return "view";
+    redirectAttributes.addFlashAttribute("jsonData", jsonData);
+    redirectAttributes.addFlashAttribute("filenames", allFiles());
+    return "redirect:/view";
   }
 
   @PostMapping("/upload/file")

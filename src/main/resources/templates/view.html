@@ -65,22 +65,30 @@
         </th:block>
       </select>
     </div>
-    <button type="submit" class="btn btn-primary">Submit</button>
+    <button type="submit" class="btn btn-success">Submit</button>
   </form>
 
+  <hr>
+
   <div th:if="${jsonData != null}">
-    <svg width="1200" height="600"></svg>
+    <p><span style="color: #1f77b4" class="mt-5">■</span> Program
+    <span style="color: #aec7e8" class="mt-5">■</span> COPYBOOK
+    <span style="color: #ffbb78" class="mt-5">■</span> Paragraph
+    <span style="color: #ff7f0e" class="mt-5">■</span> CALL</p>
+    <svg style="border: 1px solid black;"></svg>
     <script src="https://d3js.org/d3.v4.min.js"></script>
     <script th:inline="javascript">
       /*<![CDATA[*/
-      var svg = d3.select("svg"),
-          width = +svg.attr("width"),
-          height = +svg.attr("height");
+      var width = 1200;
+      var height = 600;
+
+      var svg = d3.select("svg")
+        .attr("viewBox", `0 0 `+ width + ` ` + height)
 
       var color = d3.scaleOrdinal(d3.schemeCategory20);
 
       var simulation = d3.forceSimulation()
-      .force("link", d3.forceLink().id(function(d) { return d.id; }).distance(100))
+      .force("link", d3.forceLink().id(function(d) { return d.id; }).distance(150))
       .force("charge", d3.forceManyBody())
       .force("center", d3.forceCenter(width / 2, height / 2));
 
