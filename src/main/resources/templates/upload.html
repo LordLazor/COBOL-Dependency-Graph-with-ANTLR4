@@ -29,8 +29,14 @@
               Upload
             </a>
             <ul class="dropdown-menu">
-              <li><a class="dropdown-item active" th:href="@{/upload}">Upload file</a></li>
-              <li><a class="dropdown-item disabled" aria-disabled="true">Upload folder (TBI)</a></li>
+              <div th:if="${type == 'file'}">
+                <li><a class="dropdown-item active" th:href="@{/upload/file}">Upload file</a></li>
+                <li><a class="dropdown-item" aria-disabled="true" th:href="@{/upload/folder}">Upload folder</a></li>
+              </div>
+              <div th:unless="${type == 'folder'}">
+                <li><a class="dropdown-item" th:href="@{/upload/file}">Upload file</a></li>
+                <li><a class="dropdown-item active" aria-disabled="true" th:href="@{/upload/folder}">Upload folder</a></li>
+              </div>
             </ul>
           </li>
           <li class="nav-item">
@@ -45,20 +51,33 @@
   <hr>
 
 
+  <div th:if="${type == 'folder'}">
+    <div th:if="${type == 'folder'}">
+      <h2>Select a folder to upload it</h2>
+      <form id="uploadFolderForm" method="post" enctype="multipart/form-data" th:action="@{/upload/folder}">
+        <div class="mb-3">
+          <label for="folderInput" class="form-label">Select below:</label>
+          <input type="file" id="folderInput" name="folder" class="form-control-file form-control" webkitdirectory directory required>
+        </div>
+        <button type="submit" class="btn btn-primary">Upload</button>
+      </form>
 
-
-
-  <h2>Select a file to upload it</h2>
-  <form id="uploadForm" method="post" enctype="multipart/form-data" th:action="@{/upload/file}">
-    <div class="mb-3">
-      <label for="fileInput" class="form-label">Select below:</label>
-      <input type="file" id="fileInput" name="file" class="form-control-file form-control" accept=".cbl,.cob" required>
+      <div class="mt-3 alert alert-primary" role="alert" th:if="${message}" th:text="${message}"></div>
     </div>
-    <button type="submit" class="btn btn-primary">Upload</button>
-  </form>
+  </div>
 
-  <div class="mt-3 alert alert-primary" role="alert" th:if="${message}" th:text="${message}"></div>
+  <div th:if="${type == 'file'}">
+    <h2>Select a file to upload it</h2>
+    <form id="uploadForm" method="post" enctype="multipart/form-data" th:action="@{/upload/file}">
+      <div class="mb-3">
+        <label for="fileInput" class="form-label">Select below:</label>
+        <input type="file" id="fileInput" name="file" class="form-control-file form-control" accept=".cbl,.cob" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Upload</button>
+    </form>
 
+    <div class="mt-3 alert alert-primary" role="alert" th:if="${message}" th:text="${message}"></div>
+  </div>
 
 
 </div>
