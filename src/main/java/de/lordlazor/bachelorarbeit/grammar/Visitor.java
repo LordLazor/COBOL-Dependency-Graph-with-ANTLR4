@@ -112,9 +112,10 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
     try {
       String programName = getProgramName(ctx);
       String paragraphName = ctx.children.get(0).getText();
-      jsonUtilities.addNode(programName, 1); // TODO: change groups
-      jsonUtilities.addNode(paragraphName, 2); // TODO: change groups
-      jsonUtilities.addLink(programName, paragraphName, 1); // TODO: change values
+      jsonUtilities.addNode(programName, 1);
+      jsonUtilities.addNode(paragraphName, 2);
+      jsonUtilities.addLink(programName, paragraphName, 1);
+      jsonUtilities.addLink("Root", programName, 1);
     } catch (ProgramNameNotFoundException e) {
       e.printStackTrace();
     }
@@ -126,9 +127,10 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
     try {
       String programName = getProgramName(ctx);
       String copyName = ctx.children.get(1).getText();
-      jsonUtilities.addNode(programName, 1); // TODO: change groups
-      jsonUtilities.addNode(copyName, 3); // TODO: change groups
-      jsonUtilities.addLink(programName, copyName, 1); // TODO: change values
+      jsonUtilities.addNode(programName, 1);
+      jsonUtilities.addNode(copyName, 3);
+      jsonUtilities.addLink(programName, copyName, 1);
+      jsonUtilities.addLink("Root", programName, 1);
     } catch (ProgramNameNotFoundException e) {
       e.printStackTrace();
     }
@@ -140,9 +142,10 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
     try {
       String programName = getProgramName(ctx);
       String copyName = ctx.children.get(1).getText();
-      jsonUtilities.addNode(programName, 1); // TODO: change groups
-      jsonUtilities.addNode(copyName, 3); // TODO: change groups
-      jsonUtilities.addLink(programName, copyName, 1); // TODO: change values
+      jsonUtilities.addNode(programName, 1);
+      jsonUtilities.addNode(copyName, 3);
+      jsonUtilities.addLink(programName, copyName, 1);
+      jsonUtilities.addLink("Root", programName, 1);
     } catch (ProgramNameNotFoundException e) {
       e.printStackTrace();
     }
@@ -156,9 +159,10 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
       String calledProgramName = ctx.children.get(1).getText();
       calledProgramName = calledProgramName.replace("'", "");
       calledProgramName = calledProgramName.replace("\"", "");
-      jsonUtilities.addNode(programName, 1); // TODO: change groups
-      jsonUtilities.addNode(calledProgramName, 4); // TODO: change groups
-      jsonUtilities.addLink(programName, calledProgramName, 1); // TODO: change values
+      jsonUtilities.addNode(programName, 1);
+      jsonUtilities.addNode(calledProgramName, 4);
+      jsonUtilities.addLink(programName, calledProgramName, 1);
+      jsonUtilities.addLink("Root", programName, 1);
     } catch (ProgramNameNotFoundException e) {
       e.printStackTrace();
     }
@@ -202,9 +206,10 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
 
       fileControlClause = fileControlClause.replace("'", "");
       fileControlClause = fileControlClause.replace("\"", "");
-      jsonUtilities.addNode(programName, 1); // TODO: change groups
-      jsonUtilities.addNode(fileControlClause, 5); // TODO: change groups
-      jsonUtilities.addLink(programName, fileControlClause, 1); // TODO: change values
+      jsonUtilities.addNode(programName, 1);
+      jsonUtilities.addNode(fileControlClause, 5);
+      jsonUtilities.addLink(programName, fileControlClause, 1);
+      jsonUtilities.addLink("Root", programName, 1);
     } catch (ProgramNameNotFoundException | VisitorFileNotFoundException |
              ContextNotFoundException e) {
       e.printStackTrace();

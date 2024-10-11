@@ -66,6 +66,8 @@ public class JsonUtilities {
   }
 
   public void createJsonFile(String filePath) throws IOException {
+    addNode("Root", 0); // Root node
+
     jsonMap.put("nodes", nodes);
     jsonMap.put("links", links);
 
