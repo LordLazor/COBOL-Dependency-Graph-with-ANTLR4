@@ -52,8 +52,15 @@ public class WebController {
     return "index";
   }
 
-  @GetMapping("/upload")
+  @GetMapping("/upload/file")
   public String upload(Model model) {
+    model.addAttribute("type", "file");
+    return "upload";
+  }
+
+  @GetMapping("/upload/folder")
+  public String uploadFolder(Model model) {
+    model.addAttribute("type", "folder");
     return "upload";
   }
 
@@ -74,11 +81,74 @@ public class WebController {
     return "redirect:/view";
   }
 
+  @PostMapping("/upload/folder")
+  public String uploadFolder(@RequestParam("folder")  MultipartFile[] files, RedirectAttributes redirectAttributes) {
+    redirectAttributes.addFlashAttribute("type", "folder");
+    if (files.length == 0) {
+      redirectAttributes.addFlashAttribute("message", "Please select a folder to upload");
+      return "redirect:/upload/folder";
+    }
+
+    try {
+      List<CharStream> streams = new ArrayList<>();
+      String folderName = null;
+
+      for (MultipartFile file : files) {
+        if (folderName == null) {
+          Path path = Paths.get(file.getOriginalFilename());
+          folderName = path.getParent().toString();
+        }
+
+        InputStream inputStream = file.getInputStream();
+        streams.add(CharStreams.fromStream(inputStream));
+
+      }
+
+      JsonUtilities jsonUtilities = new JsonUtilities();
+
+      Cobol85Lexer lexer;
+      CommonTokenStream tokens;
+      Cobol85Parser parser;
+
+      ParseTree tree;
+
+      Visitor visitor;
+
+      for (CharStream stream : streams) {
+        lexer = new Cobol85Lexer(stream);
+        tokens = new CommonTokenStream(lexer);
+        parser = new Cobol85Parser(tokens);
+
+        tree = parser.startRule();
+
+        visitor = new Visitor(jsonUtilities);
+        visitor.visit(tree);
+      }
+
+      DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ddMMyyyy_HHmmss");
+
+      String formattedDateTime = LocalDateTime.now().format(formatter);
+
+      jsonUtilities.createJsonFile("src/main/resources/out/output_"+ formattedDateTime + ".json");
+
+
+      redirectAttributes.addFlashAttribute("message", "You successfully uploaded the folder '" + folderName + "'");
+
+    } catch (IOException e) {
+      e.printStackTrace();
+      redirectAttributes.addFlashAttribute("message", "Folder upload failed: " + e.getMessage());
+      redirectAttributes.addFlashAttribute("error", true);
+    }
+
+    return "redirect:/upload/folder";
+  }
+
   @PostMapping("/upload/file")
   public String uploadFile(@RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {
+    redirectAttributes.addFlashAttribute("type", "file");
     if (file.isEmpty()) {
       redirectAttributes.addFlashAttribute("message", "Please select a file to upload");
-      return "redirect:/upload";
+      return "redirect:/upload/file";
     }
 
     try {
@@ -113,7 +183,7 @@ public class WebController {
       redirectAttributes.addFlashAttribute("error", true);
     }
 
-    return "redirect:/upload";
+    return "redirect:/upload/file";
   }
 
 
