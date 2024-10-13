@@ -25,6 +25,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Controller
 public class WebController {
@@ -99,6 +103,10 @@ public class WebController {
           folderName = path.getParent().toString();
         }
 
+        if (!file.getOriginalFilename().endsWith(".cbl") || !file.getOriginalFilename().endsWith(".cob")) {
+          continue; // TODO: Implement copy book support => rn grammar is problematic so that the copy book cant be parsed (prob. wont be able in the future)
+        }
+
         InputStream inputStream = file.getInputStream();
         streams.add(CharStreams.fromStream(inputStream));
 
@@ -131,6 +139,23 @@ public class WebController {
 
       jsonUtilities.createJsonFile("src/main/resources/out/output_"+ formattedDateTime + ".json");
 
+      Files.createDirectories(Paths.get(OUTPUT_FOLDER + formattedDateTime));
+
+      BufferedReader reader;
+
+      for (MultipartFile file : files) {
+        if (file.getOriginalFilename().endsWith(".cob") || file.getOriginalFilename().endsWith(".cbl")) {
+          reader = new BufferedReader(new InputStreamReader(file.getInputStream()));
+          String extractedFilename = findProgramID(reader);
+
+          if (extractedFilename == null) {
+            redirectAttributes.addFlashAttribute("message", "PROGRAM-ID not found in the file");
+            return "redirect:/upload/folder";
+          }
+
+          Files.copy(file.getInputStream(), Paths.get(OUTPUT_FOLDER + formattedDateTime + "/" + extractedFilename));
+        }
+      }
 
       redirectAttributes.addFlashAttribute("message", "You successfully uploaded the folder '" + folderName + "'");
 
@@ -141,6 +166,18 @@ public class WebController {
     }
 
     return "redirect:/upload/folder";
+  }
+
+  private String findProgramID(BufferedReader reader) throws IOException {
+    String line;
+    Pattern pattern = Pattern.compile("PROGRAM-ID\\.\\s*(\\w+)");
+    while ((line = reader.readLine()) != null) {
+      Matcher matcher = pattern.matcher(line);
+      if (matcher.find()) {
+        return matcher.group(1);
+      }
+    }
+    return null;
   }
 
   @PostMapping("/upload/file")
@@ -173,6 +210,19 @@ public class WebController {
       String formattedDateTime = LocalDateTime.now().format(formatter);
 
       jsonUtilities.createJsonFile("src/main/resources/out/output_"+ formattedDateTime + ".json");
+
+      Files.createDirectories(Paths.get(OUTPUT_FOLDER + formattedDateTime));
+
+      BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()));
+      String extractedFilename = findProgramID(reader);
+
+      if (extractedFilename == null) {
+        redirectAttributes.addFlashAttribute("message", "PROGRAM-ID not found in the file");
+        return "redirect:/upload/file";
+      }
+
+
+      Files.copy(file.getInputStream(), Paths.get(OUTPUT_FOLDER + formattedDateTime + "/" +extractedFilename));
 
 
       redirectAttributes.addFlashAttribute("message", "You successfully uploaded '" + file.getOriginalFilename() + "'");
