@@ -44,7 +44,7 @@
               Upload
             </a>
             <ul class="dropdown-menu">
-              <li><a class="dropdown-item " th:href="@{/upload}">Upload file</a></li>
+              <li><a class="dropdown-item " th:href="@{/upload/file}">Upload file</a></li>
               <li><a class="dropdown-item" aria-disabled="true" th:href="@{/upload/folder}">Upload folder</a></li>
             </ul>
           </li>
@@ -65,12 +65,12 @@
         </th:block>
       </select>
     </div>
-    <button type="submit" class="btn btn-success">Submit</button>
+    <button type="submit" class="btn btn-success">Show Graph</button>
   </form>
 
   <hr>
 
-  <div th:if="${jsonData != null}">
+  <div class="mb-5" th:if="${jsonData != null}" style="height: 100%; width: 100%;">
     <p id="legend"></p>
     <svg style="border: 1px solid black;"></svg>
     <script src="https://d3js.org/d3.v4.min.js"></script>
@@ -192,7 +192,14 @@
       }
       /*]]>*/
     </script>
+
+    <div>
+      <h2>Files</h2>
+
+    </div>
   </div>
+
+
 </div>
 
 </body>

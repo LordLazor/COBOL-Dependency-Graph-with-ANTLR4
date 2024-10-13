@@ -33,7 +33,7 @@
                 <li><a class="dropdown-item active" th:href="@{/upload/file}">Upload file</a></li>
                 <li><a class="dropdown-item" aria-disabled="true" th:href="@{/upload/folder}">Upload folder</a></li>
               </div>
-              <div th:unless="${type == 'folder'}">
+              <div th:if="${type == 'folder'}">
                 <li><a class="dropdown-item" th:href="@{/upload/file}">Upload file</a></li>
                 <li><a class="dropdown-item active" aria-disabled="true" th:href="@{/upload/folder}">Upload folder</a></li>
               </div>
