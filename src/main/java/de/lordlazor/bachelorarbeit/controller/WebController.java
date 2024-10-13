@@ -5,6 +5,7 @@ import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser;
 import de.lordlazor.bachelorarbeit.grammar.Visitor;
 import de.lordlazor.bachelorarbeit.utils.JsonUtilities;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -13,7 +14,9 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -35,6 +38,7 @@ public class WebController {
 
   private static String OUTPUT_FOLDER = "src/main/resources/out/";
 
+  // All json files in the output folder
   private List<String> allFiles(){
     List<String> files = new ArrayList<>();
     File folder = new File(OUTPUT_FOLDER);
@@ -48,6 +52,32 @@ public class WebController {
     }
 
     return files;
+  }
+
+  private Map<String, String> getProgramFiles(String fileDataFolder) {
+    Map<String, String> programFiles = new HashMap<>();
+    File folder = new File(fileDataFolder);
+    File[] listOfFiles = folder.listFiles();
+
+    assert listOfFiles != null;
+    for (File file : listOfFiles) {
+      if (file.isFile()) {
+        try {
+          BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+          String line;
+          StringBuilder stringBuilder = new StringBuilder();
+          while ((line = reader.readLine()) != null) {
+            stringBuilder.append(line).append("\n");
+          }
+          programFiles.put(file.getName(), stringBuilder.toString());
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
+    }
+
+    return programFiles;
+
   }
 
 
@@ -74,14 +104,34 @@ public class WebController {
     return "view";
   }
 
-  @PostMapping("/view/viewgraph")
+  private static String extractTimestamp(String filename) {
+    Pattern pattern = Pattern.compile("output_(\\d{8}_\\d{6})\\.json");
+    Matcher matcher = pattern.matcher(filename);
+    if (matcher.find()) {
+      return matcher.group(1);
+    }
+    return null;
+  }
+
+    @PostMapping("/view/viewgraph")
   public String viewGraph(@RequestParam("filename") String filename, RedirectAttributes redirectAttributes)
       throws IOException {
+    String fileTimestamp = extractTimestamp(filename);
+
+    if (fileTimestamp == null) {
+      redirectAttributes.addFlashAttribute("message", "Invalid filename");
+      return "redirect:/view";
+    }
+
     filename = OUTPUT_FOLDER + filename;
     String jsonData = JsonUtilities.readJsonFile(filename);
 
+    String fileDataFolder = OUTPUT_FOLDER + fileTimestamp;
+    Map<String, String> programFiles = getProgramFiles(fileDataFolder);
+
     redirectAttributes.addFlashAttribute("jsonData", jsonData);
     redirectAttributes.addFlashAttribute("filenames", allFiles());
+    redirectAttributes.addFlashAttribute("programFiles", programFiles);
     return "redirect:/view";
   }
 
@@ -103,7 +153,7 @@ public class WebController {
           folderName = path.getParent().toString();
         }
 
-        if (!file.getOriginalFilename().endsWith(".cbl") || !file.getOriginalFilename().endsWith(".cob")) {
+        if (!file.getOriginalFilename().endsWith(".cbl") && !file.getOriginalFilename().endsWith(".cob")) {
           continue; // TODO: Implement copy book support => rn grammar is problematic so that the copy book cant be parsed (prob. wont be able in the future)
         }
 
