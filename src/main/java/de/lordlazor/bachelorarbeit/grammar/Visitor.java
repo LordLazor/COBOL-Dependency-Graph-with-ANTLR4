@@ -4,11 +4,15 @@ import de.lordlazor.bachelorarbeit.exceptions.ContextNotFoundException;
 import de.lordlazor.bachelorarbeit.exceptions.ProgramNameNotFoundException;
 import de.lordlazor.bachelorarbeit.exceptions.VisitorFileNotFoundException;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.AssignClauseContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DataDescriptionEntryContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DataDescriptionEntryFormat1Context;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.IdentificationDivisionContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.LiteralContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProgramIdParagraphContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProgramUnitContext;
 import de.lordlazor.bachelorarbeit.utils.JsonUtilities;
+import java.util.ArrayList;
+import java.util.List;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 public class Visitor extends Cobol85BaseVisitor<Object> {
@@ -215,6 +219,90 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
       e.printStackTrace();
     }
     return super.visitFileControlClause(ctx);
+  }
+
+
+  // Getting Variables of Working Storage Section
+  @Override
+  public Object visitWorkingStorageSection(Cobol85Parser.WorkingStorageSectionContext ctx) {
+    try {
+      String programName = getProgramName(ctx);
+      List<DataDescriptionEntryFormat1Context> dataDescriptionEntryFormat1Contexts = new ArrayList<>();
+
+      for (int i = 0; i < ctx.children.size(); i++) {
+        if (ctx.children.get(i) instanceof Cobol85Parser.DataDescriptionEntryContext) {
+          dataDescriptionEntryFormat1Contexts.add(
+              (DataDescriptionEntryFormat1Context) ctx.children.get(i).getChild(0));
+        }
+      }
+
+      List<List<String>> variables = new ArrayList<>();
+
+      for (DataDescriptionEntryFormat1Context dataDescriptionEntryFormat1Context : dataDescriptionEntryFormat1Contexts) {
+        List<String> variable = new ArrayList<>();
+        variable.add(dataDescriptionEntryFormat1Context.children.get(0).getText());
+        variable.add(dataDescriptionEntryFormat1Context.children.get(1).getChild(0).getChild(0).getText());
+        variables.add(variable);
+      }
+
+      // TODO: Maybe add PICTURE CLAUSES to identify the type of the variable
+
+      List<List<String>> nodes = new ArrayList<>();
+      List<List<String>> links = new ArrayList<>();
+
+      for (int i = variables.size() - 1; i >= 0; i--) {
+        int currentLevelNumber = Integer.parseInt(variables.get(i).get(0));
+
+        List<String> node = new ArrayList<>();
+
+        // 6: VARIABLE; 7: SUBVARIABLE
+        if (currentLevelNumber == 1){
+          node.add(variables.get(i).get(0) + ": " + variables.get(i).get(1));
+          node.add("6");
+        } else {
+          node.add(variables.get(i).get(0) + ": " + variables.get(i).get(1));
+          node.add("7");
+        }
+
+        nodes.add(node);
+
+        if(currentLevelNumber != 1){
+          for (int j = i - 1; j >= 0; j--) {
+            int parentLevelNumber = Integer.parseInt(variables.get(j).get(0));
+            if (parentLevelNumber < currentLevelNumber) {
+              List<String> link = new ArrayList<>();
+              link.add(variables.get(j).get(0) + ": " + variables.get(j).get(1));
+              link.add(variables.get(i).get(0) + ": " + variables.get(i).get(1));
+              links.add(link);
+              break;
+            }
+          }
+        } else {
+          List<String> link = new ArrayList<>();
+          link.add(programName);
+          link.add(variables.get(i).get(0) + ": " + variables.get(i).get(1));
+          links.add(link);
+        }
+
+      }
+
+      for(List<String> node : nodes){
+        jsonUtilities.addNode(node.get(0), Integer.parseInt(node.get(1)));
+      }
+
+      for(List<String> link : links){
+        jsonUtilities.addLink(link.get(0), link.get(1), 1);
+      }
+
+      jsonUtilities.addNode(programName, 1);
+
+      jsonUtilities.addLink("Root", programName, 1);
+
+
+    } catch (ProgramNameNotFoundException e) {
+      e.printStackTrace();
+    }
+    return super.visitWorkingStorageSection(ctx);
   }
 
 }
