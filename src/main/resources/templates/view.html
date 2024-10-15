@@ -149,7 +149,7 @@
       .enter().append("g");
 
       var circles = node.append("circle")
-      .attr("r", 10)
+      .attr("r", 5)
       .attr("fill", function(d) { return group_colors[d.group]; });
 
       var drag_handler = d3.drag()
@@ -165,7 +165,7 @@
       })
       .attr('x', 6)
       .attr('y', 3)
-      .style("font-size", "14px");
+      .style("font-size", "7px");
 
       node.append("title")
       .text(function(d) { return d.id; });
