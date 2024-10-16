@@ -1,5 +1,6 @@
 package de.lordlazor.bachelorarbeit.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Lexer;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser;
 import de.lordlazor.bachelorarbeit.grammar.Visitor;
@@ -17,15 +18,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.io.BufferedReader;
@@ -122,13 +128,14 @@ public class WebController {
       redirectAttributes.addFlashAttribute("message", "Invalid filename");
       return "redirect:/view";
     }
-
+    String rawFilename = filename;
     filename = OUTPUT_FOLDER + filename;
     String jsonData = JsonUtilities.readJsonFile(filename);
 
     String fileDataFolder = OUTPUT_FOLDER + fileTimestamp;
     Map<String, String> programFiles = getProgramFiles(fileDataFolder);
 
+    redirectAttributes.addFlashAttribute("selectedOption", rawFilename);
     redirectAttributes.addFlashAttribute("jsonData", jsonData);
     redirectAttributes.addFlashAttribute("filenames", allFiles());
     redirectAttributes.addFlashAttribute("programFiles", programFiles);
@@ -284,6 +291,44 @@ public class WebController {
     }
 
     return "redirect:/upload/file";
+  }
+
+  @PostMapping("/view/updateGraph")
+  @ResponseBody
+  public String updateGraph(@RequestBody Map<String, Object> checkboxData) throws IOException {
+    String filename = (String) checkboxData.get("filename");
+    checkboxData.remove("filename");
+    String fileTimestamp = extractTimestamp(filename);
+
+    filename = OUTPUT_FOLDER + filename;
+    String jsonData = JsonUtilities.readJsonFile(filename);
+
+    List<Integer> unselectedNodes = new ArrayList<>();
+    checkboxData.forEach((key, value) -> {
+      if (!((boolean) value)) {
+        unselectedNodes.add(Integer.parseInt(key));
+      }
+    });
+
+    ObjectMapper objectMapper = new ObjectMapper();
+    Map<String, Object> jsonMap = objectMapper.readValue(jsonData, Map.class);
+    List<Map<String, Object>> nodes = (List<Map<String, Object>>) jsonMap.get("nodes");
+    List<Map<String, Object>> links = (List<Map<String, Object>>) jsonMap.get("links");
+
+    // Remove nodes with groups in unselectedNodes
+    nodes.removeIf(node -> unselectedNodes.contains(node.get("group")));
+
+    // Collect remaining node IDs
+    Set<String> remainingNodeIds = nodes.stream()
+        .map(node -> (String) node.get("id"))
+        .collect(Collectors.toSet());
+
+    // Remove links where either source or target node does not exist in remaining nodes
+    links.removeIf(link -> !remainingNodeIds.contains(link.get("source")) || !remainingNodeIds.contains(link.get("target")));
+
+    jsonMap.put("nodes", nodes);
+    jsonMap.put("links", links);
+    return objectMapper.writeValueAsString(jsonMap);
   }
 
 
