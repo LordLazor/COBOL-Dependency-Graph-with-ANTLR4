@@ -1,0 +1,36 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. worker.
+       ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+       FILE-CONTROL.
+           SELECT InputFile ASSIGN TO 'input.txt'.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+
+           COPY OTHERVARIABLES.
+       PROCEDURE DIVISION.
+           CALL "get_http_form" USING ARG-NAME RETURNING ARG-VALUE.
+           EVALUATE TRUE
+               WHEN ARG-VALUE = 1
+                   MOVE 'rock' TO PLAYER-CHOICE
+               WHEN ARG-VALUE = 2
+                   MOVE 'scissors' TO PLAYER-CHOICE
+               WHEN ARG-VALUE = 3
+                   MOVE 'paper' TO PLAYER-CHOICE
+               WHEN OTHER
+                   CALL "set_http_status" USING HTTP-BAD-REQUEST
+                   CALL "set_http_body" USING ERROR-NO-INPUT
+                   STOP RUN
+           END-EVALUATE.
+           DISPLAY-PLAYER-CHOICE.
+              DISPLAY "player: " ARG-VALUE
+              DISPLAY "player: " PLAYER-CHOICE
+              MOVE ROCK TO CHOICE(1).
+              MOVE SCISSORS TO CHOICE(2).
+              MOVE PAPER TO CHOICE(3).
+              ACCEPT current-time FROM TIME.
+              COMPUTE RAND-NUM = FUNCTION RANDOM (T-MS) * 100.
+              DIVIDE RAND-NUM BY 3 GIVING BLAH REMAINDER CHOICE-IND.
+              MOVE CHOICE(CHOICE-IND + 1) TO COMPUTER-CHOICE.
+           CALL "append_http_body" USING "Computer chose "
+           STOP RUN.
