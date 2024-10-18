@@ -2,7 +2,7 @@ package de.lordlazor.bachelorarbeit.controller;
 
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Lexer;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser;
-import de.lordlazor.bachelorarbeit.grammar.Visitor;
+import de.lordlazor.bachelorarbeit.visitor.Visitor;
 import de.lordlazor.bachelorarbeit.utils.ControllerUtilities;
 import de.lordlazor.bachelorarbeit.utils.JsonUtilities;
 import java.io.BufferedReader;

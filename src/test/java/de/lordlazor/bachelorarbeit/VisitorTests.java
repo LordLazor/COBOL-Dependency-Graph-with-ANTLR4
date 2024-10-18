@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Lexer;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser;
-import de.lordlazor.bachelorarbeit.grammar.Visitor;
+import de.lordlazor.bachelorarbeit.visitor.Visitor;
 import de.lordlazor.bachelorarbeit.utils.JsonUtilities;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;

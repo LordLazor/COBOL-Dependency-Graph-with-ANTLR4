@@ -1,23 +1,28 @@
-package de.lordlazor.bachelorarbeit.grammar;
+package de.lordlazor.bachelorarbeit.visitor;
 
 import de.lordlazor.bachelorarbeit.exceptions.ContextNotFoundException;
 import de.lordlazor.bachelorarbeit.exceptions.ProgramNameNotFoundException;
 import de.lordlazor.bachelorarbeit.exceptions.VisitorFileNotFoundException;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85BaseVisitor;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.AssignClauseContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CallStatementContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CopyStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DataDescriptionEntryContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DataDescriptionEntryFormat1Context;
-import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.IdentificationDivisionContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.FileControlClauseContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.LiteralContext;
-import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProgramIdParagraphContext;
-import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProgramUnitContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ParagraphNameContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProcedureCopyStatementContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.WorkingStorageSectionContext;
 import de.lordlazor.bachelorarbeit.utils.JsonUtilities;
+import de.lordlazor.bachelorarbeit.utils.VisitorUtilities;
 import java.util.ArrayList;
 import java.util.List;
-import org.antlr.v4.runtime.ParserRuleContext;
 
 public class Visitor extends Cobol85BaseVisitor<Object> {
 
   private JsonUtilities jsonUtilities;
+  private VisitorUtilities visitorUtilities = new VisitorUtilities();
 
   public Visitor(JsonUtilities jsonUtilities) {
     this.jsonUtilities = jsonUtilities;
@@ -27,94 +32,13 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
    * Get the program name from the program unit context by traversing through the parents of the current context.
    */
 
-  // ParagraphNameContext
-
-  public String getProgramName(Cobol85Parser.ParagraphNameContext ctx)
-      throws ProgramNameNotFoundException {
-    Object parent = ctx.getParent();
-    return getProgramName(parent);
-  }
-
-  // CopyStatementContext
-  public String getProgramName(Cobol85Parser.CopyStatementContext ctx)
-      throws ProgramNameNotFoundException {
-    Object parent = ctx.getParent();
-    return getProgramName(parent);
-  }
-
-  // ProcedureCopyStatementContext
-  public String getProgramName(Cobol85Parser.ProcedureCopyStatementContext ctx)
-      throws ProgramNameNotFoundException {
-    Object parent = ctx.getParent();
-    return getProgramName(parent);
-  }
-
-  // CallStatementContext
-  public String getProgramName(Cobol85Parser.CallStatementContext ctx)
-      throws ProgramNameNotFoundException {
-    Object parent = ctx.getParent();
-    return getProgramName(parent);
-  }
-
-  private String getProgramName(Object parent)
-      throws ProgramNameNotFoundException {
-
-    while (!(parent instanceof Cobol85Parser.ProgramUnitContext)) {
-      parent = ((ParserRuleContext) parent).getParent();
-    }
-
-    if (parent instanceof Cobol85Parser.ProgramUnitContext) {
-      Cobol85Parser.ProgramUnitContext programUnit = (ProgramUnitContext) parent;
-
-      //IdentificationDivisionContext
-      Cobol85Parser.IdentificationDivisionContext identificationDivisionContext = null;
-
-      for (int i = 0; i < programUnit.children.size(); i++) {
-        ParserRuleContext child = (ParserRuleContext) programUnit.children.get(i);
-        if (child instanceof Cobol85Parser.IdentificationDivisionContext) {
-          identificationDivisionContext = (IdentificationDivisionContext) child;
-          break;
-        }
-      }
-
-      if (identificationDivisionContext == null) {
-        throw new ProgramNameNotFoundException("identificationDivisionContext is null");
-      }
-
-      //ProgramIdParagraphContext
-      Cobol85Parser.ProgramIdParagraphContext programIdParagraphContext = null;
-
-      for (int i = 0; i < identificationDivisionContext.children.size(); i++) {
-        if (identificationDivisionContext.children.get(i) instanceof Cobol85Parser.ProgramIdParagraphContext) {
-          programIdParagraphContext = (ProgramIdParagraphContext) identificationDivisionContext.children.get(i);;
-        }
-      }
-
-      if (programIdParagraphContext == null) {
-        throw new ProgramNameNotFoundException("programIdParagraphContext is null");
-      }
-
-      //ProgramNameContext
-      Cobol85Parser.ProgramNameContext programNameContext = null;
-
-      for (int i = 0; i < programIdParagraphContext.children.size(); i++) {
-        if (programIdParagraphContext.children.get(i) instanceof Cobol85Parser.ProgramNameContext) {
-          programNameContext = (Cobol85Parser.ProgramNameContext) programIdParagraphContext.children.get(i);
-        }
-      }
-
-      return programNameContext.children.get(0).getChild(0).getText();
-
-    }
 
 
-    throw new ProgramNameNotFoundException("ProgramUnitContext not found");
-  }
 
   @Override
-  public Object visitParagraphName(Cobol85Parser.ParagraphNameContext ctx) {
+  public Object visitParagraphName(ParagraphNameContext ctx) {
     try {
-      String programName = getProgramName(ctx);
+      String programName = visitorUtilities.getProgramName(ctx);
       String paragraphName = ctx.children.get(0).getText();
       jsonUtilities.addNode(programName, 1);
       jsonUtilities.addNode(paragraphName, 2);
@@ -127,9 +51,9 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
   }
 
   @Override
-  public Object visitProcedureCopyStatement(Cobol85Parser.ProcedureCopyStatementContext ctx) {
+  public Object visitProcedureCopyStatement(ProcedureCopyStatementContext ctx) {
     try {
-      String programName = getProgramName(ctx);
+      String programName = visitorUtilities.getProgramName(ctx);
       String copyName = ctx.children.get(1).getText();
       jsonUtilities.addNode(programName, 1);
       jsonUtilities.addNode(copyName, 3);
@@ -142,9 +66,9 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
   }
 
   @Override
-  public Object visitCopyStatement(Cobol85Parser.CopyStatementContext ctx) {
+  public Object visitCopyStatement(CopyStatementContext ctx) {
     try {
-      String programName = getProgramName(ctx);
+      String programName = visitorUtilities.getProgramName(ctx);
       String copyName = ctx.children.get(1).getText();
       jsonUtilities.addNode(programName, 1);
       jsonUtilities.addNode(copyName, 3);
@@ -157,9 +81,9 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
   }
 
   @Override
-  public Object visitCallStatement(Cobol85Parser.CallStatementContext ctx) {
+  public Object visitCallStatement(CallStatementContext ctx) {
     try {
-      String programName = getProgramName(ctx);
+      String programName = visitorUtilities.getProgramName(ctx);
       String calledProgramName = ctx.children.get(1).getText();
       calledProgramName = calledProgramName.replace("'", "");
       calledProgramName = calledProgramName.replace("\"", "");
@@ -173,15 +97,17 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
     return super.visitCallStatement(ctx);
   }
 
+
+  // FileControlClauseContext
   @Override
-  public Object visitFileControlClause(Cobol85Parser.FileControlClauseContext ctx) {
+  public Object visitFileControlClause(FileControlClauseContext ctx) {
     try {
-      String programName = getProgramName(ctx);
+      String programName = visitorUtilities.getProgramName(ctx);
 
       AssignClauseContext assignClauseContext = null;
 
       for (int i = 0; i < ctx.children.size(); i++){
-        if (ctx.children.get(i) instanceof Cobol85Parser.AssignClauseContext) {
+        if (ctx.children.get(i) instanceof AssignClauseContext) {
           assignClauseContext = (AssignClauseContext) ctx.children.get(i);
         }
       }
@@ -193,7 +119,7 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
       LiteralContext literalContext = null;
 
       for (int i = 0; i < assignClauseContext.children.size(); i++){
-        if (assignClauseContext.children.get(i) instanceof Cobol85Parser.LiteralContext) {
+        if (assignClauseContext.children.get(i) instanceof LiteralContext) {
           literalContext = (LiteralContext) assignClauseContext.children.get(i);
         }
       }
@@ -224,13 +150,13 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
 
   // Getting Variables of Working Storage Section
   @Override
-  public Object visitWorkingStorageSection(Cobol85Parser.WorkingStorageSectionContext ctx) {
+  public Object visitWorkingStorageSection(WorkingStorageSectionContext ctx) {
     try {
-      String programName = getProgramName(ctx);
+      String programName = visitorUtilities.getProgramName(ctx);
       List<DataDescriptionEntryFormat1Context> dataDescriptionEntryFormat1Contexts = new ArrayList<>();
 
       for (int i = 0; i < ctx.children.size(); i++) {
-        if (ctx.children.get(i) instanceof Cobol85Parser.DataDescriptionEntryContext) {
+        if (ctx.children.get(i) instanceof DataDescriptionEntryContext) {
           dataDescriptionEntryFormat1Contexts.add(
               (DataDescriptionEntryFormat1Context) ctx.children.get(i).getChild(0));
         }
