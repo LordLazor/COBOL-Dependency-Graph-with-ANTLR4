@@ -88,7 +88,7 @@ public class WebController {
 
 
   @GetMapping("/")
-  public String index(Model model) {
+  public String index() {
     return "index";
   }
 
@@ -110,8 +110,8 @@ public class WebController {
     return "view";
   }
 
-  private static String extractTimestamp(String filename) {
-    Pattern pattern = Pattern.compile("output_(\\d{8}_\\d{6})\\.json");
+  private static String extractJsonFileName(String filename) {
+    Pattern pattern = Pattern.compile("(.+)\\.json");
     Matcher matcher = pattern.matcher(filename);
     if (matcher.find()) {
       return matcher.group(1);
@@ -122,9 +122,9 @@ public class WebController {
     @PostMapping("/view/viewgraph")
   public String viewGraph(@RequestParam("filename") String filename, RedirectAttributes redirectAttributes)
       throws IOException {
-    String fileTimestamp = extractTimestamp(filename);
+    String jsonFileName = extractJsonFileName(filename);
 
-    if (fileTimestamp == null) {
+    if (jsonFileName == null) {
       redirectAttributes.addFlashAttribute("message", "Invalid filename");
       return "redirect:/view";
     }
@@ -132,7 +132,7 @@ public class WebController {
     filename = OUTPUT_FOLDER + filename;
     String jsonData = JsonUtilities.readJsonFile(filename);
 
-    String fileDataFolder = OUTPUT_FOLDER + fileTimestamp;
+    String fileDataFolder = OUTPUT_FOLDER + jsonFileName;
     Map<String, String> programFiles = getProgramFiles(fileDataFolder);
 
     redirectAttributes.addFlashAttribute("selectedOption", rawFilename);
@@ -143,7 +143,7 @@ public class WebController {
   }
 
   @PostMapping("/upload/folder")
-  public String uploadFolder(@RequestParam("folder")  MultipartFile[] files, RedirectAttributes redirectAttributes) {
+  public String uploadFolder(@RequestParam("folder")  MultipartFile[] files, @RequestParam("textInput") String textInput, RedirectAttributes redirectAttributes) {
     redirectAttributes.addFlashAttribute("type", "folder");
     if (files.length == 0) {
       redirectAttributes.addFlashAttribute("message", "Please select a folder to upload");
@@ -190,31 +190,58 @@ public class WebController {
         visitor.visit(tree);
       }
 
-      DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ddMMyyyy_HHmmss");
+      if (textInput.isBlank()){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ddMMyyyy_HHmmss");
 
-      String formattedDateTime = LocalDateTime.now().format(formatter);
+        String formattedDateTime = LocalDateTime.now().format(formatter);
 
-      jsonUtilities.createJsonFile("src/main/resources/out/output_"+ formattedDateTime + ".json");
+        jsonUtilities.createJsonFile(OUTPUT_FOLDER + formattedDateTime + ".json");
 
-      Files.createDirectories(Paths.get(OUTPUT_FOLDER + formattedDateTime));
+        Files.createDirectories(Paths.get(OUTPUT_FOLDER + formattedDateTime));
 
-      BufferedReader reader;
+        BufferedReader reader;
 
-      for (MultipartFile file : files) {
-        if (file.getOriginalFilename().endsWith(".cob") || file.getOriginalFilename().endsWith(".cbl")) {
-          reader = new BufferedReader(new InputStreamReader(file.getInputStream()));
-          String extractedFilename = findProgramID(reader);
+        for (MultipartFile file : files) {
+          if (file.getOriginalFilename().endsWith(".cob") || file.getOriginalFilename().endsWith(".cbl")) {
+            reader = new BufferedReader(new InputStreamReader(file.getInputStream()));
+            String extractedFilename = findProgramID(reader);
 
-          if (extractedFilename == null) {
-            redirectAttributes.addFlashAttribute("message", "PROGRAM-ID not found in the file");
-            return "redirect:/upload/folder";
+            if (extractedFilename == null) {
+              redirectAttributes.addFlashAttribute("message", "PROGRAM-ID not found in the file");
+              return "redirect:/upload/folder";
+            }
+
+            Files.copy(file.getInputStream(), Paths.get(OUTPUT_FOLDER + formattedDateTime + "/" + extractedFilename));
           }
-
-          Files.copy(file.getInputStream(), Paths.get(OUTPUT_FOLDER + formattedDateTime + "/" + extractedFilename));
         }
+
+        redirectAttributes.addFlashAttribute("message", "You successfully uploaded the folder '" + folderName + "'");
+
+      } else {
+
+        jsonUtilities.createJsonFile(OUTPUT_FOLDER + textInput + ".json");
+        Files.createDirectories(Paths.get(OUTPUT_FOLDER + textInput));
+
+        BufferedReader reader;
+
+        for (MultipartFile file : files) {
+          if (file.getOriginalFilename().endsWith(".cob") || file.getOriginalFilename().endsWith(".cbl")) {
+            reader = new BufferedReader(new InputStreamReader(file.getInputStream()));
+            String extractedFilename = findProgramID(reader);
+
+            if (extractedFilename == null) {
+              redirectAttributes.addFlashAttribute("message", "PROGRAM-ID not found in the file");
+              return "redirect:/upload/folder";
+            }
+
+            Files.copy(file.getInputStream(), Paths.get(OUTPUT_FOLDER + textInput + "/" + extractedFilename));
+          }
+        }
+
+        redirectAttributes.addFlashAttribute("message", "You successfully uploaded the folder '" + textInput + "'");
+
       }
 
-      redirectAttributes.addFlashAttribute("message", "You successfully uploaded the folder '" + folderName + "'");
 
     } catch (IOException e) {
       e.printStackTrace();
@@ -238,7 +265,7 @@ public class WebController {
   }
 
   @PostMapping("/upload/file")
-  public String uploadFile(@RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {
+  public String uploadFile(@RequestParam("file") MultipartFile file, @RequestParam("textInput") String textInput, RedirectAttributes redirectAttributes) {
     redirectAttributes.addFlashAttribute("type", "file");
     if (file.isEmpty()) {
       redirectAttributes.addFlashAttribute("message", "Please select a file to upload");
@@ -262,27 +289,49 @@ public class WebController {
       Visitor visitor = new Visitor(jsonUtilities);
       visitor.visit(tree);
 
-      DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ddMMyyyy_HHmmss");
+      if (textInput.isBlank()){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ddMMyyyy_HHmmss");
 
-      String formattedDateTime = LocalDateTime.now().format(formatter);
+        String formattedDateTime = LocalDateTime.now().format(formatter);
 
-      jsonUtilities.createJsonFile("src/main/resources/out/output_"+ formattedDateTime + ".json");
+        jsonUtilities.createJsonFile(OUTPUT_FOLDER + formattedDateTime + ".json");
 
-      Files.createDirectories(Paths.get(OUTPUT_FOLDER + formattedDateTime));
+        Files.createDirectories(Paths.get(OUTPUT_FOLDER + formattedDateTime));
 
-      BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()));
-      String extractedFilename = findProgramID(reader);
 
-      if (extractedFilename == null) {
-        redirectAttributes.addFlashAttribute("message", "PROGRAM-ID not found in the file");
-        return "redirect:/upload/file";
+        BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()));
+        String extractedFilename = findProgramID(reader);
+
+        if (extractedFilename == null) {
+          redirectAttributes.addFlashAttribute("message", "PROGRAM-ID not found in the file");
+          return "redirect:/upload/file";
+        }
+
+
+        Files.copy(file.getInputStream(), Paths.get(OUTPUT_FOLDER + formattedDateTime + "/" +extractedFilename));
+
+
+        redirectAttributes.addFlashAttribute("message", "You successfully uploaded '" + file.getOriginalFilename() + "'");
+      } else {
+
+        jsonUtilities.createJsonFile("src/main/resources/out/" + textInput + ".json");
+        Files.createDirectories(Paths.get(OUTPUT_FOLDER + textInput));
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()));
+        String extractedFilename = findProgramID(reader);
+
+        if (extractedFilename == null) {
+          redirectAttributes.addFlashAttribute("message", "PROGRAM-ID not found in the file");
+          return "redirect:/upload/file";
+        }
+
+        Files.copy(file.getInputStream(), Paths.get(OUTPUT_FOLDER + textInput + "/" + extractedFilename));
+
+
+        redirectAttributes.addFlashAttribute("message", "You successfully uploaded '" + textInput + "'");
+
       }
 
-
-      Files.copy(file.getInputStream(), Paths.get(OUTPUT_FOLDER + formattedDateTime + "/" +extractedFilename));
-
-
-      redirectAttributes.addFlashAttribute("message", "You successfully uploaded '" + file.getOriginalFilename() + "'");
 
     } catch (IOException e) {
       e.printStackTrace();
@@ -298,7 +347,7 @@ public class WebController {
   public String updateGraph(@RequestBody Map<String, Object> checkboxData) throws IOException {
     String filename = (String) checkboxData.get("filename");
     checkboxData.remove("filename");
-    String fileTimestamp = extractTimestamp(filename);
+
 
     filename = OUTPUT_FOLDER + filename;
     String jsonData = JsonUtilities.readJsonFile(filename);

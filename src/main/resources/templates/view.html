@@ -278,6 +278,8 @@
 
         var group_colors = {};
 
+
+
         graph.nodes.forEach(function(node) {
           var groupColor = color(node.group);
           group_colors[node.group] = groupColor;
@@ -293,6 +295,8 @@
           6: "VARIABLE",
           7: "SUBVARIABLE"
         };
+
+
 
         Object.keys(group_names).forEach(key => {
           if (!group_colors.hasOwnProperty(key)) return;
