@@ -20,11 +20,15 @@ import org.springframework.stereotype.Component;
 public class ControllerUtilities {
 
   private final String OUTPUT_FOLDER = "src/main/resources/out/";
+  private final String OTHER_FILES_FOLDER = "other_files/";
 
   public String getOutputFolder() {
     return OUTPUT_FOLDER;
   }
 
+  public String getOtherFilesFolder() {
+    return OTHER_FILES_FOLDER;
+  }
 
   public Map<String, Object> updateJson(String filename, Map<String, Object> checkboxData) throws IOException {
     filename = getOutputFolder() + filename;
