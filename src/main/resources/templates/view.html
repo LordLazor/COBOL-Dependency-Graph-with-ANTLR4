@@ -424,8 +424,25 @@
       </th:block>
     </div>
     <hr>
-    <div id="accordion2">
-      <p>TODO: Other files like COPY or txt</p>
+    <div th:if="${otherFiles != null}" id="accordion2">
+      <p>Other files</p>
+      <th:block th:each="entry, iter : ${otherFiles}">
+
+        <div class="card">
+          <div th:attr="id='heading2' + ${iter.index}" class="card-header">
+            <h5 class="mb-0">
+              <button class="btn btn-link" data-toggle="collapse" th:attr="data-target='#collapse2' + ${iter.index}, aria-controls='collapse2' + ${iter.index}" aria-expanded="false">
+                <p th:text="${entry.key}"></p>
+              </button>
+            </h5>
+          </div>
+          <div th:attr="id='collapse2' + ${iter.index}, aria-labelledby='heading2' + ${iter.index}" class="collapse" data-parent="#accordion2">
+            <div class="card-body">
+              <pre><code class="cobol" th:text="${entry.value}"></code></pre>
+            </div>
+          </div>
+        </div>
+      </th:block>
     </div>
   </div>
 

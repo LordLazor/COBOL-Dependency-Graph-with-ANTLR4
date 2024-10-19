@@ -37,11 +37,18 @@ public class ViewController {
 
     String fileDataFolder = controllerUtilities.getOutputFolder()  + jsonFileName;
     Map<String, String> programFiles = controllerUtilities.getProgramFiles(fileDataFolder);
+    String otherFilesFolder = controllerUtilities.getOutputFolder() + jsonFileName + "/" + controllerUtilities.getOtherFilesFolder();
+    Map<String, String> otherFiles = controllerUtilities.getProgramFiles(otherFilesFolder);
+
+    if(otherFiles.isEmpty()){
+      otherFiles = null;
+    }
 
     redirectAttributes.addFlashAttribute("selectedOption", rawFilename);
     redirectAttributes.addFlashAttribute("jsonData", jsonData);
     redirectAttributes.addFlashAttribute("filenames", controllerUtilities.allFiles());
     redirectAttributes.addFlashAttribute("programFiles", programFiles);
+    redirectAttributes.addFlashAttribute("otherFiles", otherFiles);
     return "redirect:/view";
   }
 
