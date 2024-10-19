@@ -115,9 +115,11 @@ public class UploadController {
     }
 
     String outputFolder = controllerUtilities.getOutputFolder();
+    String otherFiles = controllerUtilities.getOtherFilesFolder();
     String formattedDateTime = textInput.isBlank() ? LocalDateTime.now().format(DateTimeFormatter.ofPattern("ddMMyyyy_HHmmss")) : textInput;
     jsonUtilities.createJsonFile(outputFolder + formattedDateTime + ".json");
     Files.createDirectories(Paths.get(outputFolder + formattedDateTime));
+    Files.createDirectories(Paths.get(outputFolder + formattedDateTime + "/" + otherFiles));
 
     for (MultipartFile file : files) {
       if (file.getOriginalFilename().endsWith(".cob") || file.getOriginalFilename().endsWith(".cbl")) {
@@ -130,6 +132,10 @@ public class UploadController {
         }
 
         Files.copy(file.getInputStream(), Paths.get(outputFolder + formattedDateTime + "/" + extractedFilename));
+      }
+      else {
+        String extractedFilename = Paths.get(file.getOriginalFilename()).getFileName().toString();
+        Files.copy(file.getInputStream(), Paths.get(outputFolder + formattedDateTime + "/" + otherFiles + "/" + extractedFilename));
       }
     }
 
