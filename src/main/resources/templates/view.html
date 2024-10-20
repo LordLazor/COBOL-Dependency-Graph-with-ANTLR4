@@ -111,28 +111,79 @@
       <button id="updateGraphButton" class="btn btn-secondary mb-5">Update Graph</button>
     </form>
     <div class="pb-1">
-    <button id="+" class="btn" style="border: 1px solid black;">+</button>
-    <button id="-" class="btn" style="border: 1px solid black;">-</button>
-    <button id="link-+10" class="btn" style="border: 1px solid black;">link len +10</button>
-    <button id="link--10" class="btn" style="border: 1px solid black;">link len -10</button>
+      <div class="row">
+        <div class="col">
+          <p>Size:</p>
+        </div>
+        <div class="col">
+          <p>Link length:</p>
+        </div>
+        <div class="col">
+          <p>Save svg:</p>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <button id="+" class="btn btn-info">+</button>
+          <button id="-" class="btn btn-info">-</button>
+        </div>
+        <div class="col">
+          <button id="link-+10" class="btn btn-info">+</button>
+          <button id="link--10" class="btn btn-info">-</button>
+        </div>
+        <div class="col">
+          <button id="saveAsPNG" class="btn btn-info">Save as png</button>
+        </div>
+      </div>
     </div>
+
+    <script>
+      document.getElementById('saveAsPNG').addEventListener('click', function(event) {
+        event.preventDefault();
+
+        var svg = document.querySelector('svg');
+        var svgData = new XMLSerializer().serializeToString(svg);
+
+        var canvas = document.createElement('canvas');
+        var ctx = canvas.getContext('2d');
+
+        var svgSize = svg.getBoundingClientRect();
+        var scaleFactor = 10;
+        canvas.width = svgSize.width * scaleFactor;
+        canvas.height = svgSize.height * scaleFactor;
+
+        ctx.scale(scaleFactor, scaleFactor);
+
+        var img = new Image();
+        img.setAttribute('src', 'data:image/svg+xml;base64,' + btoa(svgData));
+
+        img.onload = function() {
+          ctx.drawImage(img, 0, 0);
+
+          var downloadLink = document.createElement('a');
+          downloadLink.href = canvas.toDataURL('image/png');
+          downloadLink.download = 'graph.png';
+
+          document.body.appendChild(downloadLink);
+          downloadLink.click();
+          document.body.removeChild(downloadLink);
+        };
+      });
+    </script>
 
     <script>
       document.getElementById('updateGraphButton').addEventListener('click', function(event) {
         event.preventDefault();
 
-        // Erfassen der Checkbox-Daten
         var checkboxes = document.querySelectorAll('input[type="checkbox"]');
         var checkboxData = {};
         checkboxes.forEach(function(checkbox) {
           checkboxData[checkbox.id] = checkbox.checked;
         });
 
-        // Erfassen des filename-Werts
         var filename = document.getElementById('options').value;
         checkboxData['filename'] = filename;
 
-        // Senden der Daten mit AJAX
         $.ajax({
           type: 'POST',
           url: '/view/updateGraph',
@@ -152,18 +203,15 @@
 
         event.preventDefault();
 
-        // Erfassen der Checkbox-Daten
         var checkboxes = document.querySelectorAll('input[type="checkbox"]');
         var checkboxData = {};
         checkboxes.forEach(function(checkbox) {
           checkboxData[checkbox.id] = checkbox.checked;
         });
 
-        // Erfassen des filename-Werts
         var filename = document.getElementById('options').value;
         checkboxData['filename'] = filename;
 
-        // Senden der Daten mit AJAX
         $.ajax({
           type: 'POST',
           url: '/view/updateGraph',
@@ -187,18 +235,15 @@
 
         event.preventDefault();
 
-        // Erfassen der Checkbox-Daten
         var checkboxes = document.querySelectorAll('input[type="checkbox"]');
         var checkboxData = {};
         checkboxes.forEach(function(checkbox) {
           checkboxData[checkbox.id] = checkbox.checked;
         });
 
-        // Erfassen des filename-Werts
         var filename = document.getElementById('options').value;
         checkboxData['filename'] = filename;
 
-        // Senden der Daten mit AJAX
         $.ajax({
           type: 'POST',
           url: '/view/updateGraph',
@@ -219,18 +264,15 @@
       document.getElementById('link-+10').addEventListener('click', function(event) {
         event.preventDefault();
 
-        // Erfassen der Checkbox-Daten
         var checkboxes = document.querySelectorAll('input[type="checkbox"]');
         var checkboxData = {};
         checkboxes.forEach(function(checkbox) {
           checkboxData[checkbox.id] = checkbox.checked;
         });
 
-        // Erfassen des filename-Werts
         var filename = document.getElementById('options').value;
         checkboxData['filename'] = filename;
 
-        // Senden der Daten mit AJAX
         $.ajax({
           type: 'POST',
           url: '/view/updateGraph',
@@ -250,18 +292,15 @@
       document.getElementById('link--10').addEventListener('click', function(event) {
         event.preventDefault();
 
-        // Erfassen der Checkbox-Daten
         var checkboxes = document.querySelectorAll('input[type="checkbox"]');
         var checkboxData = {};
         checkboxes.forEach(function(checkbox) {
           checkboxData[checkbox.id] = checkbox.checked;
         });
 
-        // Erfassen des filename-Werts
         var filename = document.getElementById('options').value;
         checkboxData['filename'] = filename;
 
-        // Senden der Daten mit AJAX
         $.ajax({
           type: 'POST',
           url: '/view/updateGraph',
@@ -299,6 +338,12 @@
 
         svg.selectAll("*").remove();
 
+
+        svg.append("rect")
+        .attr("width", "100%")
+        .attr("height", "100%")
+        .attr("fill", "white");
+
         var simulation = d3.forceSimulation()
         .force("link", d3.forceLink().id(function(d) { return d.id; }).distance(link_distance))
         .force("charge", d3.forceManyBody())
@@ -312,6 +357,7 @@
         .selectAll("line")
         .data(graph.links)
         .enter().append("line")
+        .attr("stroke", "#999")
         .attr("stroke-width", function(d) { return Math.sqrt(d.value); });
 
         var node = svg.append("g")
@@ -319,6 +365,7 @@
         .selectAll("g")
         .data(graph.nodes)
         .enter().append("g");
+
 
         var circles = node.append("circle")
         .attr("r", circle_radius)
@@ -395,6 +442,10 @@
         .force("charge", d3.forceManyBody())
         .force("center", d3.forceCenter(width / 2, height / 2));
 
+        svg.append("rect")
+        .attr("width", "100%")
+        .attr("height", "100%")
+        .attr("fill", "white");
 
         var graph = JSON.parse(jsonString);
 
@@ -445,6 +496,7 @@
         .selectAll("line")
         .data(graph.links)
         .enter().append("line")
+        .attr("stroke", "#999")
         .attr("stroke-width", function(d) { return Math.sqrt(d.value); });
 
         var node = svg.append("g")
