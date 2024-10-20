@@ -148,6 +148,8 @@
 
     <script th:inline="javascript">
 
+      var group_colors = {};
+
       function updateGraph(jsonString){
         var width = 1200;
         var height = 600;
@@ -166,13 +168,6 @@
 
 
         var graph = JSON.parse(jsonString);
-
-        var group_colors = {};
-
-        graph.nodes.forEach(function(node) {
-          var groupColor = color(node.group);
-          group_colors[node.group] = groupColor;
-        });
 
         var group_names = {
           0: "Root",
@@ -279,10 +274,6 @@
 
 
         var graph = JSON.parse(jsonString);
-
-        var group_colors = {};
-
-
 
         graph.nodes.forEach(function(node) {
           var groupColor = color(node.group);
