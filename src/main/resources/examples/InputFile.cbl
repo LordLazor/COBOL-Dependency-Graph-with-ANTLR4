@@ -7,6 +7,14 @@ FILE-CONTROL.
     SELECT InputFile ASSIGN TO 'input.txt'.
 DATA DIVISION.
 FILE SECTION.
+FD InputFile.
+01  InputRecord.
+    05  Field1  PIC X(10).
+    05  Field2  PIC 9(5).
+    05  Field3.
+        10  SubField1  PIC X(5).
+        10  SubField2  PIC 9(3).
+        10  SubField3  PIC X(2).
 WORKING-STORAGE SECTION.
 
 LINKAGE SECTION.

@@ -3,7 +3,8 @@ package de.lordlazor.bachelorarbeit.utils;
 import de.lordlazor.bachelorarbeit.exceptions.ProgramNameNotFoundException;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CallStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CopyStatementContext;
-import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.FileControlClauseContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.FileControlEntryContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.FileSectionContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.IdentificationDivisionContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ParagraphNameContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProcedureCopyStatementContext;
@@ -50,9 +51,15 @@ public class VisitorUtilities {
     return getProgramName(parent);
   }
 
+  // FileSectionContext
+  public String getProgramName(FileSectionContext ctx)
+      throws ProgramNameNotFoundException {
+    Object parent = ctx.getParent();
+    return getProgramName(parent);
+  }
 
   // FileControlClauseContext
-  public String getProgramName(FileControlClauseContext ctx)
+  public String getProgramName(FileControlEntryContext ctx)
       throws ProgramNameNotFoundException {
     Object parent = ctx.getParent();
     return getProgramName(parent);
