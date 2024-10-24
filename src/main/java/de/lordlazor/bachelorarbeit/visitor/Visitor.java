@@ -321,7 +321,7 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
       List<DataDescriptionEntryFormat1Context> dataDescriptionEntryFormat1Contexts = new ArrayList<>();
 
       for (int i = 0; i < ctx.children.size(); i++) {
-        if (ctx.children.get(i) instanceof DataDescriptionEntryContext) {
+        if (ctx.children.get(i) instanceof DataDescriptionEntryFormat1Context) {
           dataDescriptionEntryFormat1Contexts.add(
               (DataDescriptionEntryFormat1Context) ctx.children.get(i).getChild(0));
         }
