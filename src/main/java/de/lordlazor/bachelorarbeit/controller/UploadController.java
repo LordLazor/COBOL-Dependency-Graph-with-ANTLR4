@@ -106,7 +106,17 @@ public class UploadController {
     Visitor visitor;
 
     for (CharStream stream : streams) {
-      lexer = new Cobol85Lexer(stream);
+      String content = stream.toString();
+
+      // Remove lines containing '*', '/', or '*>' as those are the comments
+      String filteredContent = content.lines()
+          .filter(line -> !line.contains("*") && !line.contains("/") && !line.contains("*>"))
+          .reduce("", (acc, line) -> acc + line + "\n");
+
+
+      CharStream filteredStream = CharStreams.fromString(filteredContent);
+
+      lexer = new Cobol85Lexer(filteredStream);
       tokens = new CommonTokenStream(lexer);
       parser = new Cobol85Parser(tokens);
       tree = parser.startRule();
@@ -132,8 +142,7 @@ public class UploadController {
         }
 
         Files.copy(file.getInputStream(), Paths.get(outputFolder + formattedDateTime + "/" + extractedFilename));
-      }
-      else {
+      } else {
         String extractedFilename = Paths.get(file.getOriginalFilename()).getFileName().toString();
         Files.copy(file.getInputStream(), Paths.get(outputFolder + formattedDateTime + "/" + otherFiles + "/" + extractedFilename));
       }
