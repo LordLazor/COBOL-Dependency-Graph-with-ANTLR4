@@ -2,6 +2,9 @@
        PROGRAM-ID. worker2.
        ENVIRONMENT DIVISION.
        INPUT-OUTPUT SECTION.
+      *> Comment option 1
+      *  Comment option 2
+      /  Comment option 3
        FILE-CONTROL.
            SELECT InputFile ASSIGN TO 'input2.txt'.
        DATA DIVISION.

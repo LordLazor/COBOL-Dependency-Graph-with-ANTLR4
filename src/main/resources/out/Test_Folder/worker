@@ -6,6 +6,10 @@
            SELECT InputFile ASSIGN TO 'input.txt'.
        DATA DIVISION.
        WORKING-STORAGE SECTION.
+      *> Comment option 1
+      *  Comment option 2
+      /  Comment option 3
+
 
            COPY OTHERVARIABLES.
        PROCEDURE DIVISION.

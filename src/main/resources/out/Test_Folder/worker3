@@ -26,6 +26,9 @@
               DISPLAY "player: " ARG-VALUE
               DISPLAY "player: " PLAYER-CHOICE
               MOVE ROCK TO CHOICE(1).
+      *> Comment option 1
+      *  Comment option 2
+      /  Comment option 3
               MOVE SCISSORS TO CHOICE(2).
               MOVE PAPER TO CHOICE(3).
               ACCEPT current-time FROM TIME.
