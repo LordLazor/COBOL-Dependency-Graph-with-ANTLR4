@@ -123,6 +123,7 @@ configurationSectionParagraph
     : sourceComputerParagraph
     | objectComputerParagraph
     | specialNamesParagraph
+    | copyStatement
     // strictly, specialNamesParagraph does not belong into configurationSectionParagraph, but ibm-cobol allows this
     ;
 
@@ -302,12 +303,14 @@ inputOutputSection
 inputOutputSectionParagraph
     : fileControlParagraph
     | ioControlParagraph
+    | copyStatement
     ;
 
 // - file control paragraph ----------------------------------
 
 fileControlParagraph
     : FILE_CONTROL (DOT_FS? fileControlEntry)* DOT_FS
+    | copyStatement
     ;
 
 fileControlEntry
@@ -468,6 +471,7 @@ fileSection
 
 fileDescriptionEntry
     : (FD | SD) fileName (DOT_FS? fileDescriptionEntryClause)* DOT_FS dataDescriptionEntry*
+    | copyStatement
     ;
 
 fileDescriptionEntryClause
@@ -588,6 +592,7 @@ dataBaseSection
 
 dataBaseSectionEntry
     : integerLiteral literal INVOKE literal
+    | copyStatement
     ;
 
 // -- working storage section ----------------------------------
@@ -753,6 +758,7 @@ screenDescriptionEntry
         | screenDescriptionPromptClause
         | screenDescriptionFullClause
         | screenDescriptionZeroFillClause
+        | copyStatement
     )* DOT_FS
     ;
 
@@ -892,6 +898,7 @@ reportSection
 
 reportDescription
     : reportDescriptionEntry reportGroupDescriptionEntry+
+    | copyStatement
     ;
 
 reportDescriptionEntry
@@ -1163,6 +1170,7 @@ dataDescriptionEntry
     | dataDescriptionEntryFormat2
     | dataDescriptionEntryFormat3
     | dataDescriptionEntryExecSql
+    | copyStatement
     ;
 
 dataDescriptionEntryFormat1
@@ -1510,7 +1518,7 @@ procedureCopyStatement
     ;
 
 copySource
-    : (literal | cobolWord | fileName) ((OF | IN) copyLibrary)?
+    : (literal | cobolWord | fileName) ((OF | IN) copyLibrary)? ('.cpy')?
     ;
 
 copyLibrary
