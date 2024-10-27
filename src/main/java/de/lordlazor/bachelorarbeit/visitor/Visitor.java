@@ -6,10 +6,14 @@ import de.lordlazor.bachelorarbeit.exceptions.VisitorFileNotFoundException;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85BaseVisitor;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.AssignClauseContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CallStatementContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ConditionNameContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CopyStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DataDescriptionEntryContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DataDescriptionEntryFormat1Context;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DataDescriptionEntryFormat2Context;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DataDescriptionEntryFormat3Context;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DataNameContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DataRenamesClauseContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.FileControlClauseContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.FileControlEntryContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.FileDescriptionEntryContext;
@@ -18,12 +22,15 @@ import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.FileSectionContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.LiteralContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ParagraphNameContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProcedureCopyStatementContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.QualifiedDataNameContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SelectClauseContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.WorkingStorageSectionContext;
 import de.lordlazor.bachelorarbeit.utils.JsonUtilities;
 import de.lordlazor.bachelorarbeit.utils.VisitorUtilities;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Visitor extends Cobol85BaseVisitor<Object> {
 
@@ -331,12 +338,26 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
     try {
       String programName = visitorUtilities.getProgramName(ctx);
       List<DataDescriptionEntryFormat1Context> dataDescriptionEntryFormat1Contexts = new ArrayList<>();
+      List<DataDescriptionEntryFormat2Context> dataDescriptionEntryFormat2Contexts = new ArrayList<>();
+      List<DataDescriptionEntryFormat3Context> dataDescriptionEntryFormat3Contexts = new ArrayList<>();
+
+      Map<Integer, Integer> format1Andformat3Links = new HashMap<>();
 
       for (int i = 0; i < ctx.children.size(); i++) {
         if (ctx.children.get(i).getChild(0) instanceof DataDescriptionEntryFormat1Context) {
           dataDescriptionEntryFormat1Contexts.add(
               (DataDescriptionEntryFormat1Context) ctx.children.get(i).getChild(0));
         }
+        else if (ctx.children.get(i).getChild(0) instanceof DataDescriptionEntryFormat2Context) {
+          dataDescriptionEntryFormat2Contexts.add(
+              (DataDescriptionEntryFormat2Context) ctx.children.get(i).getChild(0));
+        } else if (ctx.children.get(i).getChild(0) instanceof DataDescriptionEntryFormat3Context) {
+          dataDescriptionEntryFormat3Contexts.add(
+              (DataDescriptionEntryFormat3Context) ctx.children.get(i).getChild(0));
+
+          format1Andformat3Links.put(dataDescriptionEntryFormat3Contexts.size() - 1, dataDescriptionEntryFormat1Contexts.size() - 1);
+        }
+
       }
 
       List<List<String>> variables = new ArrayList<>();
@@ -353,6 +374,48 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
         variables.add(variable);
       }
 
+      for (DataDescriptionEntryFormat2Context dataDescriptionEntryFormat2Context : dataDescriptionEntryFormat2Contexts) {
+        List<String> variable = new ArrayList<>();
+        variable.add(dataDescriptionEntryFormat2Context.children.get(0).getText());
+        if (dataDescriptionEntryFormat2Context.children.get(1) instanceof DataNameContext) {
+          variable.add(
+              dataDescriptionEntryFormat2Context.children.get(1).getChild(0).getChild(0).getText());
+        } else {
+          variable.add(dataDescriptionEntryFormat2Context.children.get(1).getText());
+        }
+
+        if (dataDescriptionEntryFormat2Context.children.get(2) instanceof DataRenamesClauseContext) {
+          DataRenamesClauseContext dataRenamesClauseContext = (DataRenamesClauseContext) dataDescriptionEntryFormat2Context.children.get(2);
+          if (dataRenamesClauseContext.children.get(1) instanceof QualifiedDataNameContext) {
+            QualifiedDataNameContext qualifiedDataNameContext = (QualifiedDataNameContext) dataRenamesClauseContext.children.get(1);
+            String renamedName = qualifiedDataNameContext.children.get(0).getChild(0).getChild(0).getChild(0).getText();
+            variable.add(renamedName);
+          }
+        }
+
+        variables.add(variable);
+      }
+
+      Map<String, Integer> updatedFormat1AndFormat3Links = new HashMap<>();
+      int format3i = 0;
+      for (DataDescriptionEntryFormat3Context dataDescriptionEntryFormat3Context : dataDescriptionEntryFormat3Contexts) {
+        List<String> variable = new ArrayList<>();
+        variable.add(dataDescriptionEntryFormat3Context.children.get(0).getText());
+
+        if (dataDescriptionEntryFormat3Context.children.get(1) instanceof ConditionNameContext) {
+          variable.add(
+              dataDescriptionEntryFormat3Context.children.get(1).getChild(0).getChild(0).getText());
+        }
+
+        updatedFormat1AndFormat3Links.put(variable.get(0) + ": " + variable.get(1), format1Andformat3Links.get(format3i));
+        format3i++;
+
+        variables.add(variable);
+
+      }
+
+
+
       // TODO: Maybe add PICTURE CLAUSES to identify the type of the variable
 
       List<List<String>> nodes = new ArrayList<>();
@@ -364,9 +427,14 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
         List<String> node = new ArrayList<>();
 
         // 7: VARIABLE; 8: SUBVARIABLE
-        if (currentLevelNumber == 1){
+        if (currentLevelNumber == 1 || currentLevelNumber == 77) {
           node.add(variables.get(i).get(0) + ": " + variables.get(i).get(1));
           node.add("7");
+        }
+        else if (currentLevelNumber == 66) {
+          node.add(variables.get(i).get(0) + ": " + variables.get(i).get(1) + " RENAMES " + variables.get(i).get(2));
+          node.add("7");
+
         } else {
           node.add(variables.get(i).get(0) + ": " + variables.get(i).get(1));
           node.add("8");
@@ -374,18 +442,47 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
 
         nodes.add(node);
 
-        if(currentLevelNumber != 1){
-          for (int j = i - 1; j >= 0; j--) {
-            int parentLevelNumber = Integer.parseInt(variables.get(j).get(0));
-            if (parentLevelNumber < currentLevelNumber) {
-              List<String> link = new ArrayList<>();
-              link.add(variables.get(j).get(0) + ": " + variables.get(j).get(1));
-              link.add(variables.get(i).get(0) + ": " + variables.get(i).get(1));
-              links.add(link);
-              break;
+        if(currentLevelNumber != 1 && currentLevelNumber != 77 && currentLevelNumber != 66 && currentLevelNumber != 88){
+          {
+            for (int j = i - 1; j >= 0; j--) {
+              int parentLevelNumber = Integer.parseInt(variables.get(j).get(0));
+              if (parentLevelNumber < currentLevelNumber) {
+                List<String> link = new ArrayList<>();
+                link.add(variables.get(j).get(0) + ": " + variables.get(j).get(1));
+                link.add(variables.get(i).get(0) + ": " + variables.get(i).get(1));
+                links.add(link);
+                break;
+              }
             }
           }
-        } else {
+        } else if(currentLevelNumber == 66){
+          List<String> link = new ArrayList<>();
+          link.add(programName);
+          link.add(variables.get(i).get(0) + ": " + variables.get(i).get(1) + " RENAMES " + variables.get(i).get(2));
+          links.add(link);
+        }
+        else if (currentLevelNumber == 88) {
+          String linkName88 = variables.get(i).get(0) + ": " + variables.get(i).get(1);
+          int linkIndex = updatedFormat1AndFormat3Links.get(linkName88);
+
+          DataDescriptionEntryFormat1Context dataDescriptionEntryFormat1Context = dataDescriptionEntryFormat1Contexts.get(linkIndex);
+
+          String levelNumber = dataDescriptionEntryFormat1Context.children.get(0).getText();
+          String variableName = "";
+          if (dataDescriptionEntryFormat1Context.children.get(1) instanceof DataNameContext) {
+            variableName =
+                dataDescriptionEntryFormat1Context.children.get(1).getChild(0).getChild(0).getText();
+          } else {
+            variableName = dataDescriptionEntryFormat1Context.children.get(1).getText();
+          }
+
+          List<String> link = new ArrayList<>();
+          link.add(variables.get(i).get(0) + ": " + variables.get(i).get(1));
+          link.add(levelNumber + ": " + variableName);
+          links.add(link);
+
+        }
+        else {
           List<String> link = new ArrayList<>();
           link.add(programName);
           link.add(variables.get(i).get(0) + ": " + variables.get(i).get(1));
