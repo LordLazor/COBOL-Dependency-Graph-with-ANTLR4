@@ -329,9 +329,11 @@
       var label_font_size = 7;
       var link_distance = 100;
 
+      var width = 1200;
+      var height = 1200;
+
       function updateGraph(jsonString){
-        var width = 1200;
-        var height = 600;
+
 
         var svg = d3.select("svg")
         .attr("viewBox", `0 0 `+ width + ` ` + height);
@@ -429,8 +431,7 @@
 
 
       function createGraph(jsonString){
-        var width = 1200;
-        var height = 600;
+
 
         var svg = d3.select("svg")
         .attr("viewBox", `0 0 `+ width + ` ` + height);
