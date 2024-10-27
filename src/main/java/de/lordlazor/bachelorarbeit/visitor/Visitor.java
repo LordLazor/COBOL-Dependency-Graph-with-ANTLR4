@@ -9,6 +9,7 @@ import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CallStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CopyStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DataDescriptionEntryContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DataDescriptionEntryFormat1Context;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DataNameContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.FileControlClauseContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.FileControlEntryContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.FileDescriptionEntryContext;
@@ -254,9 +255,15 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
       for (DataDescriptionEntryFormat1Context dataDescriptionEntryFormat1Context : dataDescriptionEntryFormat1Contexts) {
         List<String> variable = new ArrayList<>();
         variable.add(dataDescriptionEntryFormat1Context.children.get(0).getText());
-        variable.add(dataDescriptionEntryFormat1Context.children.get(1).getChild(0).getChild(0).getText());
+        if (dataDescriptionEntryFormat1Context.children.get(1) instanceof DataNameContext) {
+          variable.add(
+              dataDescriptionEntryFormat1Context.children.get(1).getChild(0).getChild(0).getText());
+        } else {
+          variable.add(dataDescriptionEntryFormat1Context.children.get(1).getText());
+        }
         variables.add(variable);
       }
+
 
       List<List<String>> nodes = new ArrayList<>();
       List<List<String>> links = new ArrayList<>();
@@ -337,7 +344,12 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
       for (DataDescriptionEntryFormat1Context dataDescriptionEntryFormat1Context : dataDescriptionEntryFormat1Contexts) {
         List<String> variable = new ArrayList<>();
         variable.add(dataDescriptionEntryFormat1Context.children.get(0).getText());
-        variable.add(dataDescriptionEntryFormat1Context.children.get(1).getChild(0).getChild(0).getText());
+        if (dataDescriptionEntryFormat1Context.children.get(1) instanceof DataNameContext) {
+          variable.add(
+              dataDescriptionEntryFormat1Context.children.get(1).getChild(0).getChild(0).getText());
+        } else {
+          variable.add(dataDescriptionEntryFormat1Context.children.get(1).getText());
+        }
         variables.add(variable);
       }
 
