@@ -30,15 +30,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.antlr.v4.runtime.ParserRuleContext;
 
 public class Visitor extends Cobol85BaseVisitor<Object> {
-
-  private JsonUtilities jsonUtilities;
-  private RetrieveProgramName retrieveProgramName = new RetrieveProgramName();
+  private final RetrieveProgramName retrieveProgramName;
+  private final RetrieveContext retrieveContext;
+  private final NodeLinkManager nodeLinkManager;
 
   public Visitor(JsonUtilities jsonUtilities) {
-    this.jsonUtilities = jsonUtilities;
+    this.nodeLinkManager = new NodeLinkManager(jsonUtilities);
+
+    this.retrieveProgramName = new RetrieveProgramName();
+    this.retrieveContext = new RetrieveContext();
   }
 
   /**
@@ -50,11 +52,8 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
     try {
       String programName = retrieveProgramName.getProgramName(ctx);
       String paragraphName = ctx.children.get(0).getText();
-      jsonUtilities.addNode(programName, 1);
-      jsonUtilities.addNode(paragraphName, 2);
-      jsonUtilities.addLink(programName, paragraphName, 1);
-      jsonUtilities.addLink("Root", programName, 1);
-    } catch (ProgramNameNotFoundException e) {
+      nodeLinkManager.addNodeAndLink(programName, paragraphName, 2);
+    } catch (ProgramNameNotFoundException | ContextNotFoundException e) {
       e.printStackTrace();
     }
     return super.visitParagraphName(ctx);
@@ -65,11 +64,8 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
     try {
       String programName = retrieveProgramName.getProgramName(ctx);
       String copyName = ctx.children.get(1).getText();
-      jsonUtilities.addNode(programName, 1);
-      jsonUtilities.addNode(copyName, 3);
-      jsonUtilities.addLink(programName, copyName, 1);
-      jsonUtilities.addLink("Root", programName, 1);
-    } catch (ProgramNameNotFoundException e) {
+      nodeLinkManager.addNodeAndLink(programName, copyName, 3);
+    } catch (ProgramNameNotFoundException | ContextNotFoundException e) {
       e.printStackTrace();
     }
     return super.visitProcedureCopyStatement(ctx);
@@ -80,11 +76,8 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
     try {
       String programName = retrieveProgramName.getProgramName(ctx);
       String copyName = ctx.children.get(1).getText();
-      jsonUtilities.addNode(programName, 1);
-      jsonUtilities.addNode(copyName, 3);
-      jsonUtilities.addLink(programName, copyName, 1);
-      jsonUtilities.addLink("Root", programName, 1);
-    } catch (ProgramNameNotFoundException e) {
+      nodeLinkManager.addNodeAndLink(programName, copyName, 3);
+    } catch (ProgramNameNotFoundException | ContextNotFoundException e) {
       e.printStackTrace();
     }
     return super.visitCopyStatement(ctx);
@@ -94,18 +87,15 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
   public Object visitCallStatement(CallStatementContext ctx) {
     try {
       String programName = retrieveProgramName.getProgramName(ctx);
-      String calledProgramName = ctx.children.get(1).getText();
-      calledProgramName = calledProgramName.replace("'", "");
-      calledProgramName = calledProgramName.replace("\"", "");
-      jsonUtilities.addNode(programName, 1);
-      jsonUtilities.addNode(calledProgramName, 4);
-      jsonUtilities.addLink(programName, calledProgramName, 1);
-      jsonUtilities.addLink("Root", programName, 1);
-    } catch (ProgramNameNotFoundException e) {
+      String calledProgramName = ctx.children.get(1).getText().replace("'", "").replace("\"", "");
+      nodeLinkManager.addNodeAndLink(programName, calledProgramName, 4);
+    } catch (ProgramNameNotFoundException | ContextNotFoundException e) {
       e.printStackTrace();
     }
     return super.visitCallStatement(ctx);
   }
+
+
 
 
   // FileControlClauseContext
@@ -116,70 +106,19 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
 
       // Select Clause for Getting FD Name
 
-      SelectClauseContext selectClauseContext = null;
+      SelectClauseContext selectClauseContext = retrieveContext.getSelectClauseContext(ctx);
 
-      for (int i = 0; i < ctx.children.size(); i++){
-        if (ctx.children.get(i) instanceof SelectClauseContext) {
-          selectClauseContext = (SelectClauseContext) ctx.children.get(i);
-        }
-      }
-
-      if (selectClauseContext == null) {
-        throw new ContextNotFoundException("selectClauseContext is null");
-      }
-
-      FileNameContext fileNameContext = null;
-
-      for (int i = 0; i < selectClauseContext.children.size(); i++){
-        if (selectClauseContext.children.get(i) instanceof FileNameContext) {
-          fileNameContext = (FileNameContext) selectClauseContext.children.get(i);
-        }
-      }
-
-      if (fileNameContext == null) {
-        throw new ContextNotFoundException("fileNameContext is null");
-      }
+      FileNameContext fileNameContext = retrieveContext.getFileNameContext(selectClauseContext);
 
       String fdName = fileNameContext.children.get(0).getChild(0).getText();
 
-
       // File Control Clause
 
-      FileControlClauseContext fileControlClauseContext = null;
+      FileControlClauseContext fileControlClauseContext = retrieveContext.getFileControlClauseContext(ctx);
 
-      for (int i = 0; i < ctx.children.size(); i++){
-        if (ctx.children.get(i) instanceof FileControlClauseContext) {
-          fileControlClauseContext = (FileControlClauseContext) ctx.children.get(i);
-        }
-      }
+      AssignClauseContext assignClauseContext = retrieveContext.getAssignClauseContext(fileControlClauseContext);
 
-      if (fileControlClauseContext == null) {
-        throw new ContextNotFoundException("fileControlClauseContext is null");
-      }
-
-      AssignClauseContext assignClauseContext = null;
-
-      for (int i = 0; i < fileControlClauseContext.children.size(); i++){
-        if (fileControlClauseContext.children.get(i) instanceof AssignClauseContext) {
-          assignClauseContext = (AssignClauseContext) fileControlClauseContext.children.get(i);
-        }
-      }
-
-      if (assignClauseContext == null) {
-        throw new ContextNotFoundException("assignClauseContext is null");
-      }
-
-      LiteralContext literalContext = null;
-
-      for (int i = 0; i < assignClauseContext.children.size(); i++){
-        if (assignClauseContext.children.get(i) instanceof LiteralContext) {
-          literalContext = (LiteralContext) assignClauseContext.children.get(i);
-        }
-      }
-
-      if (literalContext == null) {
-        throw new ContextNotFoundException("literalContext is null");
-      }
+      LiteralContext literalContext = retrieveContext.getLiteralContext(assignClauseContext);
 
       String fileControlClause = literalContext.children.get(0).getText();
 
@@ -187,14 +126,8 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
         throw new VisitorFileNotFoundException("fileControlClause is null");
       }
 
-      fileControlClause = fileControlClause.replace("'", "");
-      fileControlClause = fileControlClause.replace("\"", "");
-      jsonUtilities.addNode(programName, 1);
-      jsonUtilities.addNode(fileControlClause, 6);
-      jsonUtilities.addNode(fdName, 5);
-      jsonUtilities.addLink(programName, fdName, 1);
-      jsonUtilities.addLink(fdName, fileControlClause, 1);
-      jsonUtilities.addLink("Root", programName, 1);
+      fileControlClause = fileControlClause.replace("'", "").replace("\"", "");;
+      nodeLinkManager.addFileControlEntry(programName, fdName, fileControlClause);
     } catch (ProgramNameNotFoundException | VisitorFileNotFoundException |
              ContextNotFoundException e) {
       e.printStackTrace();
@@ -204,59 +137,37 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
 
 
 
+
   @Override
   public Object visitFileSection(FileSectionContext ctx){
     try {
       String programName = retrieveProgramName.getProgramName(ctx);
 
-
-
-      FileDescriptionEntryContext fileDescriptionEntryContext = null;
-
-      for (int i = 0; i < ctx.children.size(); i++) {
-        if (ctx.children.get(i) instanceof FileDescriptionEntryContext) {
-          fileDescriptionEntryContext = (FileDescriptionEntryContext) ctx.children.get(i);
-        }
-      }
-
+      FileDescriptionEntryContext fileDescriptionEntryContext = retrieveContext.getFileDescriptionEntryContext(ctx);
 
       // File Section is empty
       if (fileDescriptionEntryContext == null) {
         return super.visitFileSection(ctx);
       }
 
+      // Get FileName
 
-      FileNameContext fileNameContext = null;
+      FileNameContext fileNameContext = retrieveContext.getFileNameContext(fileDescriptionEntryContext);
+      String fdName = fileNameContext.children.get(0).getChild(0).getText();
 
-      for (int i = 0; i < fileDescriptionEntryContext.children.size(); i++) {
-        if (fileDescriptionEntryContext.children.get(i) instanceof FileNameContext) {
-          fileNameContext = (FileNameContext) fileDescriptionEntryContext.children.get(i);
-        }
-      }
+      nodeLinkManager.addFileDescriptionName(programName, fdName);
 
+
+
+
+      // Get Variables
       List<DataDescriptionEntryFormat1Context> dataDescriptionEntryFormat1Contexts = new ArrayList<>();
       List<DataDescriptionEntryFormat2Context> dataDescriptionEntryFormat2Contexts = new ArrayList<>();
       List<DataDescriptionEntryFormat3Context> dataDescriptionEntryFormat3Contexts = new ArrayList<>();
       Map<Integer, Integer> format1Andformat3Links = new HashMap<>();
 
-      getDataDescriptionExntryFormats(fileDescriptionEntryContext, format1Andformat3Links, dataDescriptionEntryFormat1Contexts, dataDescriptionEntryFormat2Contexts, dataDescriptionEntryFormat3Contexts);
+      retrieveContext.getDataDescriptionEntryFormatContexts(fileDescriptionEntryContext, format1Andformat3Links, dataDescriptionEntryFormat1Contexts, dataDescriptionEntryFormat2Contexts, dataDescriptionEntryFormat3Contexts);
 
-
-      // Get FileName
-      if (fileNameContext == null) {
-        throw new ContextNotFoundException("fileNameContext is null");
-      }
-
-      String fdName = fileNameContext.children.get(0).getChild(0).getText();
-      jsonUtilities.addNode(fdName, 5);
-      jsonUtilities.addLink(programName, fdName, 1);
-
-      jsonUtilities.addNode(programName, 1);
-
-      jsonUtilities.addLink("Root", programName, 1);
-
-
-      // Get Variables
 
       List<List<String>> variables = new ArrayList<>();
 
@@ -269,10 +180,7 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
       List<List<String>> nodes = getNodes(variables, "9", "10");
       List<List<String>> links = getLinks(variables, fdName, updatedFormat1AndFormat3Links, dataDescriptionEntryFormat1Contexts);
 
-
-      variablesToJson(programName, nodes, links);
-
-
+      nodeLinkManager.addVariables(programName, nodes, links);
     } catch (ProgramNameNotFoundException e) {
       e.printStackTrace();
     } catch (ContextNotFoundException e) {
@@ -287,12 +195,13 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
   public Object visitLinkageSection(LinkageSectionContext ctx) {
     try {
       String programName = retrieveProgramName.getProgramName(ctx);
+
       List<DataDescriptionEntryFormat1Context> dataDescriptionEntryFormat1Contexts = new ArrayList<>();
       List<DataDescriptionEntryFormat2Context> dataDescriptionEntryFormat2Contexts = new ArrayList<>();
       List<DataDescriptionEntryFormat3Context> dataDescriptionEntryFormat3Contexts = new ArrayList<>();
       Map<Integer, Integer> format1Andformat3Links = new HashMap<>();
 
-      getDataDescriptionExntryFormats(ctx, format1Andformat3Links, dataDescriptionEntryFormat1Contexts, dataDescriptionEntryFormat2Contexts, dataDescriptionEntryFormat3Contexts);
+      retrieveContext.getDataDescriptionEntryFormatContexts(ctx, format1Andformat3Links, dataDescriptionEntryFormat1Contexts, dataDescriptionEntryFormat2Contexts, dataDescriptionEntryFormat3Contexts);
 
 
       List<List<String>> variables = new ArrayList<>();
@@ -306,28 +215,18 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
       List<List<String>> nodes = getNodes(variables, "11", "12");
       List<List<String>> links = getLinks(variables, programName, updatedFormat1AndFormat3Links, dataDescriptionEntryFormat1Contexts);
 
-      variablesToJson(programName, nodes, links);
+      nodeLinkManager.addVariables(programName, nodes, links);
 
 
     } catch (ProgramNameNotFoundException e) {
       e.printStackTrace();
+    } catch (ContextNotFoundException e) {
+      throw new RuntimeException(e);
     }
     return super.visitLinkageSection(ctx);
   }
 
-  private void variablesToJson(String programName, List<List<String>> nodes, List<List<String>> links) {
-    for(List<String> node : nodes){
-      jsonUtilities.addNode(node.get(0), Integer.parseInt(node.get(1)));
-    }
 
-    for(List<String> link : links){
-      jsonUtilities.addLink(link.get(0), link.get(1), 1);
-    }
-
-    jsonUtilities.addNode(programName, 1);
-
-    jsonUtilities.addLink("Root", programName, 1);
-  }
 
   private List<List<String>> getNodes(List<List<String>> variables, String variableNodeNumber, String subVariableNodeNumber) {
     List<List<String>> nodes = new ArrayList<>();
@@ -357,8 +256,6 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
 
     return nodes;
   }
-
-
 
   private List<List<String>> getLinks(List<List<String>> variables, String programName,
       Map<String, Integer> updatedFormat1AndFormat3Links,
@@ -423,25 +320,6 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
   }
 
 
-
-
-  private void getDataDescriptionExntryFormats(ParserRuleContext ctx, Map<Integer, Integer> format1Andformat3Links, List<DataDescriptionEntryFormat1Context> dataDescriptionEntryFormat1Contexts, List<DataDescriptionEntryFormat2Context> dataDescriptionEntryFormat2Contexts, List<DataDescriptionEntryFormat3Context> dataDescriptionEntryFormat3Contexts) {
-    for (int i = 0; i < ctx.children.size(); i++) {
-      if (ctx.children.get(i).getChild(0) instanceof DataDescriptionEntryFormat1Context) {
-        dataDescriptionEntryFormat1Contexts.add(
-            (DataDescriptionEntryFormat1Context) ctx.children.get(i).getChild(0));
-      } else if (ctx.children.get(i).getChild(0) instanceof DataDescriptionEntryFormat2Context) {
-        dataDescriptionEntryFormat2Contexts.add(
-            (DataDescriptionEntryFormat2Context) ctx.children.get(i).getChild(0));
-      } else if (ctx.children.get(i).getChild(0) instanceof DataDescriptionEntryFormat3Context) {
-        dataDescriptionEntryFormat3Contexts.add(
-            (DataDescriptionEntryFormat3Context) ctx.children.get(i).getChild(0));
-
-        format1Andformat3Links.put(dataDescriptionEntryFormat3Contexts.size() - 1,
-            dataDescriptionEntryFormat1Contexts.size() - 1);
-      }
-    }
-  }
 
   private void getDifferentVariableTypes(List<List<String>> variables, List<DataDescriptionEntryFormat1Context> dataDescriptionEntryFormat1Contexts, List<DataDescriptionEntryFormat2Context> dataDescriptionEntryFormat2Contexts) {
     for (DataDescriptionEntryFormat1Context dataDescriptionEntryFormat1Context : dataDescriptionEntryFormat1Contexts) {
@@ -508,7 +386,7 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
       List<DataDescriptionEntryFormat3Context> dataDescriptionEntryFormat3Contexts = new ArrayList<>();
       Map<Integer, Integer> format1Andformat3Links = new HashMap<>();
 
-      getDataDescriptionExntryFormats(ctx, format1Andformat3Links, dataDescriptionEntryFormat1Contexts, dataDescriptionEntryFormat2Contexts, dataDescriptionEntryFormat3Contexts);
+      retrieveContext.getDataDescriptionEntryFormatContexts(ctx, format1Andformat3Links, dataDescriptionEntryFormat1Contexts, dataDescriptionEntryFormat2Contexts, dataDescriptionEntryFormat3Contexts);
 
 
       List<List<String>> variables = new ArrayList<>();
@@ -519,13 +397,14 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
 
       update(variables, dataDescriptionEntryFormat3Contexts, updatedFormat1AndFormat3Links, format1Andformat3Links);
 
-
       List<List<String>> nodes = getNodes(variables, "7", "8");
       List<List<String>> links = getLinks(variables, programName, updatedFormat1AndFormat3Links, dataDescriptionEntryFormat1Contexts);
 
-      variablesToJson(programName, nodes, links);
+      nodeLinkManager.addVariables(programName, nodes, links);
     } catch (ProgramNameNotFoundException e) {
       e.printStackTrace();
+    } catch (ContextNotFoundException e) {
+      throw new RuntimeException(e);
     }
     return super.visitWorkingStorageSection(ctx);
   }

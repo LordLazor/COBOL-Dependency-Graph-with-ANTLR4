@@ -1,130 +1,33 @@
 package de.lordlazor.bachelorarbeit.visitor;
 
+import de.lordlazor.bachelorarbeit.exceptions.ContextNotFoundException;
 import de.lordlazor.bachelorarbeit.exceptions.ProgramNameNotFoundException;
-import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CallStatementContext;
-import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CopyStatementContext;
-import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.FileControlEntryContext;
-import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.FileSectionContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.IdentificationDivisionContext;
-import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.LinkageSectionContext;
-import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ParagraphNameContext;
-import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProcedureCopyStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProgramIdParagraphContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProgramNameContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProgramUnitContext;
-import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.WorkingStorageSectionContext;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 public class RetrieveProgramName {
 
-  // ParagraphNameContext
-  public String getProgramName(ParagraphNameContext ctx)
-      throws ProgramNameNotFoundException {
-    Object parent = ctx.getParent();
-    return getProgramName(parent);
-  }
+  private RetrieveContext retrieveContext = new RetrieveContext();
 
-  // CopyStatementContext
-  public String getProgramName(CopyStatementContext ctx)
-      throws ProgramNameNotFoundException {
-    Object parent = ctx.getParent();
-    return getProgramName(parent);
-  }
+  public String getProgramName(ParserRuleContext ctx)
+      throws ProgramNameNotFoundException, ContextNotFoundException {
 
-  // ProcedureCopyStatementContext
-  public String getProgramName(ProcedureCopyStatementContext ctx)
-      throws ProgramNameNotFoundException {
-    Object parent = ctx.getParent();
-    return getProgramName(parent);
-  }
-
-  // CallStatementContext
-  public String getProgramName(CallStatementContext ctx)
-      throws ProgramNameNotFoundException {
-    Object parent = ctx.getParent();
-    return getProgramName(parent);
-  }
-
-  // WorkingStorageSectionContext
-  public String getProgramName(WorkingStorageSectionContext ctx)
-      throws ProgramNameNotFoundException {
-    Object parent = ctx.getParent();
-    return getProgramName(parent);
-  }
-  // LinkageSectionContext
-  public String getProgramName(LinkageSectionContext ctx)
-      throws ProgramNameNotFoundException {
-    Object parent = ctx.getParent();
-    return getProgramName(parent);
-  }
-
-  // FileSectionContext
-  public String getProgramName(FileSectionContext ctx)
-      throws ProgramNameNotFoundException {
-    Object parent = ctx.getParent();
-    return getProgramName(parent);
-  }
-
-  // FileControlClauseContext
-  public String getProgramName(FileControlEntryContext ctx)
-      throws ProgramNameNotFoundException {
-    Object parent = ctx.getParent();
-    return getProgramName(parent);
-  }
-
-  private String getProgramName(Object parent)
-      throws ProgramNameNotFoundException {
-
-    while (!(parent instanceof ProgramUnitContext)) {
-      parent = ((ParserRuleContext) parent).getParent();
+    while (!(ctx instanceof ProgramUnitContext programUnit)) {
+      ctx = ctx.getParent();
     }
 
-    if (parent instanceof ProgramUnitContext) {
-      ProgramUnitContext programUnit = (ProgramUnitContext) parent;
+    IdentificationDivisionContext identificationDivisionContext = retrieveContext.getIdentificationDivisionContext(programUnit);
 
-      //IdentificationDivisionContext
-      IdentificationDivisionContext identificationDivisionContext = null;
+    ProgramIdParagraphContext programIdParagraphContext = retrieveContext.getProgramIdParagraphContext(identificationDivisionContext);
 
-      for (int i = 0; i < programUnit.children.size(); i++) {
-        ParserRuleContext child = (ParserRuleContext) programUnit.children.get(i);
-        if (child instanceof IdentificationDivisionContext) {
-          identificationDivisionContext = (IdentificationDivisionContext) child;
-          break;
-        }
-      }
+    ProgramNameContext programNameContext = retrieveContext.getProgramNameContext(programIdParagraphContext);
 
-      if (identificationDivisionContext == null) {
-        throw new ProgramNameNotFoundException("identificationDivisionContext is null");
-      }
-
-      //ProgramIdParagraphContext
-      ProgramIdParagraphContext programIdParagraphContext = null;
-
-      for (int i = 0; i < identificationDivisionContext.children.size(); i++) {
-        if (identificationDivisionContext.children.get(i) instanceof ProgramIdParagraphContext) {
-          programIdParagraphContext = (ProgramIdParagraphContext) identificationDivisionContext.children.get(i);;
-        }
-      }
-
-      if (programIdParagraphContext == null) {
-        throw new ProgramNameNotFoundException("programIdParagraphContext is null");
-      }
-
-      //ProgramNameContext
-      ProgramNameContext programNameContext = null;
-
-      for (int i = 0; i < programIdParagraphContext.children.size(); i++) {
-        if (programIdParagraphContext.children.get(i) instanceof ProgramNameContext) {
-          programNameContext = (ProgramNameContext) programIdParagraphContext.children.get(i);
-        }
-      }
-
-      return programNameContext.children.get(0).getChild(0).getText();
-
-    }
+    return programNameContext.children.get(0).getChild(0).getText();
 
 
-    throw new ProgramNameNotFoundException("ProgramUnitContext not found");
   }
 
 
