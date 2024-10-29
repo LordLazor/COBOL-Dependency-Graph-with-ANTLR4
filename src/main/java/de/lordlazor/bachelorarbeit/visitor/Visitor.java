@@ -8,7 +8,6 @@ import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.AssignClauseContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CallStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ConditionNameContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CopyStatementContext;
-import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DataDescriptionEntryContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DataDescriptionEntryFormat1Context;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DataDescriptionEntryFormat2Context;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DataDescriptionEntryFormat3Context;
@@ -27,7 +26,6 @@ import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.QualifiedDataNameContex
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SelectClauseContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.WorkingStorageSectionContext;
 import de.lordlazor.bachelorarbeit.utils.JsonUtilities;
-import de.lordlazor.bachelorarbeit.utils.VisitorUtilities;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +35,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 public class Visitor extends Cobol85BaseVisitor<Object> {
 
   private JsonUtilities jsonUtilities;
-  private VisitorUtilities visitorUtilities = new VisitorUtilities();
+  private RetrieveProgramName retrieveProgramName = new RetrieveProgramName();
 
   public Visitor(JsonUtilities jsonUtilities) {
     this.jsonUtilities = jsonUtilities;
@@ -50,7 +48,7 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
   @Override
   public Object visitParagraphName(ParagraphNameContext ctx) {
     try {
-      String programName = visitorUtilities.getProgramName(ctx);
+      String programName = retrieveProgramName.getProgramName(ctx);
       String paragraphName = ctx.children.get(0).getText();
       jsonUtilities.addNode(programName, 1);
       jsonUtilities.addNode(paragraphName, 2);
@@ -65,7 +63,7 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
   @Override
   public Object visitProcedureCopyStatement(ProcedureCopyStatementContext ctx) {
     try {
-      String programName = visitorUtilities.getProgramName(ctx);
+      String programName = retrieveProgramName.getProgramName(ctx);
       String copyName = ctx.children.get(1).getText();
       jsonUtilities.addNode(programName, 1);
       jsonUtilities.addNode(copyName, 3);
@@ -80,7 +78,7 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
   @Override
   public Object visitCopyStatement(CopyStatementContext ctx) {
     try {
-      String programName = visitorUtilities.getProgramName(ctx);
+      String programName = retrieveProgramName.getProgramName(ctx);
       String copyName = ctx.children.get(1).getText();
       jsonUtilities.addNode(programName, 1);
       jsonUtilities.addNode(copyName, 3);
@@ -95,7 +93,7 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
   @Override
   public Object visitCallStatement(CallStatementContext ctx) {
     try {
-      String programName = visitorUtilities.getProgramName(ctx);
+      String programName = retrieveProgramName.getProgramName(ctx);
       String calledProgramName = ctx.children.get(1).getText();
       calledProgramName = calledProgramName.replace("'", "");
       calledProgramName = calledProgramName.replace("\"", "");
@@ -114,7 +112,7 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
   @Override
   public Object visitFileControlEntry(FileControlEntryContext ctx) {
     try {
-      String programName = visitorUtilities.getProgramName(ctx);
+      String programName = retrieveProgramName.getProgramName(ctx);
 
       // Select Clause for Getting FD Name
 
@@ -209,7 +207,7 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
   @Override
   public Object visitFileSection(FileSectionContext ctx){
     try {
-      String programName = visitorUtilities.getProgramName(ctx);
+      String programName = retrieveProgramName.getProgramName(ctx);
 
 
 
@@ -288,7 +286,7 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
   @Override
   public Object visitLinkageSection(LinkageSectionContext ctx) {
     try {
-      String programName = visitorUtilities.getProgramName(ctx);
+      String programName = retrieveProgramName.getProgramName(ctx);
       List<DataDescriptionEntryFormat1Context> dataDescriptionEntryFormat1Contexts = new ArrayList<>();
       List<DataDescriptionEntryFormat2Context> dataDescriptionEntryFormat2Contexts = new ArrayList<>();
       List<DataDescriptionEntryFormat3Context> dataDescriptionEntryFormat3Contexts = new ArrayList<>();
@@ -504,7 +502,7 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
   @Override
   public Object visitWorkingStorageSection(WorkingStorageSectionContext ctx) {
     try {
-      String programName = visitorUtilities.getProgramName(ctx);
+      String programName = retrieveProgramName.getProgramName(ctx);
       List<DataDescriptionEntryFormat1Context> dataDescriptionEntryFormat1Contexts = new ArrayList<>();
       List<DataDescriptionEntryFormat2Context> dataDescriptionEntryFormat2Contexts = new ArrayList<>();
       List<DataDescriptionEntryFormat3Context> dataDescriptionEntryFormat3Contexts = new ArrayList<>();

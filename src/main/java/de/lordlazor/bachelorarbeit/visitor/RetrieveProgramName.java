@@ -1,4 +1,4 @@
-package de.lordlazor.bachelorarbeit.utils;
+package de.lordlazor.bachelorarbeit.visitor;
 
 import de.lordlazor.bachelorarbeit.exceptions.ProgramNameNotFoundException;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CallStatementContext;
@@ -15,7 +15,7 @@ import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProgramUnitContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.WorkingStorageSectionContext;
 import org.antlr.v4.runtime.ParserRuleContext;
 
-public class VisitorUtilities {
+public class RetrieveProgramName {
 
   // ParagraphNameContext
   public String getProgramName(ParagraphNameContext ctx)
