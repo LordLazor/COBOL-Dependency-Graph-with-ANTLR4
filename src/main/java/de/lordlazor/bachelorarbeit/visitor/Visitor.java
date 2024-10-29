@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.antlr.v4.runtime.ParserRuleContext;
 
 public class Visitor extends Cobol85BaseVisitor<Object> {
 
@@ -228,43 +229,22 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
 
 
       FileNameContext fileNameContext = null;
-      List<DataDescriptionEntryContext> dataDescriptionEntryContexts = new ArrayList<>();
 
       for (int i = 0; i < fileDescriptionEntryContext.children.size(); i++) {
-        if (fileDescriptionEntryContext.children.get(i) instanceof DataDescriptionEntryContext) {
-          dataDescriptionEntryContexts.add(
-              (DataDescriptionEntryContext) fileDescriptionEntryContext.children.get(i));
-        } else if (fileDescriptionEntryContext.children.get(i) instanceof FileNameContext) {
+        if (fileDescriptionEntryContext.children.get(i) instanceof FileNameContext) {
           fileNameContext = (FileNameContext) fileDescriptionEntryContext.children.get(i);
         }
       }
 
-
       List<DataDescriptionEntryFormat1Context> dataDescriptionEntryFormat1Contexts = new ArrayList<>();
       List<DataDescriptionEntryFormat2Context> dataDescriptionEntryFormat2Contexts = new ArrayList<>();
       List<DataDescriptionEntryFormat3Context> dataDescriptionEntryFormat3Contexts = new ArrayList<>();
-
       Map<Integer, Integer> format1Andformat3Links = new HashMap<>();
 
-      for (int i = 0; i < dataDescriptionEntryContexts.size(); i++) {
-        if (dataDescriptionEntryContexts.get(i).children.get(0) instanceof DataDescriptionEntryFormat1Context) {
-          dataDescriptionEntryFormat1Contexts.add(
-              (DataDescriptionEntryFormat1Context) dataDescriptionEntryContexts.get(i).children.get(0));
-        } else if (dataDescriptionEntryContexts.get(i).children.get(0) instanceof DataDescriptionEntryFormat2Context) {
-          dataDescriptionEntryFormat2Contexts.add(
-              (DataDescriptionEntryFormat2Context) dataDescriptionEntryContexts.get(i).children.get(0));
-        } else if (dataDescriptionEntryContexts.get(i).children.get(0) instanceof DataDescriptionEntryFormat3Context) {
-          dataDescriptionEntryFormat3Contexts.add(
-              (DataDescriptionEntryFormat3Context) dataDescriptionEntryContexts.get(i).children.get(0));
-
-          format1Andformat3Links.put(dataDescriptionEntryFormat3Contexts.size() - 1,
-              dataDescriptionEntryFormat1Contexts.size() - 1);
-        }
-      }
+      getDataDescriptionExntryFormats(fileDescriptionEntryContext, format1Andformat3Links, dataDescriptionEntryFormat1Contexts, dataDescriptionEntryFormat2Contexts, dataDescriptionEntryFormat3Contexts);
 
 
-
-        // Get FileName
+      // Get FileName
       if (fileNameContext == null) {
         throw new ContextNotFoundException("fileNameContext is null");
       }
@@ -282,57 +262,11 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
 
       List<List<String>> variables = new ArrayList<>();
 
-      for (DataDescriptionEntryFormat1Context dataDescriptionEntryFormat1Context : dataDescriptionEntryFormat1Contexts) {
-        List<String> variable = new ArrayList<>();
-        variable.add(dataDescriptionEntryFormat1Context.children.get(0).getText());
-        if (dataDescriptionEntryFormat1Context.children.get(1) instanceof DataNameContext) {
-          variable.add(
-              dataDescriptionEntryFormat1Context.children.get(1).getChild(0).getChild(0).getText());
-        } else {
-          variable.add(dataDescriptionEntryFormat1Context.children.get(1).getText());
-        }
-        variables.add(variable);
-      }
-
-      for (DataDescriptionEntryFormat2Context dataDescriptionEntryFormat2Context : dataDescriptionEntryFormat2Contexts) {
-        List<String> variable = new ArrayList<>();
-        variable.add(dataDescriptionEntryFormat2Context.children.get(0).getText());
-        if (dataDescriptionEntryFormat2Context.children.get(1) instanceof DataNameContext) {
-          variable.add(
-              dataDescriptionEntryFormat2Context.children.get(1).getChild(0).getChild(0).getText());
-        } else {
-          variable.add(dataDescriptionEntryFormat2Context.children.get(1).getText());
-        }
-
-        if (dataDescriptionEntryFormat2Context.children.get(2) instanceof DataRenamesClauseContext) {
-          DataRenamesClauseContext dataRenamesClauseContext = (DataRenamesClauseContext) dataDescriptionEntryFormat2Context.children.get(2);
-          if (dataRenamesClauseContext.children.get(1) instanceof QualifiedDataNameContext) {
-            QualifiedDataNameContext qualifiedDataNameContext = (QualifiedDataNameContext) dataRenamesClauseContext.children.get(1);
-            String renamedName = qualifiedDataNameContext.children.get(0).getChild(0).getChild(0).getChild(0).getText();
-            variable.add(renamedName);
-          }
-        }
-
-        variables.add(variable);
-      }
+      getDifferentVariableTypes(variables, dataDescriptionEntryFormat1Contexts, dataDescriptionEntryFormat2Contexts);
 
       Map<String, Integer> updatedFormat1AndFormat3Links = new HashMap<>();
-      int format3i = 0;
-      for (DataDescriptionEntryFormat3Context dataDescriptionEntryFormat3Context : dataDescriptionEntryFormat3Contexts) {
-        List<String> variable = new ArrayList<>();
-        variable.add(dataDescriptionEntryFormat3Context.children.get(0).getText());
 
-        if (dataDescriptionEntryFormat3Context.children.get(1) instanceof ConditionNameContext) {
-          variable.add(
-              dataDescriptionEntryFormat3Context.children.get(1).getChild(0).getChild(0).getText());
-        }
-
-        updatedFormat1AndFormat3Links.put(variable.get(0) + ": " + variable.get(1), format1Andformat3Links.get(format3i));
-        format3i++;
-
-        variables.add(variable);
-
-      }
+      update(variables, dataDescriptionEntryFormat3Contexts, updatedFormat1AndFormat3Links, format1Andformat3Links);
 
       List<List<String>> nodes = getNodes(variables, "9", "10");
       List<List<String>> links = getLinks(variables, fdName, updatedFormat1AndFormat3Links, dataDescriptionEntryFormat1Contexts);
@@ -355,83 +289,21 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
   public Object visitLinkageSection(LinkageSectionContext ctx) {
     try {
       String programName = visitorUtilities.getProgramName(ctx);
-
       List<DataDescriptionEntryFormat1Context> dataDescriptionEntryFormat1Contexts = new ArrayList<>();
       List<DataDescriptionEntryFormat2Context> dataDescriptionEntryFormat2Contexts = new ArrayList<>();
       List<DataDescriptionEntryFormat3Context> dataDescriptionEntryFormat3Contexts = new ArrayList<>();
-
       Map<Integer, Integer> format1Andformat3Links = new HashMap<>();
 
-      for (int i = 0; i < ctx.children.size(); i++) {
-        if (ctx.children.get(i).getChild(0) instanceof DataDescriptionEntryFormat1Context) {
-          dataDescriptionEntryFormat1Contexts.add(
-              (DataDescriptionEntryFormat1Context) ctx.children.get(i).getChild(0));
-        }
-        else if (ctx.children.get(i).getChild(0) instanceof DataDescriptionEntryFormat2Context) {
-          dataDescriptionEntryFormat2Contexts.add(
-              (DataDescriptionEntryFormat2Context) ctx.children.get(i).getChild(0));
-        } else if (ctx.children.get(i).getChild(0) instanceof DataDescriptionEntryFormat3Context) {
-          dataDescriptionEntryFormat3Contexts.add(
-              (DataDescriptionEntryFormat3Context) ctx.children.get(i).getChild(0));
+      getDataDescriptionExntryFormats(ctx, format1Andformat3Links, dataDescriptionEntryFormat1Contexts, dataDescriptionEntryFormat2Contexts, dataDescriptionEntryFormat3Contexts);
 
-          format1Andformat3Links.put(dataDescriptionEntryFormat3Contexts.size() - 1, dataDescriptionEntryFormat1Contexts.size() - 1);
-        }
-
-      }
 
       List<List<String>> variables = new ArrayList<>();
 
-      for (DataDescriptionEntryFormat1Context dataDescriptionEntryFormat1Context : dataDescriptionEntryFormat1Contexts) {
-        List<String> variable = new ArrayList<>();
-        variable.add(dataDescriptionEntryFormat1Context.children.get(0).getText());
-        if (dataDescriptionEntryFormat1Context.children.get(1) instanceof DataNameContext) {
-          variable.add(
-              dataDescriptionEntryFormat1Context.children.get(1).getChild(0).getChild(0).getText());
-        } else {
-          variable.add(dataDescriptionEntryFormat1Context.children.get(1).getText());
-        }
-        variables.add(variable);
-      }
-
-      for (DataDescriptionEntryFormat2Context dataDescriptionEntryFormat2Context : dataDescriptionEntryFormat2Contexts) {
-        List<String> variable = new ArrayList<>();
-        variable.add(dataDescriptionEntryFormat2Context.children.get(0).getText());
-        if (dataDescriptionEntryFormat2Context.children.get(1) instanceof DataNameContext) {
-          variable.add(
-              dataDescriptionEntryFormat2Context.children.get(1).getChild(0).getChild(0).getText());
-        } else {
-          variable.add(dataDescriptionEntryFormat2Context.children.get(1).getText());
-        }
-
-        if (dataDescriptionEntryFormat2Context.children.get(2) instanceof DataRenamesClauseContext) {
-          DataRenamesClauseContext dataRenamesClauseContext = (DataRenamesClauseContext) dataDescriptionEntryFormat2Context.children.get(2);
-          if (dataRenamesClauseContext.children.get(1) instanceof QualifiedDataNameContext) {
-            QualifiedDataNameContext qualifiedDataNameContext = (QualifiedDataNameContext) dataRenamesClauseContext.children.get(1);
-            String renamedName = qualifiedDataNameContext.children.get(0).getChild(0).getChild(0).getChild(0).getText();
-            variable.add(renamedName);
-          }
-        }
-
-        variables.add(variable);
-      }
+      getDifferentVariableTypes(variables, dataDescriptionEntryFormat1Contexts, dataDescriptionEntryFormat2Contexts);
 
       Map<String, Integer> updatedFormat1AndFormat3Links = new HashMap<>();
-      int format3i = 0;
-      for (DataDescriptionEntryFormat3Context dataDescriptionEntryFormat3Context : dataDescriptionEntryFormat3Contexts) {
-        List<String> variable = new ArrayList<>();
-        variable.add(dataDescriptionEntryFormat3Context.children.get(0).getText());
 
-        if (dataDescriptionEntryFormat3Context.children.get(1) instanceof ConditionNameContext) {
-          variable.add(
-              dataDescriptionEntryFormat3Context.children.get(1).getChild(0).getChild(0).getText());
-        }
-
-        updatedFormat1AndFormat3Links.put(variable.get(0) + ": " + variable.get(1), format1Andformat3Links.get(format3i));
-        format3i++;
-
-        variables.add(variable);
-
-      }
+      update(variables, dataDescriptionEntryFormat3Contexts, updatedFormat1AndFormat3Links, format1Andformat3Links);
 
       List<List<String>> nodes = getNodes(variables, "11", "12");
       List<List<String>> links = getLinks(variables, programName, updatedFormat1AndFormat3Links, dataDescriptionEntryFormat1Contexts);
@@ -555,6 +427,79 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
 
 
 
+  private void getDataDescriptionExntryFormats(ParserRuleContext ctx, Map<Integer, Integer> format1Andformat3Links, List<DataDescriptionEntryFormat1Context> dataDescriptionEntryFormat1Contexts, List<DataDescriptionEntryFormat2Context> dataDescriptionEntryFormat2Contexts, List<DataDescriptionEntryFormat3Context> dataDescriptionEntryFormat3Contexts) {
+    for (int i = 0; i < ctx.children.size(); i++) {
+      if (ctx.children.get(i).getChild(0) instanceof DataDescriptionEntryFormat1Context) {
+        dataDescriptionEntryFormat1Contexts.add(
+            (DataDescriptionEntryFormat1Context) ctx.children.get(i).getChild(0));
+      } else if (ctx.children.get(i).getChild(0) instanceof DataDescriptionEntryFormat2Context) {
+        dataDescriptionEntryFormat2Contexts.add(
+            (DataDescriptionEntryFormat2Context) ctx.children.get(i).getChild(0));
+      } else if (ctx.children.get(i).getChild(0) instanceof DataDescriptionEntryFormat3Context) {
+        dataDescriptionEntryFormat3Contexts.add(
+            (DataDescriptionEntryFormat3Context) ctx.children.get(i).getChild(0));
+
+        format1Andformat3Links.put(dataDescriptionEntryFormat3Contexts.size() - 1,
+            dataDescriptionEntryFormat1Contexts.size() - 1);
+      }
+    }
+  }
+
+  private void getDifferentVariableTypes(List<List<String>> variables, List<DataDescriptionEntryFormat1Context> dataDescriptionEntryFormat1Contexts, List<DataDescriptionEntryFormat2Context> dataDescriptionEntryFormat2Contexts) {
+    for (DataDescriptionEntryFormat1Context dataDescriptionEntryFormat1Context : dataDescriptionEntryFormat1Contexts) {
+      List<String> variable = new ArrayList<>();
+      variable.add(dataDescriptionEntryFormat1Context.children.get(0).getText());
+      if (dataDescriptionEntryFormat1Context.children.get(1) instanceof DataNameContext) {
+        variable.add(
+            dataDescriptionEntryFormat1Context.children.get(1).getChild(0).getChild(0).getText());
+      } else {
+        variable.add(dataDescriptionEntryFormat1Context.children.get(1).getText());
+      }
+      variables.add(variable);
+    }
+
+    for (DataDescriptionEntryFormat2Context dataDescriptionEntryFormat2Context : dataDescriptionEntryFormat2Contexts) {
+      List<String> variable = new ArrayList<>();
+      variable.add(dataDescriptionEntryFormat2Context.children.get(0).getText());
+      if (dataDescriptionEntryFormat2Context.children.get(1) instanceof DataNameContext) {
+        variable.add(
+            dataDescriptionEntryFormat2Context.children.get(1).getChild(0).getChild(0).getText());
+      } else {
+        variable.add(dataDescriptionEntryFormat2Context.children.get(1).getText());
+      }
+
+      if (dataDescriptionEntryFormat2Context.children.get(2) instanceof DataRenamesClauseContext) {
+        DataRenamesClauseContext dataRenamesClauseContext = (DataRenamesClauseContext) dataDescriptionEntryFormat2Context.children.get(2);
+        if (dataRenamesClauseContext.children.get(1) instanceof QualifiedDataNameContext) {
+          QualifiedDataNameContext qualifiedDataNameContext = (QualifiedDataNameContext) dataRenamesClauseContext.children.get(1);
+          String renamedName = qualifiedDataNameContext.children.get(0).getChild(0).getChild(0).getChild(0).getText();
+          variable.add(renamedName);
+        }
+      }
+
+      variables.add(variable);
+    }
+  }
+
+  private void update(List<List<String>> variables, List<DataDescriptionEntryFormat3Context> dataDescriptionEntryFormat3Contexts, Map<String, Integer> updatedFormat1AndFormat3Links, Map<Integer, Integer> format1Andformat3Links){
+    int format3i = 0;
+    for (DataDescriptionEntryFormat3Context dataDescriptionEntryFormat3Context : dataDescriptionEntryFormat3Contexts) {
+      List<String> variable = new ArrayList<>();
+      variable.add(dataDescriptionEntryFormat3Context.children.get(0).getText());
+
+      if (dataDescriptionEntryFormat3Context.children.get(1) instanceof ConditionNameContext) {
+        variable.add(
+            dataDescriptionEntryFormat3Context.children.get(1).getChild(0).getChild(0).getText());
+      }
+
+      updatedFormat1AndFormat3Links.put(variable.get(0) + ": " + variable.get(1), format1Andformat3Links.get(format3i));
+      format3i++;
+
+      variables.add(variable);
+
+    }
+  }
+
   // Getting Variables of Working Storage Section
   @Override
   public Object visitWorkingStorageSection(WorkingStorageSectionContext ctx) {
@@ -563,86 +508,24 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
       List<DataDescriptionEntryFormat1Context> dataDescriptionEntryFormat1Contexts = new ArrayList<>();
       List<DataDescriptionEntryFormat2Context> dataDescriptionEntryFormat2Contexts = new ArrayList<>();
       List<DataDescriptionEntryFormat3Context> dataDescriptionEntryFormat3Contexts = new ArrayList<>();
-
       Map<Integer, Integer> format1Andformat3Links = new HashMap<>();
 
-      for (int i = 0; i < ctx.children.size(); i++) {
-        if (ctx.children.get(i).getChild(0) instanceof DataDescriptionEntryFormat1Context) {
-          dataDescriptionEntryFormat1Contexts.add(
-              (DataDescriptionEntryFormat1Context) ctx.children.get(i).getChild(0));
-        }
-        else if (ctx.children.get(i).getChild(0) instanceof DataDescriptionEntryFormat2Context) {
-          dataDescriptionEntryFormat2Contexts.add(
-              (DataDescriptionEntryFormat2Context) ctx.children.get(i).getChild(0));
-        } else if (ctx.children.get(i).getChild(0) instanceof DataDescriptionEntryFormat3Context) {
-          dataDescriptionEntryFormat3Contexts.add(
-              (DataDescriptionEntryFormat3Context) ctx.children.get(i).getChild(0));
+      getDataDescriptionExntryFormats(ctx, format1Andformat3Links, dataDescriptionEntryFormat1Contexts, dataDescriptionEntryFormat2Contexts, dataDescriptionEntryFormat3Contexts);
 
-          format1Andformat3Links.put(dataDescriptionEntryFormat3Contexts.size() - 1, dataDescriptionEntryFormat1Contexts.size() - 1);
-        }
-
-      }
 
       List<List<String>> variables = new ArrayList<>();
 
-      for (DataDescriptionEntryFormat1Context dataDescriptionEntryFormat1Context : dataDescriptionEntryFormat1Contexts) {
-        List<String> variable = new ArrayList<>();
-        variable.add(dataDescriptionEntryFormat1Context.children.get(0).getText());
-        if (dataDescriptionEntryFormat1Context.children.get(1) instanceof DataNameContext) {
-          variable.add(
-              dataDescriptionEntryFormat1Context.children.get(1).getChild(0).getChild(0).getText());
-        } else {
-          variable.add(dataDescriptionEntryFormat1Context.children.get(1).getText());
-        }
-        variables.add(variable);
-      }
-
-      for (DataDescriptionEntryFormat2Context dataDescriptionEntryFormat2Context : dataDescriptionEntryFormat2Contexts) {
-        List<String> variable = new ArrayList<>();
-        variable.add(dataDescriptionEntryFormat2Context.children.get(0).getText());
-        if (dataDescriptionEntryFormat2Context.children.get(1) instanceof DataNameContext) {
-          variable.add(
-              dataDescriptionEntryFormat2Context.children.get(1).getChild(0).getChild(0).getText());
-        } else {
-          variable.add(dataDescriptionEntryFormat2Context.children.get(1).getText());
-        }
-
-        if (dataDescriptionEntryFormat2Context.children.get(2) instanceof DataRenamesClauseContext) {
-          DataRenamesClauseContext dataRenamesClauseContext = (DataRenamesClauseContext) dataDescriptionEntryFormat2Context.children.get(2);
-          if (dataRenamesClauseContext.children.get(1) instanceof QualifiedDataNameContext) {
-            QualifiedDataNameContext qualifiedDataNameContext = (QualifiedDataNameContext) dataRenamesClauseContext.children.get(1);
-            String renamedName = qualifiedDataNameContext.children.get(0).getChild(0).getChild(0).getChild(0).getText();
-            variable.add(renamedName);
-          }
-        }
-
-        variables.add(variable);
-      }
+      getDifferentVariableTypes(variables, dataDescriptionEntryFormat1Contexts, dataDescriptionEntryFormat2Contexts);
 
       Map<String, Integer> updatedFormat1AndFormat3Links = new HashMap<>();
-      int format3i = 0;
-      for (DataDescriptionEntryFormat3Context dataDescriptionEntryFormat3Context : dataDescriptionEntryFormat3Contexts) {
-        List<String> variable = new ArrayList<>();
-        variable.add(dataDescriptionEntryFormat3Context.children.get(0).getText());
 
-        if (dataDescriptionEntryFormat3Context.children.get(1) instanceof ConditionNameContext) {
-          variable.add(
-              dataDescriptionEntryFormat3Context.children.get(1).getChild(0).getChild(0).getText());
-        }
+      update(variables, dataDescriptionEntryFormat3Contexts, updatedFormat1AndFormat3Links, format1Andformat3Links);
 
-        updatedFormat1AndFormat3Links.put(variable.get(0) + ": " + variable.get(1), format1Andformat3Links.get(format3i));
-        format3i++;
-
-        variables.add(variable);
-
-      }
 
       List<List<String>> nodes = getNodes(variables, "7", "8");
       List<List<String>> links = getLinks(variables, programName, updatedFormat1AndFormat3Links, dataDescriptionEntryFormat1Contexts);
 
       variablesToJson(programName, nodes, links);
-
-
     } catch (ProgramNameNotFoundException e) {
       e.printStackTrace();
     }
