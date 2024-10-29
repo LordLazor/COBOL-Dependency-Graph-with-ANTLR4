@@ -6,6 +6,7 @@ import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CopyStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.FileControlEntryContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.FileSectionContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.IdentificationDivisionContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.LinkageSectionContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ParagraphNameContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProcedureCopyStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProgramIdParagraphContext;
@@ -46,6 +47,12 @@ public class VisitorUtilities {
 
   // WorkingStorageSectionContext
   public String getProgramName(WorkingStorageSectionContext ctx)
+      throws ProgramNameNotFoundException {
+    Object parent = ctx.getParent();
+    return getProgramName(parent);
+  }
+  // LinkageSectionContext
+  public String getProgramName(LinkageSectionContext ctx)
       throws ProgramNameNotFoundException {
     Object parent = ctx.getParent();
     return getProgramName(parent);
