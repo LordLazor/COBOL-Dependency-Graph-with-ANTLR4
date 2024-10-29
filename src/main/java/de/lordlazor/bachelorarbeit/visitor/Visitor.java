@@ -46,9 +46,6 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
    * Get the program name from the program unit context by traversing through the parents of the current context.
    */
 
-
-
-
   @Override
   public Object visitParagraphName(ParagraphNameContext ctx) {
     try {
@@ -337,90 +334,11 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
 
       }
 
-      List<List<String>> nodes = new ArrayList<>();
-      List<List<String>> links = new ArrayList<>();
+      List<List<String>> nodes = getNodes(variables, "9", "10");
+      List<List<String>> links = getLinks(variables, fdName, updatedFormat1AndFormat3Links, dataDescriptionEntryFormat1Contexts);
 
-      for (int i = variables.size() - 1; i >= 0; i--) {
-        int currentLevelNumber = Integer.parseInt(variables.get(i).get(0));
 
-        List<String> node = new ArrayList<>();
-
-        // 9: FILEVARIABLE; 10: FILESUBVARIABLE
-        if (currentLevelNumber == 1 || currentLevelNumber == 77) {
-          node.add(variables.get(i).get(0) + ": " + variables.get(i).get(1));
-          node.add("9");
-        }
-        else if (currentLevelNumber == 66) {
-          node.add(variables.get(i).get(0) + ": " + variables.get(i).get(1) + " RENAMES " + variables.get(i).get(2));
-          node.add("9");
-
-        } else {
-          node.add(variables.get(i).get(0) + ": " + variables.get(i).get(1));
-          node.add("10");
-        }
-
-        nodes.add(node);
-
-        if(currentLevelNumber != 1 && currentLevelNumber != 77 && currentLevelNumber != 66 && currentLevelNumber != 88){
-          {
-            for (int j = i - 1; j >= 0; j--) {
-              int parentLevelNumber = Integer.parseInt(variables.get(j).get(0));
-              if (parentLevelNumber < currentLevelNumber) {
-                List<String> link = new ArrayList<>();
-                link.add(variables.get(j).get(0) + ": " + variables.get(j).get(1));
-                link.add(variables.get(i).get(0) + ": " + variables.get(i).get(1));
-                links.add(link);
-                break;
-              }
-            }
-          }
-        } else if(currentLevelNumber == 66){
-          List<String> link = new ArrayList<>();
-          link.add(fdName);
-          link.add(variables.get(i).get(0) + ": " + variables.get(i).get(1) + " RENAMES " + variables.get(i).get(2));
-          links.add(link);
-        }
-        else if (currentLevelNumber == 88) {
-          String linkName88 = variables.get(i).get(0) + ": " + variables.get(i).get(1);
-          int linkIndex = updatedFormat1AndFormat3Links.get(linkName88);
-
-          DataDescriptionEntryFormat1Context dataDescriptionEntryFormat1Context = dataDescriptionEntryFormat1Contexts.get(linkIndex);
-
-          String levelNumber = dataDescriptionEntryFormat1Context.children.get(0).getText();
-          String variableName = "";
-          if (dataDescriptionEntryFormat1Context.children.get(1) instanceof DataNameContext) {
-            variableName =
-                dataDescriptionEntryFormat1Context.children.get(1).getChild(0).getChild(0).getText();
-          } else {
-            variableName = dataDescriptionEntryFormat1Context.children.get(1).getText();
-          }
-
-          List<String> link = new ArrayList<>();
-          link.add(variables.get(i).get(0) + ": " + variables.get(i).get(1));
-          link.add(levelNumber + ": " + variableName);
-          links.add(link);
-
-        }
-        else {
-          List<String> link = new ArrayList<>();
-          link.add(fdName);
-          link.add(variables.get(i).get(0) + ": " + variables.get(i).get(1));
-          links.add(link);
-        }
-
-      }
-
-      for(List<String> node : nodes){
-        jsonUtilities.addNode(node.get(0), Integer.parseInt(node.get(1)));
-      }
-
-      for(List<String> link : links){
-        jsonUtilities.addLink(link.get(0), link.get(1), 1);
-      }
-
-      jsonUtilities.addNode(programName, 1);
-
-      jsonUtilities.addLink("Root", programName, 1);
+      variablesToJson(programName, nodes, links);
 
 
     } catch (ProgramNameNotFoundException e) {
@@ -437,6 +355,7 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
   public Object visitLinkageSection(LinkageSectionContext ctx) {
     try {
       String programName = visitorUtilities.getProgramName(ctx);
+
       List<DataDescriptionEntryFormat1Context> dataDescriptionEntryFormat1Contexts = new ArrayList<>();
       List<DataDescriptionEntryFormat2Context> dataDescriptionEntryFormat2Contexts = new ArrayList<>();
       List<DataDescriptionEntryFormat3Context> dataDescriptionEntryFormat3Contexts = new ArrayList<>();
@@ -514,90 +433,10 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
 
       }
 
-      List<List<String>> nodes = new ArrayList<>();
-      List<List<String>> links = new ArrayList<>();
+      List<List<String>> nodes = getNodes(variables, "11", "12");
+      List<List<String>> links = getLinks(variables, programName, updatedFormat1AndFormat3Links, dataDescriptionEntryFormat1Contexts);
 
-      for (int i = variables.size() - 1; i >= 0; i--) {
-        int currentLevelNumber = Integer.parseInt(variables.get(i).get(0));
-
-        List<String> node = new ArrayList<>();
-
-        // 7: VARIABLE; 8: SUBVARIABLE
-        if (currentLevelNumber == 1 || currentLevelNumber == 77) {
-          node.add(variables.get(i).get(0) + ": " + variables.get(i).get(1));
-          node.add("11");
-        }
-        else if (currentLevelNumber == 66) {
-          node.add(variables.get(i).get(0) + ": " + variables.get(i).get(1) + " RENAMES " + variables.get(i).get(2));
-          node.add("11");
-
-        } else {
-          node.add(variables.get(i).get(0) + ": " + variables.get(i).get(1));
-          node.add("12");
-        }
-
-        nodes.add(node);
-
-        if(currentLevelNumber != 1 && currentLevelNumber != 77 && currentLevelNumber != 66 && currentLevelNumber != 88){
-          {
-            for (int j = i - 1; j >= 0; j--) {
-              int parentLevelNumber = Integer.parseInt(variables.get(j).get(0));
-              if (parentLevelNumber < currentLevelNumber) {
-                List<String> link = new ArrayList<>();
-                link.add(variables.get(j).get(0) + ": " + variables.get(j).get(1));
-                link.add(variables.get(i).get(0) + ": " + variables.get(i).get(1));
-                links.add(link);
-                break;
-              }
-            }
-          }
-        } else if(currentLevelNumber == 66){
-          List<String> link = new ArrayList<>();
-          link.add(programName);
-          link.add(variables.get(i).get(0) + ": " + variables.get(i).get(1) + " RENAMES " + variables.get(i).get(2));
-          links.add(link);
-        }
-        else if (currentLevelNumber == 88) {
-          String linkName88 = variables.get(i).get(0) + ": " + variables.get(i).get(1);
-          int linkIndex = updatedFormat1AndFormat3Links.get(linkName88);
-
-          DataDescriptionEntryFormat1Context dataDescriptionEntryFormat1Context = dataDescriptionEntryFormat1Contexts.get(linkIndex);
-
-          String levelNumber = dataDescriptionEntryFormat1Context.children.get(0).getText();
-          String variableName = "";
-          if (dataDescriptionEntryFormat1Context.children.get(1) instanceof DataNameContext) {
-            variableName =
-                dataDescriptionEntryFormat1Context.children.get(1).getChild(0).getChild(0).getText();
-          } else {
-            variableName = dataDescriptionEntryFormat1Context.children.get(1).getText();
-          }
-
-          List<String> link = new ArrayList<>();
-          link.add(variables.get(i).get(0) + ": " + variables.get(i).get(1));
-          link.add(levelNumber + ": " + variableName);
-          links.add(link);
-
-        }
-        else {
-          List<String> link = new ArrayList<>();
-          link.add(programName);
-          link.add(variables.get(i).get(0) + ": " + variables.get(i).get(1));
-          links.add(link);
-        }
-
-      }
-
-      for(List<String> node : nodes){
-        jsonUtilities.addNode(node.get(0), Integer.parseInt(node.get(1)));
-      }
-
-      for(List<String> link : links){
-        jsonUtilities.addLink(link.get(0), link.get(1), 1);
-      }
-
-      jsonUtilities.addNode(programName, 1);
-
-      jsonUtilities.addLink("Root", programName, 1);
+      variablesToJson(programName, nodes, links);
 
 
     } catch (ProgramNameNotFoundException e) {
@@ -605,6 +444,114 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
     }
     return super.visitLinkageSection(ctx);
   }
+
+  private void variablesToJson(String programName, List<List<String>> nodes, List<List<String>> links) {
+    for(List<String> node : nodes){
+      jsonUtilities.addNode(node.get(0), Integer.parseInt(node.get(1)));
+    }
+
+    for(List<String> link : links){
+      jsonUtilities.addLink(link.get(0), link.get(1), 1);
+    }
+
+    jsonUtilities.addNode(programName, 1);
+
+    jsonUtilities.addLink("Root", programName, 1);
+  }
+
+  private List<List<String>> getNodes(List<List<String>> variables, String variableNodeNumber, String subVariableNodeNumber) {
+    List<List<String>> nodes = new ArrayList<>();
+
+
+    for (int i = variables.size() - 1; i >= 0; i--) {
+      int currentLevelNumber = Integer.parseInt(variables.get(i).get(0));
+
+      List<String> node = new ArrayList<>();
+
+      if (currentLevelNumber == 1 || currentLevelNumber == 77) {
+        node.add(variables.get(i).get(0) + ": " + variables.get(i).get(1));
+        node.add(variableNodeNumber);
+      } else if (currentLevelNumber == 66) {
+        node.add(
+            variables.get(i).get(0) + ": " + variables.get(i).get(1) + " RENAMES " + variables.get(
+                i).get(2));
+        node.add(variableNodeNumber);
+
+      } else {
+        node.add(variables.get(i).get(0) + ": " + variables.get(i).get(1));
+        node.add(subVariableNodeNumber);
+      }
+
+      nodes.add(node);
+    }
+
+    return nodes;
+  }
+
+
+
+  private List<List<String>> getLinks(List<List<String>> variables, String programName,
+      Map<String, Integer> updatedFormat1AndFormat3Links,
+      List<DataDescriptionEntryFormat1Context> dataDescriptionEntryFormat1Contexts) {
+    List<List<String>> links = new ArrayList<>();
+
+    for (int i = variables.size() - 1; i >= 0; i--) {
+      int currentLevelNumber = Integer.parseInt(variables.get(i).get(0));
+
+      if (currentLevelNumber != 1 && currentLevelNumber != 77 && currentLevelNumber != 66
+          && currentLevelNumber != 88) {
+        {
+          for (int j = i - 1; j >= 0; j--) {
+            int parentLevelNumber = Integer.parseInt(variables.get(j).get(0));
+            if (parentLevelNumber < currentLevelNumber) {
+              List<String> link = new ArrayList<>();
+              link.add(variables.get(j).get(0) + ": " + variables.get(j).get(1));
+              link.add(variables.get(i).get(0) + ": " + variables.get(i).get(1));
+              links.add(link);
+              break;
+            }
+          }
+        }
+      } else if (currentLevelNumber == 66) {
+        List<String> link = new ArrayList<>();
+        link.add(programName);
+        link.add(
+            variables.get(i).get(0) + ": " + variables.get(i).get(1) + " RENAMES " + variables.get(
+                i).get(2));
+        links.add(link);
+      } else if (currentLevelNumber == 88) {
+        String linkName88 = variables.get(i).get(0) + ": " + variables.get(i).get(1);
+        int linkIndex = updatedFormat1AndFormat3Links.get(linkName88);
+
+        DataDescriptionEntryFormat1Context dataDescriptionEntryFormat1Context = dataDescriptionEntryFormat1Contexts.get(
+            linkIndex);
+
+        String levelNumber = dataDescriptionEntryFormat1Context.children.get(0).getText();
+        String variableName = "";
+        if (dataDescriptionEntryFormat1Context.children.get(1) instanceof DataNameContext) {
+          variableName =
+              dataDescriptionEntryFormat1Context.children.get(1).getChild(0).getChild(0).getText();
+        } else {
+          variableName = dataDescriptionEntryFormat1Context.children.get(1).getText();
+        }
+
+        List<String> link = new ArrayList<>();
+        link.add(variables.get(i).get(0) + ": " + variables.get(i).get(1));
+        link.add(levelNumber + ": " + variableName);
+        links.add(link);
+
+      } else {
+        List<String> link = new ArrayList<>();
+        link.add(programName);
+        link.add(variables.get(i).get(0) + ": " + variables.get(i).get(1));
+        links.add(link);
+      }
+
+    }
+
+    return links;
+  }
+
 
 
 
@@ -690,90 +637,10 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
 
       }
 
-      List<List<String>> nodes = new ArrayList<>();
-      List<List<String>> links = new ArrayList<>();
+      List<List<String>> nodes = getNodes(variables, "7", "8");
+      List<List<String>> links = getLinks(variables, programName, updatedFormat1AndFormat3Links, dataDescriptionEntryFormat1Contexts);
 
-      for (int i = variables.size() - 1; i >= 0; i--) {
-        int currentLevelNumber = Integer.parseInt(variables.get(i).get(0));
-
-        List<String> node = new ArrayList<>();
-
-        // 7: VARIABLE; 8: SUBVARIABLE
-        if (currentLevelNumber == 1 || currentLevelNumber == 77) {
-          node.add(variables.get(i).get(0) + ": " + variables.get(i).get(1));
-          node.add("7");
-        }
-        else if (currentLevelNumber == 66) {
-          node.add(variables.get(i).get(0) + ": " + variables.get(i).get(1) + " RENAMES " + variables.get(i).get(2));
-          node.add("7");
-
-        } else {
-          node.add(variables.get(i).get(0) + ": " + variables.get(i).get(1));
-          node.add("8");
-        }
-
-        nodes.add(node);
-
-        if(currentLevelNumber != 1 && currentLevelNumber != 77 && currentLevelNumber != 66 && currentLevelNumber != 88){
-          {
-            for (int j = i - 1; j >= 0; j--) {
-              int parentLevelNumber = Integer.parseInt(variables.get(j).get(0));
-              if (parentLevelNumber < currentLevelNumber) {
-                List<String> link = new ArrayList<>();
-                link.add(variables.get(j).get(0) + ": " + variables.get(j).get(1));
-                link.add(variables.get(i).get(0) + ": " + variables.get(i).get(1));
-                links.add(link);
-                break;
-              }
-            }
-          }
-        } else if(currentLevelNumber == 66){
-          List<String> link = new ArrayList<>();
-          link.add(programName);
-          link.add(variables.get(i).get(0) + ": " + variables.get(i).get(1) + " RENAMES " + variables.get(i).get(2));
-          links.add(link);
-        }
-        else if (currentLevelNumber == 88) {
-          String linkName88 = variables.get(i).get(0) + ": " + variables.get(i).get(1);
-          int linkIndex = updatedFormat1AndFormat3Links.get(linkName88);
-
-          DataDescriptionEntryFormat1Context dataDescriptionEntryFormat1Context = dataDescriptionEntryFormat1Contexts.get(linkIndex);
-
-          String levelNumber = dataDescriptionEntryFormat1Context.children.get(0).getText();
-          String variableName = "";
-          if (dataDescriptionEntryFormat1Context.children.get(1) instanceof DataNameContext) {
-            variableName =
-                dataDescriptionEntryFormat1Context.children.get(1).getChild(0).getChild(0).getText();
-          } else {
-            variableName = dataDescriptionEntryFormat1Context.children.get(1).getText();
-          }
-
-          List<String> link = new ArrayList<>();
-          link.add(variables.get(i).get(0) + ": " + variables.get(i).get(1));
-          link.add(levelNumber + ": " + variableName);
-          links.add(link);
-
-        }
-        else {
-          List<String> link = new ArrayList<>();
-          link.add(programName);
-          link.add(variables.get(i).get(0) + ": " + variables.get(i).get(1));
-          links.add(link);
-        }
-
-      }
-
-      for(List<String> node : nodes){
-        jsonUtilities.addNode(node.get(0), Integer.parseInt(node.get(1)));
-      }
-
-      for(List<String> link : links){
-        jsonUtilities.addLink(link.get(0), link.get(1), 1);
-      }
-
-      jsonUtilities.addNode(programName, 1);
-
-      jsonUtilities.addLink("Root", programName, 1);
+      variablesToJson(programName, nodes, links);
 
 
     } catch (ProgramNameNotFoundException e) {
