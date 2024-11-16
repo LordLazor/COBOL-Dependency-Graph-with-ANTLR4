@@ -27,6 +27,7 @@ import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.FileSectionContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.IdentifierContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.LinkageSectionContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.LiteralContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.LocalStorageSectionContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ParagraphNameContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProcedureCopyStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.QualifiedDataNameContext;
@@ -271,6 +272,41 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
     return super.visitLinkageSection(ctx);
   }
 
+  // Getting Variables of Local Storage Section
+  @Override
+  public Object visitLocalStorageSection(LocalStorageSectionContext ctx) {
+    try {
+      String programName = retrieveProgramName.getProgramName(ctx);
+
+      List<DataDescriptionEntryFormat1Context> dataDescriptionEntryFormat1Contexts = new ArrayList<>();
+      List<DataDescriptionEntryFormat2Context> dataDescriptionEntryFormat2Contexts = new ArrayList<>();
+      List<DataDescriptionEntryFormat3Context> dataDescriptionEntryFormat3Contexts = new ArrayList<>();
+      Map<Integer, Integer> format1Andformat3Links = new HashMap<>();
+
+      retrieveContext.getDataDescriptionEntryFormatContexts(ctx, format1Andformat3Links, dataDescriptionEntryFormat1Contexts, dataDescriptionEntryFormat2Contexts, dataDescriptionEntryFormat3Contexts);
+
+
+      List<List<String>> variables = new ArrayList<>();
+
+      getDifferentVariableTypes(variables, dataDescriptionEntryFormat1Contexts, dataDescriptionEntryFormat2Contexts);
+
+      Map<String, Integer> updatedFormat1AndFormat3Links = new HashMap<>();
+
+      update(variables, dataDescriptionEntryFormat3Contexts, updatedFormat1AndFormat3Links, format1Andformat3Links);
+
+      List<List<String>> nodes = getNodes(variables, "13", "14");
+      List<List<String>> links = getLinks(variables, programName, updatedFormat1AndFormat3Links, dataDescriptionEntryFormat1Contexts);
+
+      nodeLinkManager.addVariables(programName, nodes, links);
+
+
+    } catch (ProgramNameNotFoundException e) {
+      e.printStackTrace();
+    } catch (ContextNotFoundException e) {
+      throw new RuntimeException(e);
+    }
+    return super.visitLocalStorageSection(ctx);
+  }
 
 
   private List<List<String>> getNodes(List<List<String>> variables, String variableNodeNumber, String subVariableNodeNumber) {
