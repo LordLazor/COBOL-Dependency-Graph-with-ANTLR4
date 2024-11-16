@@ -1,6 +1,7 @@
 package de.lordlazor.bachelorarbeit.visitor;
 
 import de.lordlazor.bachelorarbeit.utils.JsonUtilities;
+import java.util.HashMap;
 import java.util.List;
 
 public class NodeLinkManager {
@@ -26,6 +27,10 @@ public class NodeLinkManager {
     jsonUtilities.addLink("Root", programName, 1);
   }
 
+  public void addLink(String source, String target) {
+    jsonUtilities.addLink(source, target, 1);
+  }
+
   public void addFileDescriptionName(String programName, String fdName) {
     jsonUtilities.addNode(fdName, 5);
     jsonUtilities.addLink(programName, fdName, 1);
@@ -47,6 +52,16 @@ public class NodeLinkManager {
     jsonUtilities.addNode(programName, 1);
 
     jsonUtilities.addLink("Root", programName, 1);
+  }
+
+  public String searchNodeContainsName(String name) {
+    List<HashMap<String, Object>> nodes = jsonUtilities.getNodes();
+    for (HashMap<String, Object> node : nodes) {
+      if (node.get("id").toString().contains(name)) {
+        return node.get("id").toString();
+      }
+    }
+    return null;
   }
 
 }

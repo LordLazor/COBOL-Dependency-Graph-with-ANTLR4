@@ -1,11 +1,17 @@
 package de.lordlazor.bachelorarbeit.visitor;
 
 import de.lordlazor.bachelorarbeit.exceptions.ContextNotFoundException;
+import de.lordlazor.bachelorarbeit.exceptions.JsonNodeNotFoundException;
 import de.lordlazor.bachelorarbeit.exceptions.ProgramNameNotFoundException;
 import de.lordlazor.bachelorarbeit.exceptions.VisitorFileNotFoundException;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85BaseVisitor;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.AssignClauseContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CallByReferenceContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CallByReferencePhraseContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CallStatementContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CallUsingParameterContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CallUsingPhraseContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CobolWordContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ConditionNameContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CopyStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DataDescriptionEntryFormat1Context;
@@ -18,11 +24,13 @@ import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.FileControlEntryContext
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.FileDescriptionEntryContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.FileNameContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.FileSectionContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.IdentifierContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.LinkageSectionContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.LiteralContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ParagraphNameContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProcedureCopyStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.QualifiedDataNameContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.QualifiedDataNameFormat1Context;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SelectClauseContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.WorkingStorageSectionContext;
 import de.lordlazor.bachelorarbeit.utils.JsonUtilities;
@@ -42,6 +50,7 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
     this.retrieveProgramName = new RetrieveProgramName();
     this.retrieveContext = new RetrieveContext();
   }
+
 
   /**
    * Get the program name from the program unit context by traversing through the parents of the current context.
@@ -86,10 +95,46 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
   @Override
   public Object visitCallStatement(CallStatementContext ctx) {
     try {
+
+      // Get the called program
       String programName = retrieveProgramName.getProgramName(ctx);
       String calledProgramName = ctx.children.get(1).getText().replace("'", "").replace("\"", "");
       nodeLinkManager.addNodeAndLink(programName, calledProgramName, 4);
-    } catch (ProgramNameNotFoundException | ContextNotFoundException e) {
+
+      // Get all Variables that are passed to the called program
+      CallUsingPhraseContext callUsingPhraseContext = retrieveContext.getCallUsingPhraseContext(ctx);
+
+      CallUsingParameterContext callUsingParameterContext = retrieveContext.getCallUsingParameterContext(callUsingPhraseContext);
+
+      CallByReferencePhraseContext callByReferencePhraseContext = retrieveContext.getCallByReferencePhraseContext(callUsingParameterContext);
+
+      for (int i = 0; i < callByReferencePhraseContext.children.size(); i++) {
+        CallByReferenceContext callByReferenceContext = (CallByReferenceContext) callByReferencePhraseContext.children.get(i);
+
+        IdentifierContext identifierContext = (IdentifierContext) callByReferenceContext.children.get(0);
+
+        QualifiedDataNameContext qualifiedDataNameContext = (QualifiedDataNameContext) identifierContext.children.get(0);
+
+        QualifiedDataNameFormat1Context qualifiedDataNameFormat1Context = (QualifiedDataNameFormat1Context) qualifiedDataNameContext.children.get(0);
+
+        DataNameContext dataNameContext = (DataNameContext) qualifiedDataNameFormat1Context.children.get(0);
+
+        CobolWordContext cobolWordContext = (CobolWordContext) dataNameContext.children.get(0);
+
+        String variableNameWithoutLevelNumber = cobolWordContext.children.get(0).getText();
+
+        String variableWithLevelNumber = nodeLinkManager.searchNodeContainsName(variableNameWithoutLevelNumber);
+
+        if (variableWithLevelNumber == null) {
+          throw new JsonNodeNotFoundException("variableWithLevelNumber is null");
+        }
+
+        nodeLinkManager.addLink(calledProgramName, variableWithLevelNumber);
+      }
+
+
+
+    } catch (ProgramNameNotFoundException | ContextNotFoundException | JsonNodeNotFoundException e) {
       e.printStackTrace();
     }
     return super.visitCallStatement(ctx);

@@ -2,6 +2,9 @@ package de.lordlazor.bachelorarbeit.visitor;
 
 import de.lordlazor.bachelorarbeit.exceptions.ContextNotFoundException;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.AssignClauseContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CallByReferencePhraseContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CallUsingParameterContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CallUsingPhraseContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DataDescriptionEntryFormat1Context;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DataDescriptionEntryFormat2Context;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DataDescriptionEntryFormat3Context;
@@ -28,6 +31,42 @@ public class RetrieveContext {
     }
 
     throw new ContextNotFoundException("selectClauseContext is null");
+
+  }
+
+  public CallUsingPhraseContext getCallUsingPhraseContext(ParserRuleContext ctx)
+      throws ContextNotFoundException {
+    for (int i = 0; i < ctx.children.size(); i++){
+      if (ctx.children.get(i) instanceof CallUsingPhraseContext) {
+        return (CallUsingPhraseContext) ctx.children.get(i);
+      }
+    }
+
+    throw new ContextNotFoundException("callUsingPhraseContext is null");
+
+  }
+
+  public CallUsingParameterContext getCallUsingParameterContext(ParserRuleContext ctx)
+      throws ContextNotFoundException {
+    for (int i = 0; i < ctx.children.size(); i++){
+      if (ctx.children.get(i) instanceof CallUsingParameterContext) {
+        return (CallUsingParameterContext) ctx.children.get(i);
+      }
+    }
+
+    throw new ContextNotFoundException("callUsingParameterContext is null");
+
+  }
+
+  public CallByReferencePhraseContext getCallByReferencePhraseContext(ParserRuleContext ctx)
+      throws ContextNotFoundException {
+    for (int i = 0; i < ctx.children.size(); i++){
+      if (ctx.children.get(i) instanceof CallByReferencePhraseContext) {
+        return (CallByReferencePhraseContext) ctx.children.get(i);
+      }
+    }
+
+    throw new ContextNotFoundException("callByReferencePhraseContext is null");
 
   }
 

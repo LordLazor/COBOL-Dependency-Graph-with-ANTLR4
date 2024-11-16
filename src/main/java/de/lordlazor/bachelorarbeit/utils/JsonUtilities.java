@@ -36,6 +36,8 @@ public class JsonUtilities {
     this.links = links;
   }
 
+
+
   public void addNode(String id, int group) {
     // If node already exist in nodes list, do not add it again
     for (HashMap<String, Object> node : nodes) {
