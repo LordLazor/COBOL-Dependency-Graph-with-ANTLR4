@@ -105,32 +105,35 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
       // Get all Variables that are passed to the called program
       CallUsingPhraseContext callUsingPhraseContext = retrieveContext.getCallUsingPhraseContext(ctx);
 
-      CallUsingParameterContext callUsingParameterContext = retrieveContext.getCallUsingParameterContext(callUsingPhraseContext);
+      // if callUsingPhraseContext is null, then there are no variables passed to the called program
+      if (callUsingPhraseContext != null) {
+        CallUsingParameterContext callUsingParameterContext = retrieveContext.getCallUsingParameterContext(callUsingPhraseContext);
 
-      CallByReferencePhraseContext callByReferencePhraseContext = retrieveContext.getCallByReferencePhraseContext(callUsingParameterContext);
+        CallByReferencePhraseContext callByReferencePhraseContext = retrieveContext.getCallByReferencePhraseContext(callUsingParameterContext);
 
-      for (int i = 0; i < callByReferencePhraseContext.children.size(); i++) {
-        CallByReferenceContext callByReferenceContext = (CallByReferenceContext) callByReferencePhraseContext.children.get(i);
+        for (int i = 0; i < callByReferencePhraseContext.children.size(); i++) {
+          CallByReferenceContext callByReferenceContext = (CallByReferenceContext) callByReferencePhraseContext.children.get(i);
 
-        IdentifierContext identifierContext = (IdentifierContext) callByReferenceContext.children.get(0);
+          IdentifierContext identifierContext = (IdentifierContext) callByReferenceContext.children.get(0);
 
-        QualifiedDataNameContext qualifiedDataNameContext = (QualifiedDataNameContext) identifierContext.children.get(0);
+          QualifiedDataNameContext qualifiedDataNameContext = (QualifiedDataNameContext) identifierContext.children.get(0);
 
-        QualifiedDataNameFormat1Context qualifiedDataNameFormat1Context = (QualifiedDataNameFormat1Context) qualifiedDataNameContext.children.get(0);
+          QualifiedDataNameFormat1Context qualifiedDataNameFormat1Context = (QualifiedDataNameFormat1Context) qualifiedDataNameContext.children.get(0);
 
-        DataNameContext dataNameContext = (DataNameContext) qualifiedDataNameFormat1Context.children.get(0);
+          DataNameContext dataNameContext = (DataNameContext) qualifiedDataNameFormat1Context.children.get(0);
 
-        CobolWordContext cobolWordContext = (CobolWordContext) dataNameContext.children.get(0);
+          CobolWordContext cobolWordContext = (CobolWordContext) dataNameContext.children.get(0);
 
-        String variableNameWithoutLevelNumber = cobolWordContext.children.get(0).getText();
+          String variableNameWithoutLevelNumber = cobolWordContext.children.get(0).getText();
 
-        String variableWithLevelNumber = nodeLinkManager.searchNodeContainsName(variableNameWithoutLevelNumber);
+          String variableWithLevelNumber = nodeLinkManager.searchNodeContainsName(variableNameWithoutLevelNumber);
 
-        if (variableWithLevelNumber == null) {
-          throw new JsonNodeNotFoundException("variableWithLevelNumber is null");
+          if (variableWithLevelNumber == null) {
+            throw new JsonNodeNotFoundException("variableWithLevelNumber is null");
+          }
+
+          nodeLinkManager.addLink(calledProgramName, variableWithLevelNumber);
         }
-
-        nodeLinkManager.addLink(calledProgramName, variableWithLevelNumber);
       }
 
 

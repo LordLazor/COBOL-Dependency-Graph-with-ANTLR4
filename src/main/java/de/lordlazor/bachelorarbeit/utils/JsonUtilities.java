@@ -52,7 +52,7 @@ public class JsonUtilities {
     nodes.add(node);
   }
 
-  public void addLink(String source, String target, int value) {
+  public void addLink(String source, String target) {
     // If link already exist in links list, do not add it again
     for (HashMap<String, Object> link : links) {
       if (link.get("source").equals(source) && link.get("target").equals(target)) {
@@ -63,7 +63,6 @@ public class JsonUtilities {
     HashMap<String, Object> link = new HashMap<>();
     link.put("source", source);
     link.put("target", target);
-    link.put("value", value);
     links.add(link);
   }
 

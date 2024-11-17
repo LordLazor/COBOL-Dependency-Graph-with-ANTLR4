@@ -14,30 +14,30 @@ public class NodeLinkManager {
   public void addNodeAndLink(String parent, String child, int group) {
     jsonUtilities.addNode(parent, 1);
     jsonUtilities.addNode(child, group);
-    jsonUtilities.addLink(parent, child, 1);
-    jsonUtilities.addLink("Root", parent, 1);
+    jsonUtilities.addLink(parent, child);
+    jsonUtilities.addLink("Root", parent);
   }
 
   public void addFileControlEntry(String programName, String fdName, String fileControlClause) {
     jsonUtilities.addNode(programName, 1);
     jsonUtilities.addNode(fileControlClause, 6);
     jsonUtilities.addNode(fdName, 5);
-    jsonUtilities.addLink(programName, fdName, 1);
-    jsonUtilities.addLink(fdName, fileControlClause, 1);
-    jsonUtilities.addLink("Root", programName, 1);
+    jsonUtilities.addLink(programName, fdName);
+    jsonUtilities.addLink(fdName, fileControlClause);
+    jsonUtilities.addLink("Root", programName);
   }
 
   public void addLink(String source, String target) {
-    jsonUtilities.addLink(source, target, 1);
+    jsonUtilities.addLink(source, target);
   }
 
   public void addFileDescriptionName(String programName, String fdName) {
     jsonUtilities.addNode(fdName, 5);
-    jsonUtilities.addLink(programName, fdName, 1);
+    jsonUtilities.addLink(programName, fdName);
 
     jsonUtilities.addNode(programName, 1);
 
-    jsonUtilities.addLink("Root", programName, 1);
+    jsonUtilities.addLink("Root", programName);
   }
 
   public void addVariables(String programName, List<List<String>> nodes, List<List<String>> links) {
@@ -46,12 +46,12 @@ public class NodeLinkManager {
     }
 
     for(List<String> link : links){
-      jsonUtilities.addLink(link.get(0), link.get(1), 1);
+      jsonUtilities.addLink(link.get(0), link.get(1));
     }
 
     jsonUtilities.addNode(programName, 1);
 
-    jsonUtilities.addLink("Root", programName, 1);
+    jsonUtilities.addLink("Root", programName);
   }
 
   public String searchNodeContainsName(String name) {

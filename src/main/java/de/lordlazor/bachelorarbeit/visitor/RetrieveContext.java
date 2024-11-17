@@ -42,7 +42,8 @@ public class RetrieveContext {
       }
     }
 
-    throw new ContextNotFoundException("callUsingPhraseContext is null");
+    return null; // Does not throw error because Call Using can be empty and is checked in the visitor
+    //throw new ContextNotFoundException("callUsingPhraseContext is null");
 
   }
 
