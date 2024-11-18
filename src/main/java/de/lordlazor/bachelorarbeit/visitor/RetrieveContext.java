@@ -1,6 +1,8 @@
 package de.lordlazor.bachelorarbeit.visitor;
 
 import de.lordlazor.bachelorarbeit.exceptions.ContextNotFoundException;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.AddToGivingStatementContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.AddToStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.AssignClauseContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CallByReferencePhraseContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CallUsingParameterContext;
@@ -9,19 +11,101 @@ import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CobolWordContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DataDescriptionEntryFormat1Context;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DataDescriptionEntryFormat2Context;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DataDescriptionEntryFormat3Context;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DivideByGivingStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.FileControlClauseContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.FileDescriptionEntryContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.FileNameContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.IdentificationDivisionContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.IdentifierContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.LiteralContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MultiplyGivingContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MultiplyRegularOperandContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProgramIdParagraphContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProgramNameContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SelectClauseContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SubtractFromGivingStatementContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SubtractFromStatementContext;
 import java.util.List;
 import java.util.Map;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 public class RetrieveContext {
+
+
+  public DivideByGivingStatementContext getDivideByGivingStatementContext(ParserRuleContext ctx)
+      throws ContextNotFoundException {
+    for (int i = 0; i < ctx.children.size(); i++){
+      if (ctx.children.get(i) instanceof DivideByGivingStatementContext) {
+        return (DivideByGivingStatementContext) ctx.children.get(i);
+      }
+    }
+
+    throw new ContextNotFoundException("divideByGivingStatementContext is null");
+  }
+
+  public MultiplyRegularOperandContext getMultiplyRegularOperandContext(ParserRuleContext ctx)
+      throws ContextNotFoundException {
+    for (int i = 0; i < ctx.children.size(); i++){
+      if (ctx.children.get(i) instanceof MultiplyRegularOperandContext) {
+        return (MultiplyRegularOperandContext) ctx.children.get(i);
+      }
+    }
+
+    throw new ContextNotFoundException("multiplyRegularOperandContext is null");
+  }
+
+  public SubtractFromGivingStatementContext getSubtractFromGivingStatementContext(ParserRuleContext ctx)
+      throws ContextNotFoundException {
+    for (int i = 0; i < ctx.children.size(); i++){
+      if (ctx.children.get(i) instanceof SubtractFromGivingStatementContext) {
+        return (SubtractFromGivingStatementContext) ctx.children.get(i);
+      }
+    }
+
+    throw new ContextNotFoundException("subtractFromGivingStatementContext is null");
+  }
+  public AddToGivingStatementContext getAddToGivingStatementContext(ParserRuleContext ctx)
+      throws ContextNotFoundException {
+    for (int i = 0; i < ctx.children.size(); i++){
+      if (ctx.children.get(i) instanceof AddToGivingStatementContext) {
+        return (AddToGivingStatementContext) ctx.children.get(i);
+      }
+    }
+
+    throw new ContextNotFoundException("addToGivingStatementContext is null");
+  }
+  public SubtractFromStatementContext getSubtractFromStatementContext(ParserRuleContext ctx)
+      throws ContextNotFoundException {
+    for (int i = 0; i < ctx.children.size(); i++){
+      if (ctx.children.get(i) instanceof SubtractFromStatementContext) {
+        return (SubtractFromStatementContext) ctx.children.get(i);
+      }
+    }
+
+    throw new ContextNotFoundException("subtractFromStatementContext is null");
+  }
+
+  public IdentifierContext getIdentifierContext(ParserRuleContext ctx)
+      throws ContextNotFoundException {
+    for (int i = 0; i < ctx.children.size(); i++){
+      if (ctx.children.get(i) instanceof IdentifierContext) {
+        return (IdentifierContext) ctx.children.get(i);
+      }
+    }
+
+    throw new ContextNotFoundException("identifierContext is null");
+  }
+
+  public AddToStatementContext getAddToStatementContext(ParserRuleContext ctx)
+      throws ContextNotFoundException {
+    for (int i = 0; i < ctx.children.size(); i++){
+      if (ctx.children.get(i) instanceof AddToStatementContext) {
+        return (AddToStatementContext) ctx.children.get(i);
+      }
+    }
+
+    throw new ContextNotFoundException("addToStatementContext is null");
+  }
 
   public CobolWordContext getCobolWordContext(ParserRuleContext ctx)
       throws ContextNotFoundException {
@@ -32,7 +116,6 @@ public class RetrieveContext {
     }
 
     throw new ContextNotFoundException("cobolWordContext is null");
-
   }
 
   public SelectClauseContext getSelectClauseContext(ParserRuleContext ctx)
@@ -44,7 +127,6 @@ public class RetrieveContext {
     }
 
     throw new ContextNotFoundException("selectClauseContext is null");
-
   }
 
   public CallUsingPhraseContext getCallUsingPhraseContext(ParserRuleContext ctx)
@@ -57,7 +139,6 @@ public class RetrieveContext {
 
     return null; // Does not throw error because Call Using can be empty and is checked in the visitor
     //throw new ContextNotFoundException("callUsingPhraseContext is null");
-
   }
 
   public CallUsingParameterContext getCallUsingParameterContext(ParserRuleContext ctx)
@@ -69,7 +150,6 @@ public class RetrieveContext {
     }
 
     throw new ContextNotFoundException("callUsingParameterContext is null");
-
   }
 
   public CallByReferencePhraseContext getCallByReferencePhraseContext(ParserRuleContext ctx)
@@ -81,7 +161,6 @@ public class RetrieveContext {
     }
 
     throw new ContextNotFoundException("callByReferencePhraseContext is null");
-
   }
 
   public FileNameContext getFileNameContext(ParserRuleContext ctx)
@@ -93,7 +172,6 @@ public class RetrieveContext {
     }
 
     throw new ContextNotFoundException("fileNameContext is null");
-
   }
 
   public FileControlClauseContext getFileControlClauseContext(ParserRuleContext ctx)
@@ -105,7 +183,6 @@ public class RetrieveContext {
     }
 
     throw new ContextNotFoundException("fileControlClauseContext is null");
-
   }
 
   public AssignClauseContext getAssignClauseContext(ParserRuleContext ctx)
@@ -117,7 +194,6 @@ public class RetrieveContext {
     }
 
     throw new ContextNotFoundException("assignClauseContext is null");
-
   }
 
   public LiteralContext getLiteralContext(ParserRuleContext ctx)
@@ -129,7 +205,6 @@ public class RetrieveContext {
     }
 
     throw new ContextNotFoundException("literalContext is null");
-
   }
 
   public FileDescriptionEntryContext getFileDescriptionEntryContext(ParserRuleContext ctx)
@@ -141,7 +216,6 @@ public class RetrieveContext {
     }
     return null;
     // Does not throw error because File Section can be empty
-
   }
 
   public IdentificationDivisionContext getIdentificationDivisionContext(ParserRuleContext ctx)
@@ -194,5 +268,4 @@ public class RetrieveContext {
       }
     }
   }
-
 }

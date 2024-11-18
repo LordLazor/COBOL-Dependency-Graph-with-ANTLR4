@@ -2,6 +2,7 @@ package de.lordlazor.bachelorarbeit.controller;
 
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Lexer;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser;
+import de.lordlazor.bachelorarbeit.utils.VisitorUtilites;
 import de.lordlazor.bachelorarbeit.visitor.Visitor;
 import de.lordlazor.bachelorarbeit.utils.ControllerUtilities;
 import de.lordlazor.bachelorarbeit.utils.JsonUtilities;
@@ -44,6 +45,8 @@ public class UploadController {
     }
 
     try {
+      VisitorUtilites.resetCounters();
+
       List<CharStream> streams = new ArrayList<>();
       String folderName = null;
 
@@ -81,6 +84,8 @@ public class UploadController {
     }
 
     try {
+      VisitorUtilites.resetCounters();
+
       InputStream inputStream = file.getInputStream();
       CharStream stream = CharStreams.fromStream(inputStream);
       List<CharStream> streams = new ArrayList<>();

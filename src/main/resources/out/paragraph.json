@@ -1,0 +1,1 @@
+{"nodes":[{"id":"BeispielProgramm","group":1},{"id":"Root","group":0},{"id":"Beispiel-Paragraph","group":2}],"links":[{"source":"Root","target":"BeispielProgramm"},{"source":"BeispielProgramm","target":"Beispiel-Paragraph"}]}

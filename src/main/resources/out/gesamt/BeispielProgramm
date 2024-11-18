@@ -1,0 +1,40 @@
+IDENTIFICATION DIVISION. 
+PROGRAM-ID. BeispielProgramm.
+ENVIRONMENT DIVISION.
+INPUT-OUTPUT SECTION.
+FILE-CONTROL.
+    SELECT BeispielDatei ASSIGN TO 'beispieldatei.txt'.
+DATA DIVISION.
+WORKING-STORAGE SECTION.
+01 WS-Informationen.
+    05 WS-Name PIC X(10).
+    05 WS-Adresse PIC X(10).
+    05 WS-Postleitzahl PIC X(10).
+01 WS-Ist-Student.
+    88 WS-Ist-Student-Wahr VALUE "Y".
+    88 WS-Ist-Student-Falsch VALUE "N".
+FILE SECTION.
+FD BeispielDatei.
+01 FS-BeispielRecord.
+    05 FS-Adresse PIC X(10).
+    05 FS-Postleitzahl PIC X(10).
+linkage section.
+01 LK-Customer.
+    05 LK-KundeId PIC 9(10).
+    05 LK-KundeName PIC X(20).
+    05 LK-KundeAdresse PIC X(30).
+
+66 CustomerData RENAMES LS-CustomerName THROUGH LS-CustomerAddress.
+local-storage section.
+01 LS-Adresse.
+    05 LS-Vorname PIC X(11).
+    05 LS-Nachname PIC X(10).
+77 LS-Stadt PIC X(11) VALUE "Duesseldorf".
+
+PROCEDURE DIVISION.
+BeispielParagraph.
+    DISPLAY "Hello, world!".
+
+COPY ProcedureBook.cpy.
+
+CALL 'SubProgramm' USING WS-Informationen.

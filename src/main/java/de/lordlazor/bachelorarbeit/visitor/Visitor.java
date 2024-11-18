@@ -5,6 +5,13 @@ import de.lordlazor.bachelorarbeit.exceptions.JsonNodeNotFoundException;
 import de.lordlazor.bachelorarbeit.exceptions.ProgramNameNotFoundException;
 import de.lordlazor.bachelorarbeit.exceptions.VisitorFileNotFoundException;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85BaseVisitor;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.AddFromContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.AddGivingContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.AddStatementContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.AddToContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.AddToGivingContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.AddToGivingStatementContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.AddToStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.AssignClauseContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CallByReferenceContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CallByReferencePhraseContext;
@@ -19,6 +26,9 @@ import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DataDescriptionEntryFor
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DataDescriptionEntryFormat3Context;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DataNameContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DataRenamesClauseContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DivideByGivingStatementContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DivideGivingPhraseContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DivideStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.FileControlClauseContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.FileControlEntryContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.FileDescriptionEntryContext;
@@ -28,6 +38,12 @@ import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.IdentifierContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.LinkageSectionContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.LiteralContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.LocalStorageSectionContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MultiplyGivingContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MultiplyGivingOperandContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MultiplyGivingResultContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MultiplyRegularContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MultiplyRegularOperandContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MultiplyStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ParagraphNameContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProcedureCopyStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProgramIdParagraphContext;
@@ -35,12 +51,21 @@ import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProgramNameContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.QualifiedDataNameContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.QualifiedDataNameFormat1Context;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SelectClauseContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SubtractFromGivingStatementContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SubtractFromStatementContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SubtractGivingContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SubtractMinuendContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SubtractMinuendGivingContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SubtractStatementContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SubtractSubtrahendContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.WorkingStorageSectionContext;
 import de.lordlazor.bachelorarbeit.utils.JsonUtilities;
+import de.lordlazor.bachelorarbeit.utils.VisitorUtilites;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.antlr.v4.runtime.ParserRuleContext;
 
 public class Visitor extends Cobol85BaseVisitor<Object> {
   private final RetrieveProgramName retrieveProgramName;
@@ -58,6 +83,233 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
   /**
    * Get the program name from the program unit context by traversing through the parents of the current context.
    */
+
+  @Override
+  public Object visitAddStatement(AddStatementContext ctx) {
+    try{
+      String programName = retrieveProgramName.getProgramName(ctx);
+
+      if (ctx.children.get(1) instanceof  AddToStatementContext) {
+
+        AddToStatementContext addToStatementContext = retrieveContext.getAddToStatementContext(ctx);
+
+        String currentAddNodeName = "ADD:" + VisitorUtilites.currentAdd;
+
+        for (int i = 0; i < addToStatementContext.children.size(); i++) {
+          if (addToStatementContext.children.get(i) instanceof AddFromContext
+              || addToStatementContext.children.get(i) instanceof AddToContext) {
+            IdentifierContext identifierContext = retrieveContext.getIdentifierContext(
+                (ParserRuleContext) addToStatementContext.children.get(i));
+
+            String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
+
+            nodeLinkManager.addNodeWithoutRoot(currentAddNodeName, 15);
+            nodeLinkManager.addLink(programName, currentAddNodeName);
+            nodeLinkManager.addLink(currentAddNodeName, variableWithLevelNumber);
+          }
+        }
+      } else if (ctx.children.get(1) instanceof AddToGivingStatementContext) {
+
+        AddToGivingStatementContext addToGivingStatementContext = retrieveContext.getAddToGivingStatementContext(ctx);
+
+        String currentAddNodeName = "ADD:" + VisitorUtilites.currentAdd;
+
+        for (int i = 0; i < addToGivingStatementContext.children.size(); i++) {
+          if (addToGivingStatementContext.children.get(i) instanceof AddFromContext
+              || addToGivingStatementContext.children.get(i) instanceof AddToGivingContext
+              || addToGivingStatementContext.children.get(i) instanceof AddGivingContext) {
+            IdentifierContext identifierContext = retrieveContext.getIdentifierContext((ParserRuleContext) addToGivingStatementContext.children.get(i));
+
+            String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
+
+            nodeLinkManager.addNodeWithoutRoot(currentAddNodeName, 15);
+            nodeLinkManager.addLink(programName, currentAddNodeName);
+            nodeLinkManager.addLink(currentAddNodeName, variableWithLevelNumber);
+          }
+        }
+
+      }
+      VisitorUtilites.currentAdd  += 1;
+
+    } catch (ContextNotFoundException e) {
+      e.printStackTrace();
+    } catch (ProgramNameNotFoundException e) {
+      throw new RuntimeException(e);
+    }
+
+    return super.visitAddStatement(ctx);
+  }
+
+  @Override
+  public Object visitSubtractStatement(SubtractStatementContext ctx){
+    try{
+      String programName = retrieveProgramName.getProgramName(ctx);
+      if (ctx.children.get(1) instanceof SubtractFromStatementContext) {
+
+        SubtractFromStatementContext subtractFromStatementContext = retrieveContext.getSubtractFromStatementContext(ctx);
+
+        String currentSubtractNodeName = "SUBTRACT:" + VisitorUtilites.currentSubtract;
+
+        for (int i = 0; i < subtractFromStatementContext.children.size(); i++) {
+          if (subtractFromStatementContext.children.get(i) instanceof SubtractSubtrahendContext
+              || subtractFromStatementContext.children.get(i) instanceof SubtractMinuendContext) {
+            IdentifierContext identifierContext = retrieveContext.getIdentifierContext((ParserRuleContext) subtractFromStatementContext.children.get(i));
+
+            String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
+
+            nodeLinkManager.addNodeWithoutRoot(currentSubtractNodeName, 16);
+            nodeLinkManager.addLink(programName, currentSubtractNodeName);
+            nodeLinkManager.addLink(currentSubtractNodeName, variableWithLevelNumber);
+          }
+        }
+      } else if (ctx.children.get(1) instanceof SubtractFromGivingStatementContext) {
+        SubtractFromGivingStatementContext subtractFromGivingStatementContext = retrieveContext.getSubtractFromGivingStatementContext(ctx);
+
+        String currentSubtractNodeName = "SUBTRACT:" + VisitorUtilites.currentSubtract;
+
+        for (int i = 0; i < subtractFromGivingStatementContext.children.size(); i++) {
+          if (subtractFromGivingStatementContext.children.get(i) instanceof SubtractSubtrahendContext
+              || subtractFromGivingStatementContext.children.get(i) instanceof SubtractMinuendGivingContext
+              || subtractFromGivingStatementContext.children.get(i) instanceof SubtractGivingContext) {
+            IdentifierContext identifierContext = retrieveContext.getIdentifierContext((ParserRuleContext) subtractFromGivingStatementContext.children.get(i));
+
+            String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
+
+            nodeLinkManager.addNodeWithoutRoot(currentSubtractNodeName, 16);
+            nodeLinkManager.addLink(programName, currentSubtractNodeName);
+            nodeLinkManager.addLink(currentSubtractNodeName, variableWithLevelNumber);
+          }
+        }
+      }
+      VisitorUtilites.currentSubtract  += 1;
+
+    } catch (ContextNotFoundException e) {
+      e.printStackTrace();
+    } catch (ProgramNameNotFoundException e) {
+      throw new RuntimeException(e);
+    }
+
+    return super.visitSubtractStatement(ctx);
+  }
+
+  @Override
+  public Object visitMultiplyStatement(MultiplyStatementContext ctx){
+    try{
+      String programName = retrieveProgramName.getProgramName(ctx);
+
+      String currentMultiplyNodeName = "MULTIPLY:" + VisitorUtilites.currentMultiply;
+
+      for (int i = 0; i < ctx.children.size(); i++) {
+        if (ctx.children.get(i) instanceof IdentifierContext) {
+          String variableWithLevelNumber = extractVariableWithLevelNumber((IdentifierContext) ctx.children.get(i));
+
+          nodeLinkManager.addNodeWithoutRoot(currentMultiplyNodeName, 17);
+          nodeLinkManager.addLink(programName, currentMultiplyNodeName);
+          nodeLinkManager.addLink(currentMultiplyNodeName, variableWithLevelNumber);
+        } else if (ctx.children.get(i) instanceof MultiplyRegularContext) {
+          MultiplyRegularOperandContext multiplyRegularOperandContext = retrieveContext.getMultiplyRegularOperandContext((MultiplyRegularContext) ctx.children.get(i));
+
+          IdentifierContext identifierContext = retrieveContext.getIdentifierContext(multiplyRegularOperandContext);
+
+          String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
+
+          nodeLinkManager.addNodeWithoutRoot(currentMultiplyNodeName, 17);
+          nodeLinkManager.addLink(programName, currentMultiplyNodeName);
+          nodeLinkManager.addLink(currentMultiplyNodeName, variableWithLevelNumber);
+        } else if (ctx.children.get(i) instanceof MultiplyGivingContext multiplyGivingContext){
+          for(int j = 0; j < multiplyGivingContext.children.size(); j++){
+            if (multiplyGivingContext.children.get(j) instanceof MultiplyGivingOperandContext
+                || multiplyGivingContext.children.get(j) instanceof MultiplyGivingResultContext) {
+
+              IdentifierContext identifierContext = retrieveContext.getIdentifierContext((ParserRuleContext) multiplyGivingContext.children.get(j));
+
+              String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
+
+              nodeLinkManager.addNodeWithoutRoot(currentMultiplyNodeName, 17);
+              nodeLinkManager.addLink(programName, currentMultiplyNodeName);
+              nodeLinkManager.addLink(currentMultiplyNodeName, variableWithLevelNumber);
+            }
+          }
+
+        }
+      }
+      VisitorUtilites.currentMultiply  += 1;
+
+    } catch (ContextNotFoundException e) {
+      e.printStackTrace();
+    } catch (ProgramNameNotFoundException e) {
+      throw new RuntimeException(e);
+    }
+
+    return super.visitMultiplyStatement(ctx);
+  }
+
+  @Override
+  public Object visitDivideStatement(DivideStatementContext ctx){
+    try{
+      String programName = retrieveProgramName.getProgramName(ctx);
+
+      String currentDivideNodeName = "DIVIDE:" + VisitorUtilites.currentDivide;
+
+      for (int i = 0; i < ctx.children.size(); i++) {
+        if (ctx.children.get(i) instanceof IdentifierContext) {
+          String variableWithLevelNumber = extractVariableWithLevelNumber((IdentifierContext) ctx.children.get(i));
+
+          nodeLinkManager.addNodeWithoutRoot(currentDivideNodeName, 18);
+          nodeLinkManager.addLink(programName, currentDivideNodeName);
+          nodeLinkManager.addLink(currentDivideNodeName, variableWithLevelNumber);
+        } else if (ctx.children.get(i) instanceof DivideByGivingStatementContext divideByGivingStatementContext) {
+          //DivideByGivingStatementContext divideByGivingStatementContext = retrieveContext.getDivideByGivingStatementContext((ParserRuleContext) ctx.children.get(i));
+
+          for(int j = 0; j < divideByGivingStatementContext.children.size(); j++){
+            if (divideByGivingStatementContext.children.get(j) instanceof IdentifierContext identifierContext) {
+
+              //IdentifierContext identifierContext = retrieveContext.getIdentifierContext((ParserRuleContext) divideByGivingStatementContext.children.get(j));
+
+              String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
+
+              nodeLinkManager.addNodeWithoutRoot(currentDivideNodeName, 18);
+              nodeLinkManager.addLink(programName, currentDivideNodeName);
+              nodeLinkManager.addLink(currentDivideNodeName, variableWithLevelNumber);
+            } else if(divideByGivingStatementContext.children.get(j) instanceof DivideGivingPhraseContext divideGivingPhraseContext){
+              IdentifierContext identifierContext = retrieveContext.getIdentifierContext((ParserRuleContext) divideGivingPhraseContext.children.get(1));
+
+              String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
+
+              nodeLinkManager.addNodeWithoutRoot(currentDivideNodeName, 18);
+              nodeLinkManager.addLink(programName, currentDivideNodeName);
+              nodeLinkManager.addLink(currentDivideNodeName, variableWithLevelNumber);
+            }
+          }
+
+
+        }
+      }
+      VisitorUtilites.currentDivide  += 1;
+
+    } catch (ContextNotFoundException e) {
+      e.printStackTrace();
+    } catch (ProgramNameNotFoundException e) {
+      throw new RuntimeException(e);
+    }
+
+    return super.visitDivideStatement(ctx);
+  }
+
+
+  private String extractVariableWithLevelNumber(IdentifierContext identifierContext) {
+    QualifiedDataNameContext qualifiedDataNameContext = (QualifiedDataNameContext) identifierContext.children.get(0);
+
+    QualifiedDataNameFormat1Context qualifiedDataNameFormat1Context = (QualifiedDataNameFormat1Context) qualifiedDataNameContext.children.get(0);
+
+    DataNameContext dataNameContext = (DataNameContext) qualifiedDataNameFormat1Context.children.get(0);
+
+    CobolWordContext cobolWordContext = (CobolWordContext) dataNameContext.children.get(0);
+
+    String variableNameWithoutLevelNumber = cobolWordContext.children.get(0).getText();
+
+    return nodeLinkManager.searchNodeContainsName(variableNameWithoutLevelNumber);
+  }
 
   @Override
   public Object visitProgramIdParagraph(ProgramIdParagraphContext ctx) {
@@ -134,17 +386,7 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
 
           IdentifierContext identifierContext = (IdentifierContext) callByReferenceContext.children.get(0);
 
-          QualifiedDataNameContext qualifiedDataNameContext = (QualifiedDataNameContext) identifierContext.children.get(0);
-
-          QualifiedDataNameFormat1Context qualifiedDataNameFormat1Context = (QualifiedDataNameFormat1Context) qualifiedDataNameContext.children.get(0);
-
-          DataNameContext dataNameContext = (DataNameContext) qualifiedDataNameFormat1Context.children.get(0);
-
-          CobolWordContext cobolWordContext = (CobolWordContext) dataNameContext.children.get(0);
-
-          String variableNameWithoutLevelNumber = cobolWordContext.children.get(0).getText();
-
-          String variableWithLevelNumber = nodeLinkManager.searchNodeContainsName(variableNameWithoutLevelNumber);
+          String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
 
           if (variableWithLevelNumber == null) {
             throw new JsonNodeNotFoundException("variableWithLevelNumber is null");

@@ -7,6 +7,7 @@ import java.util.List;
 public class NodeLinkManager {
   private JsonUtilities jsonUtilities;
 
+
   public NodeLinkManager(JsonUtilities jsonUtilities) {
     this.jsonUtilities = jsonUtilities;
   }
@@ -17,6 +18,7 @@ public class NodeLinkManager {
     jsonUtilities.addLink(parent, child);
     jsonUtilities.addLink("Root", parent);
   }
+
 
   public void addFileControlEntry(String programName, String fdName, String fileControlClause) {
     jsonUtilities.addNode(programName, 1);
@@ -40,6 +42,9 @@ public class NodeLinkManager {
     jsonUtilities.addLink("Root", programName);
   }
 
+  public void addNodeWithoutRoot(String id, int group) {
+    jsonUtilities.addNode(id, group);
+  }
   public void addNode(String id, int group) {
     jsonUtilities.addNode(id, group);
     jsonUtilities.addNode("Root", 0);

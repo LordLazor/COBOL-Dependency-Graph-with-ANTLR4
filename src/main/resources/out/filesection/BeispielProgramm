@@ -1,0 +1,7 @@
+IDENTIFICATION DIVISION. 
+PROGRAM-ID. BeispielProgramm.
+DATA DIVISION.
+FILE SECTION.
+FD BeispielDatei.
+01 FS-BeispielRecord.
+	05 FS-Vorname PIC X(10).
