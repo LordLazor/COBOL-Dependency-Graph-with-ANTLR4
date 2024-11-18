@@ -10,6 +10,8 @@ WORKING-STORAGE SECTION.
     05 WS-Ergebnis PIC 99.
     05 WS-Zahl1 PIC 9.
     05 WS-Zahl2 PIC 9.
+    05 WS-Zahl3 PIC 9.
+    05 WS-Zahl4 PIC 9.
 01 WS-Ist-Student.
     88 WS-Ist-Student-Wahr VALUE "Y".
     88 WS-Ist-Student-Falsch VALUE "N".
@@ -33,7 +35,7 @@ local-storage section.
 
 PROCEDURE DIVISION.
 BeispielParagraph.
-    DISPLAY "Hello, world!".
+    DISPLAY "Ein Paragraph".
 
 ADD WS-Zahl1 TO WS-Zahl2 GIVING WS-Ergebnis.
 SUBTRACT WS-Zahl1 FROM WS-Zahl2 GIVING WS-Ergebnis.
@@ -42,3 +44,11 @@ DIVIDE WS-Zahl1 BY WS-Zahl2 GIVING WS-Ergebnis.
 
 COPY ProcedureBook.cpy.
 CALL 'SubProgramm' USING WS-Mathematik.
+
+IF WS-Zahl1 = WS-Zahl2 AND WS-Zahl3 > WS-Zahl4
+  DISPLAY ""
+ELSE IF WS-Ergebnis
+  DISPLAY ""
+END-IF.
+
+PERFORM BeispielParagraph.
