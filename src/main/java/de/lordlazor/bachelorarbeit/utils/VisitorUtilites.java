@@ -7,6 +7,7 @@ public class VisitorUtilites {
   public static int currentMultiply = 0;
   public static int currentDivide = 0;
   public static int currentIf = 0;
+  public static int currentPerform = 0;
 
   public static void resetCounters() {
     currentAdd = 0;
@@ -14,6 +15,7 @@ public class VisitorUtilites {
     currentMultiply = 0;
     currentDivide = 0;
     currentIf = 0;
+    currentPerform = 0;
   }
 
 }

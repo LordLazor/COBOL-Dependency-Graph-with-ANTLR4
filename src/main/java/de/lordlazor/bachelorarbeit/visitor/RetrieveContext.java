@@ -24,7 +24,9 @@ import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.LiteralContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MultDivsContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MultiplyGivingContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MultiplyRegularOperandContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ParagraphNameContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.PowersContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProcedureNameContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProgramIdParagraphContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProgramNameContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.RelationArithmeticComparisonContext;
@@ -38,6 +40,28 @@ import java.util.Map;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 public class RetrieveContext {
+
+  public ProcedureNameContext getProcedureNameContext(ParserRuleContext ctx)
+      throws ContextNotFoundException {
+    for (int i = 0; i < ctx.children.size(); i++){
+      if (ctx.children.get(i) instanceof ProcedureNameContext) {
+        return (ProcedureNameContext) ctx.children.get(i);
+      }
+    }
+
+    throw new ContextNotFoundException("procedureNameContext is null");
+  }
+
+  public ParagraphNameContext getParagraphNameContext(ParserRuleContext ctx)
+      throws ContextNotFoundException {
+    for (int i = 0; i < ctx.children.size(); i++){
+      if (ctx.children.get(i) instanceof ParagraphNameContext) {
+        return (ParagraphNameContext) ctx.children.get(i);
+      }
+    }
+
+    throw new ContextNotFoundException("paragraphNameContext is null");
+  }
 
   public MultDivsContext getMultDivsContext(ParserRuleContext ctx)
       throws ContextNotFoundException {

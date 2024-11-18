@@ -1,0 +1,12 @@
+IDENTIFICATION DIVISION. 
+PROGRAM-ID. BeispielProgramm.
+DATA DIVISION.
+WORKING-STORAGE SECTION.
+PROCEDURE DIVISION.
+  PERFORM BeispielParagraph.
+
+BeispielParagraph.
+  DISPLAY "Hallo Welt".
+  STOP RUN.
+  
+

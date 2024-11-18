@@ -54,8 +54,11 @@ import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MultiplyRegularContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MultiplyRegularOperandContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MultiplyStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ParagraphNameContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.PerformProcedureStatementContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.PerformStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.PowersContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProcedureCopyStatementContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProcedureNameContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProgramIdParagraphContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProgramNameContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.QualifiedDataNameContext;
@@ -369,6 +372,35 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
       e.printStackTrace();
     }
     return super.visitCopyStatement(ctx);
+  }
+
+  @Override
+  public Object visitPerformStatement(PerformStatementContext ctx) {
+    try {
+      String programName = retrieveProgramName.getProgramName(ctx);
+
+      String currentPerformNodeName = "PERFORM:" + VisitorUtilites.currentPerform;
+
+      for(int i = 0; i < ctx.children.size(); i++){
+        if(ctx.children.get(i) instanceof PerformProcedureStatementContext performProcedureStatementContext){
+          ProcedureNameContext procedureNameContext = retrieveContext.getProcedureNameContext(performProcedureStatementContext);
+          ParagraphNameContext paragraphNameContext = retrieveContext.getParagraphNameContext(procedureNameContext);
+          CobolWordContext cobolWordContext = retrieveContext.getCobolWordContext(paragraphNameContext);
+
+          String paragraphName = cobolWordContext.children.get(0).getText();
+
+          nodeLinkManager.addNodeWithoutRoot(currentPerformNodeName, 20);
+          nodeLinkManager.addLink(programName, currentPerformNodeName);
+          nodeLinkManager.addLink(currentPerformNodeName, paragraphName);
+        }
+      }
+
+      VisitorUtilites.currentPerform += 1;
+
+    } catch (ProgramNameNotFoundException | ContextNotFoundException e) {
+      e.printStackTrace();
+    }
+    return super.visitPerformStatement(ctx);
   }
 
   @Override
