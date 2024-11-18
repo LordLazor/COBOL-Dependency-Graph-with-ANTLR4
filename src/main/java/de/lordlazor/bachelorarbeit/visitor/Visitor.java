@@ -30,6 +30,8 @@ import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.LiteralContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.LocalStorageSectionContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ParagraphNameContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProcedureCopyStatementContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProgramIdParagraphContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProgramNameContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.QualifiedDataNameContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.QualifiedDataNameFormat1Context;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SelectClauseContext;
@@ -56,6 +58,22 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
   /**
    * Get the program name from the program unit context by traversing through the parents of the current context.
    */
+
+  @Override
+  public Object visitProgramIdParagraph(ProgramIdParagraphContext ctx) {
+    try {
+    ProgramNameContext programNameContext = retrieveContext.getProgramNameContext(ctx);
+
+    CobolWordContext cobolWordContext = retrieveContext.getCobolWordContext(programNameContext);
+
+    String programName = cobolWordContext.children.get(0).getText();
+
+    nodeLinkManager.addNode(programName, 1);
+    } catch (ContextNotFoundException e) {
+      e.printStackTrace();
+    }
+    return super.visitProgramIdParagraph(ctx);
+  }
 
   @Override
   public Object visitParagraphName(ParagraphNameContext ctx) {

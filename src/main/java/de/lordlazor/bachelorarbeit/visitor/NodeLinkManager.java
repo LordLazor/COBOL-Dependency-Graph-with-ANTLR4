@@ -40,6 +40,12 @@ public class NodeLinkManager {
     jsonUtilities.addLink("Root", programName);
   }
 
+  public void addNode(String id, int group) {
+    jsonUtilities.addNode(id, group);
+    jsonUtilities.addNode("Root", 0);
+    jsonUtilities.addLink("Root", id);
+  }
+
   public void addVariables(String programName, List<List<String>> nodes, List<List<String>> links) {
     for(List<String> node : nodes){
       jsonUtilities.addNode(node.get(0), Integer.parseInt(node.get(1)));

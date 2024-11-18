@@ -333,8 +333,6 @@
       var height = 1200;
 
       function updateGraph(jsonString){
-
-
         var svg = d3.select("svg")
         .attr("viewBox", `0 0 `+ width + ` ` + height);
 
@@ -431,8 +429,6 @@
 
 
       function createGraph(jsonString){
-
-
         var svg = d3.select("svg")
         .attr("viewBox", `0 0 `+ width + ` ` + height);
 
@@ -463,17 +459,15 @@
           4: "CALL",
           5: "FILE",
           6: "FILENAME",
-          7: "VARIABLE",
-          8: "SUBVARIABLE",
+          7: "WORKINGVARIABLE",
+          8: "WORKINGSUBVARIABLE",
           9: "FILEVARIABLE",
           10: "FILESUBVARIABLE",
           11: "LINKAGEVARIABLE",
           12: "LINKAGESUBVARIABLE",
           13: "LOCALVARIABLE",
-          14: "LOCALSUBVARIABLE",
+          14: "LOCALSUBVARIABLE"
         };
-
-
 
         Object.keys(group_names).forEach(key => {
           if (!group_colors.hasOwnProperty(key)) return;
@@ -494,14 +488,12 @@
           document.getElementById("legend").appendChild(container);
         });
 
-
-
         var link = svg.append("g")
         .attr("class", "links")
         .selectAll("line")
         .data(graph.links)
         .enter().append("line")
-        .attr("stroke", "#999")
+        .attr("stroke", "#000000")
         .attr("stroke-width", function(d) { return Math.sqrt(d.value); });
 
         var node = svg.append("g")

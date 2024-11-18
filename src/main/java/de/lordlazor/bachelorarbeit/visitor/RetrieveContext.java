@@ -5,6 +5,7 @@ import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.AssignClauseContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CallByReferencePhraseContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CallUsingParameterContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CallUsingPhraseContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CobolWordContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DataDescriptionEntryFormat1Context;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DataDescriptionEntryFormat2Context;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DataDescriptionEntryFormat3Context;
@@ -21,6 +22,18 @@ import java.util.Map;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 public class RetrieveContext {
+
+  public CobolWordContext getCobolWordContext(ParserRuleContext ctx)
+      throws ContextNotFoundException {
+    for (int i = 0; i < ctx.children.size(); i++){
+      if (ctx.children.get(i) instanceof CobolWordContext) {
+        return (CobolWordContext) ctx.children.get(i);
+      }
+    }
+
+    throw new ContextNotFoundException("cobolWordContext is null");
+
+  }
 
   public SelectClauseContext getSelectClauseContext(ParserRuleContext ctx)
       throws ContextNotFoundException {
