@@ -46,15 +46,12 @@ public class ControllerUtilities {
     List<Map<String, Object>> nodes = (List<Map<String, Object>>) jsonMap.get("nodes");
     List<Map<String, Object>> links = (List<Map<String, Object>>) jsonMap.get("links");
 
-    // Remove nodes with groups in unselectedNodes
     nodes.removeIf(node -> unselectedNodes.contains(node.get("group")));
 
-    // Collect remaining node IDs
     Set<String> remainingNodeIds = nodes.stream()
         .map(node -> (String) node.get("id"))
         .collect(Collectors.toSet());
 
-    // Remove links where either source or target node does not exist in remaining nodes
     links.removeIf(link -> !remainingNodeIds.contains(link.get("source")) || !remainingNodeIds.contains(link.get("target")));
 
     jsonMap.put("nodes", nodes);
