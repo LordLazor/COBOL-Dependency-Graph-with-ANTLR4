@@ -12,14 +12,20 @@ import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.AddToContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.AddToGivingContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.AddToGivingStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.AddToStatementContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.AndOrConditionContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ArithmeticExpressionContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.AssignClauseContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.BasisContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CallByReferenceContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CallByReferencePhraseContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CallStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CallUsingParameterContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CallUsingPhraseContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CobolWordContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CombinableConditionContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ConditionContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ConditionNameContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ConditionNameReferenceContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CopyStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DataDescriptionEntryFormat1Context;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DataDescriptionEntryFormat2Context;
@@ -35,9 +41,12 @@ import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.FileDescriptionEntryCon
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.FileNameContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.FileSectionContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.IdentifierContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.IfStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.LinkageSectionContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.LiteralContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.LocalStorageSectionContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MultDivContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MultDivsContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MultiplyGivingContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MultiplyGivingOperandContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MultiplyGivingResultContext;
@@ -45,12 +54,16 @@ import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MultiplyRegularContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MultiplyRegularOperandContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MultiplyStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ParagraphNameContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.PowersContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProcedureCopyStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProgramIdParagraphContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProgramNameContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.QualifiedDataNameContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.QualifiedDataNameFormat1Context;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.RelationArithmeticComparisonContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.RelationConditionContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SelectClauseContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SimpleConditionContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SubtractFromGivingStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SubtractFromStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SubtractGivingContext;
@@ -259,13 +272,8 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
           nodeLinkManager.addLink(programName, currentDivideNodeName);
           nodeLinkManager.addLink(currentDivideNodeName, variableWithLevelNumber);
         } else if (ctx.children.get(i) instanceof DivideByGivingStatementContext divideByGivingStatementContext) {
-          //DivideByGivingStatementContext divideByGivingStatementContext = retrieveContext.getDivideByGivingStatementContext((ParserRuleContext) ctx.children.get(i));
-
           for(int j = 0; j < divideByGivingStatementContext.children.size(); j++){
             if (divideByGivingStatementContext.children.get(j) instanceof IdentifierContext identifierContext) {
-
-              //IdentifierContext identifierContext = retrieveContext.getIdentifierContext((ParserRuleContext) divideByGivingStatementContext.children.get(j));
-
               String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
 
               nodeLinkManager.addNodeWithoutRoot(currentDivideNodeName, 18);
@@ -361,6 +369,88 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
       e.printStackTrace();
     }
     return super.visitCopyStatement(ctx);
+  }
+
+  @Override
+  public Object visitIfStatement(IfStatementContext ctx) {
+    try {
+      String programName = retrieveProgramName.getProgramName(ctx);
+
+      String currentIfNodeName = "IF:" + VisitorUtilites.currentIf;
+
+      ConditionContext conditionContext = retrieveContext.getConditionContext(ctx);
+
+      for (int i = 0; i < conditionContext.children.size(); i++){
+        if (conditionContext.children.get(i) instanceof CombinableConditionContext combinableConditionContext) {
+          SimpleConditionContext simpleConditionContext = retrieveContext.getSimpleConditionContext(combinableConditionContext);
+          if (simpleConditionContext.children.get(0) instanceof  RelationConditionContext relationConditionContext) {
+
+            RelationArithmeticComparisonContext relationArithmeticComparisonContext = retrieveContext.getRelationArithmeticComparisonContext(relationConditionContext);
+
+            for (int j = 0; j < relationArithmeticComparisonContext.children.size(); j++) {
+              if (relationArithmeticComparisonContext.children.get(
+                  j) instanceof ArithmeticExpressionContext arithmeticExpressionContext) {
+                MultDivsContext multDivsContext = retrieveContext.getMultDivsContext(
+                    arithmeticExpressionContext);
+                PowersContext powersContext = retrieveContext.getPowersContext(multDivsContext);
+                BasisContext basisContext = retrieveContext.getBasisContext(powersContext);
+                IdentifierContext identifierContext = retrieveContext.getIdentifierContext(
+                    basisContext);
+
+                String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
+
+                nodeLinkManager.addNodeWithoutRoot(currentIfNodeName, 19);
+                nodeLinkManager.addLink(programName, currentIfNodeName);
+                nodeLinkManager.addLink(currentIfNodeName, variableWithLevelNumber);
+
+              }
+            }
+          } else if(simpleConditionContext.children.get(0) instanceof  ConditionNameReferenceContext conditionNameReferenceContext){
+            ConditionNameContext conditionNameContext = retrieveContext.getConditionNameContext(conditionNameReferenceContext);
+            CobolWordContext cobolWordContext = retrieveContext.getCobolWordContext(conditionNameContext);
+            String variableWithoutLevelNumber = cobolWordContext.children.get(0).getText();
+
+            String variableWithLevelNumber = nodeLinkManager.searchNodeContainsName(variableWithoutLevelNumber);
+
+            nodeLinkManager.addNodeWithoutRoot(currentIfNodeName, 19);
+            nodeLinkManager.addLink(programName, currentIfNodeName);
+            nodeLinkManager.addLink(currentIfNodeName, variableWithLevelNumber);
+          }
+        }
+        else if(conditionContext.children.get(i) instanceof AndOrConditionContext andOrConditionContext){
+          for(int j = 0; j < andOrConditionContext.children.size(); j++){
+            if(andOrConditionContext.children.get(j) instanceof CombinableConditionContext combinableConditionContext){
+              SimpleConditionContext simpleConditionContext = retrieveContext.getSimpleConditionContext(combinableConditionContext);
+              RelationConditionContext relationConditionContext = retrieveContext.getRelationConditionContext(simpleConditionContext);
+              RelationArithmeticComparisonContext relationArithmeticComparisonContext = retrieveContext.getRelationArithmeticComparisonContext(relationConditionContext);
+
+              for(int k = 0; k < relationArithmeticComparisonContext.children.size(); k++){
+                if (relationArithmeticComparisonContext.children.get(k) instanceof ArithmeticExpressionContext arithmeticExpressionContext) {
+                  MultDivsContext multDivsContext = retrieveContext.getMultDivsContext(arithmeticExpressionContext);
+                  PowersContext powersContext = retrieveContext.getPowersContext(multDivsContext);
+                  BasisContext basisContext = retrieveContext.getBasisContext(powersContext);
+                  IdentifierContext identifierContext = retrieveContext.getIdentifierContext(basisContext);
+
+                  String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
+
+
+                  nodeLinkManager.addNodeWithoutRoot(currentIfNodeName, 19);
+                  nodeLinkManager.addLink(programName, currentIfNodeName);
+                  nodeLinkManager.addLink(currentIfNodeName, variableWithLevelNumber);
+
+                }
+              }
+            }
+          }
+        }
+      }
+
+      VisitorUtilites.currentIf += 1;
+
+    } catch (ProgramNameNotFoundException | ContextNotFoundException e) {
+      e.printStackTrace();
+    }
+    return super.visitIfStatement(ctx);
   }
 
   @Override

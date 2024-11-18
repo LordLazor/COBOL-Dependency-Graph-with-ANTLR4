@@ -4,10 +4,13 @@ import de.lordlazor.bachelorarbeit.exceptions.ContextNotFoundException;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.AddToGivingStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.AddToStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.AssignClauseContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.BasisContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CallByReferencePhraseContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CallUsingParameterContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CallUsingPhraseContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.CobolWordContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ConditionContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ConditionNameContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DataDescriptionEntryFormat1Context;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DataDescriptionEntryFormat2Context;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DataDescriptionEntryFormat3Context;
@@ -18,11 +21,16 @@ import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.FileNameContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.IdentificationDivisionContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.IdentifierContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.LiteralContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MultDivsContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MultiplyGivingContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MultiplyRegularOperandContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.PowersContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProgramIdParagraphContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProgramNameContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.RelationArithmeticComparisonContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.RelationConditionContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SelectClauseContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SimpleConditionContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SubtractFromGivingStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SubtractFromStatementContext;
 import java.util.List;
@@ -31,7 +39,92 @@ import org.antlr.v4.runtime.ParserRuleContext;
 
 public class RetrieveContext {
 
+  public MultDivsContext getMultDivsContext(ParserRuleContext ctx)
+      throws ContextNotFoundException {
+    for (int i = 0; i < ctx.children.size(); i++){
+      if (ctx.children.get(i) instanceof MultDivsContext) {
+        return (MultDivsContext) ctx.children.get(i);
+      }
+    }
 
+    throw new ContextNotFoundException("multDivsContext is null");
+  }
+  public ConditionNameContext getConditionNameContext(ParserRuleContext ctx)
+      throws ContextNotFoundException {
+    for (int i = 0; i < ctx.children.size(); i++){
+      if (ctx.children.get(i) instanceof ConditionNameContext) {
+        return (ConditionNameContext) ctx.children.get(i);
+      }
+    }
+
+    throw new ContextNotFoundException("conditionNameContext is null");
+  }
+
+  public PowersContext getPowersContext(ParserRuleContext ctx)
+      throws ContextNotFoundException {
+    for (int i = 0; i < ctx.children.size(); i++){
+      if (ctx.children.get(i) instanceof PowersContext) {
+        return (PowersContext) ctx.children.get(i);
+      }
+    }
+
+    throw new ContextNotFoundException("powersContext is null");
+  }
+
+  public BasisContext getBasisContext(ParserRuleContext ctx)
+      throws ContextNotFoundException {
+    for (int i = 0; i < ctx.children.size(); i++){
+      if (ctx.children.get(i) instanceof BasisContext) {
+        return (BasisContext) ctx.children.get(i);
+      }
+    }
+
+    throw new ContextNotFoundException("basisContext is null");
+  }
+
+  public SimpleConditionContext getSimpleConditionContext(ParserRuleContext ctx)
+      throws ContextNotFoundException {
+    for (int i = 0; i < ctx.children.size(); i++){
+      if (ctx.children.get(i) instanceof SimpleConditionContext) {
+        return (SimpleConditionContext) ctx.children.get(i);
+      }
+    }
+
+    throw new ContextNotFoundException("simpleConditionContext is null");
+  }
+
+  public RelationConditionContext getRelationConditionContext(ParserRuleContext ctx)
+      throws ContextNotFoundException {
+    for (int i = 0; i < ctx.children.size(); i++){
+      if (ctx.children.get(i) instanceof RelationConditionContext) {
+        return (RelationConditionContext) ctx.children.get(i);
+      }
+    }
+
+    throw new ContextNotFoundException("relationConditionContext is null");
+  }
+
+  public RelationArithmeticComparisonContext getRelationArithmeticComparisonContext(ParserRuleContext ctx)
+      throws ContextNotFoundException {
+    for (int i = 0; i < ctx.children.size(); i++){
+      if (ctx.children.get(i) instanceof RelationArithmeticComparisonContext) {
+        return (RelationArithmeticComparisonContext) ctx.children.get(i);
+      }
+    }
+
+    throw new ContextNotFoundException("relationArithmeticComparisonContext is null");
+  }
+
+  public ConditionContext getConditionContext(ParserRuleContext ctx)
+      throws ContextNotFoundException {
+    for (int i = 0; i < ctx.children.size(); i++){
+      if (ctx.children.get(i) instanceof ConditionContext) {
+        return (ConditionContext) ctx.children.get(i);
+      }
+    }
+
+    throw new ContextNotFoundException("conditionContext is null");
+  }
   public DivideByGivingStatementContext getDivideByGivingStatementContext(ParserRuleContext ctx)
       throws ContextNotFoundException {
     for (int i = 0; i < ctx.children.size(); i++){
