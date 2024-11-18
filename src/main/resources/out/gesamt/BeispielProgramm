@@ -6,10 +6,10 @@ FILE-CONTROL.
     SELECT BeispielDatei ASSIGN TO 'beispieldatei.txt'.
 DATA DIVISION.
 WORKING-STORAGE SECTION.
-01 WS-Informationen.
-    05 WS-Name PIC X(10).
-    05 WS-Adresse PIC X(10).
-    05 WS-Postleitzahl PIC X(10).
+01 WS-Mathematik.
+    05 WS-Ergebnis PIC 99.
+    05 WS-Zahl1 PIC 9.
+    05 WS-Zahl2 PIC 9.
 01 WS-Ist-Student.
     88 WS-Ist-Student-Wahr VALUE "Y".
     88 WS-Ist-Student-Falsch VALUE "N".
@@ -35,6 +35,10 @@ PROCEDURE DIVISION.
 BeispielParagraph.
     DISPLAY "Hello, world!".
 
-COPY ProcedureBook.cpy.
+ADD WS-Zahl1 TO WS-Zahl2 GIVING WS-Ergebnis.
+SUBTRACT WS-Zahl1 FROM WS-Zahl2 GIVING WS-Ergebnis.
+MULTIPLY WS-Zahl1 BY WS-Zahl2 GIVING WS-Ergebnis.
+DIVIDE WS-Zahl1 BY WS-Zahl2 GIVING WS-Ergebnis.
 
-CALL 'SubProgramm' USING WS-Informationen.
+COPY ProcedureBook.cpy.
+CALL 'SubProgramm' USING WS-Mathematik.
