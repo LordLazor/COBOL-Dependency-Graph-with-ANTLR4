@@ -65,11 +65,12 @@ public class NodeLinkManager {
     jsonUtilities.addLink("Root", programName);
   }
 
-  public String searchNodeContainsName(String name) {
+  public String searchNodeMatchesName(String name) {
     List<HashMap<String, Object>> nodes = jsonUtilities.getNodes();
     for (HashMap<String, Object> node : nodes) {
-      if (node.get("id").toString().contains(name)) {
-        return node.get("id").toString();
+      String id = node.get("id").toString();
+      if (id.length() > 4 && id.substring(4).equals(name)) {
+        return id;
       }
     }
     return name;

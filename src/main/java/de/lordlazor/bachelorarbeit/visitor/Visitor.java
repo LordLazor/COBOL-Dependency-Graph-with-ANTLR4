@@ -40,12 +40,13 @@ import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.FileControlEntryContext
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.FileDescriptionEntryContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.FileNameContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.FileSectionContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.GoToStatementContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.GoToStatementSimpleContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.IdentifierContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.IfStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.LinkageSectionContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.LiteralContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.LocalStorageSectionContext;
-import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MultDivContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MultDivsContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MultiplyGivingContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MultiplyGivingOperandContext;
@@ -66,6 +67,9 @@ import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.QualifiedDataNameFormat
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.RelationArithmeticComparisonContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.RelationConditionContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SelectClauseContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SetStatementContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SetToContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SetToStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SimpleConditionContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SubtractFromGivingStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SubtractFromStatementContext;
@@ -322,7 +326,7 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
 
       String variableNameWithoutLevelNumber = cobolWordContext.children.get(0).getText();
 
-      return nodeLinkManager.searchNodeContainsName(variableNameWithoutLevelNumber);
+      return nodeLinkManager.searchNodeMatchesName(variableNameWithoutLevelNumber);
     } else if(identifierContext.children.get(0) instanceof TableCallContext tableCallContext){
       QualifiedDataNameContext qualifiedDataNameContext = (QualifiedDataNameContext) tableCallContext.children.get(0);
 
@@ -334,7 +338,7 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
 
       String variableNameWithoutLevelNumber = cobolWordContext.children.get(0).getText();
 
-      return nodeLinkManager.searchNodeContainsName(variableNameWithoutLevelNumber);
+      return nodeLinkManager.searchNodeMatchesName(variableNameWithoutLevelNumber);
     }
 
     return null;
@@ -362,11 +366,71 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
     try {
       String programName = retrieveProgramName.getProgramName(ctx);
       String paragraphName = ctx.children.get(0).getText();
-      nodeLinkManager.addNodeAndLink(programName, paragraphName, 2);
+      nodeLinkManager.addNodeWithoutRoot(paragraphName, 2);
+      nodeLinkManager.addLink(programName, paragraphName);
     } catch (ProgramNameNotFoundException | ContextNotFoundException e) {
       e.printStackTrace();
     }
     return super.visitParagraphName(ctx);
+  }
+
+  @Override
+  public Object visitSetStatement(SetStatementContext ctx) {
+    try {
+      String programName = retrieveProgramName.getProgramName(ctx);
+
+      String currentSetNodeName = "SET:" + VisitorUtilites.currentSet;
+
+      for (int i = 0; i < ctx.children.size(); i++) {
+        if (ctx.children.get(i) instanceof SetToStatementContext setToStatementContext) {
+          SetToContext setToContext = retrieveContext.getSetToContext(setToStatementContext);
+          IdentifierContext identifierContext = retrieveContext.getIdentifierContext(setToContext);
+
+          String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
+
+          nodeLinkManager.addNodeWithoutRoot(currentSetNodeName, 22);
+          nodeLinkManager.addLink(programName, currentSetNodeName);
+          nodeLinkManager.addLink(currentSetNodeName, variableWithLevelNumber);
+        }
+      }
+
+      VisitorUtilites.currentSet += 1;
+
+    } catch (ProgramNameNotFoundException | ContextNotFoundException e) {
+      e.printStackTrace();
+    }
+    return super.visitSetStatement(ctx);
+  }
+
+  @Override
+  public Object visitGoToStatement(GoToStatementContext ctx) {
+    try {
+      String programName = retrieveProgramName.getProgramName(ctx);
+
+      String currentGoToNodeName = "GOTO:" + VisitorUtilites.currentGoTo;
+
+      for (int i = 0; i < ctx.children.size(); i++) {
+        if (ctx.children.get(i) instanceof GoToStatementSimpleContext goToStatementSimpleContext) {
+          ProcedureNameContext procedureNameContext = retrieveContext.getProcedureNameContext(goToStatementSimpleContext);
+          ParagraphNameContext paragraphNameContext = retrieveContext.getParagraphNameContext(procedureNameContext);
+          CobolWordContext cobolWordContext = retrieveContext.getCobolWordContext(paragraphNameContext);
+
+          String paragraphName = cobolWordContext.children.get(0).getText();
+
+          nodeLinkManager.addNodeWithoutRoot(currentGoToNodeName, 21);
+          nodeLinkManager.addLink(programName, currentGoToNodeName);
+          nodeLinkManager.addLink(currentGoToNodeName, paragraphName);
+          nodeLinkManager.addNodeWithoutRoot(paragraphName, 2);
+
+        }
+      }
+
+      VisitorUtilites.currentGoTo += 1;
+
+    } catch (ProgramNameNotFoundException | ContextNotFoundException e) {
+      e.printStackTrace();
+    }
+    return super.visitGoToStatement(ctx);
   }
 
   @Override
@@ -461,9 +525,7 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
             CobolWordContext cobolWordContext = retrieveContext.getCobolWordContext(conditionNameContext);
             String variableWithoutLevelNumber = cobolWordContext.children.get(0).getText();
 
-            String variableWithLevelNumber = nodeLinkManager.searchNodeContainsName(variableWithoutLevelNumber);
-
-
+            String variableWithLevelNumber = nodeLinkManager.searchNodeMatchesName(variableWithoutLevelNumber);
 
             nodeLinkManager.addNodeWithoutRoot(currentIfNodeName, 19);
             nodeLinkManager.addLink(programName, currentIfNodeName);

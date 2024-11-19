@@ -47,8 +47,13 @@ CALL 'SubProgramm' USING WS-Mathematik.
 
 IF WS-Zahl1 = WS-Zahl2 AND WS-Zahl3 > WS-Zahl4
   DISPLAY ""
-ELSE IF WS-Ergebnis
+ELSE IF Ergebnis
   DISPLAY ""
 END-IF.
 
 PERFORM BeispielParagraph.
+
+GO TO BeispielParagraph.
+
+SET WS-Zahl1 TO 10.
+

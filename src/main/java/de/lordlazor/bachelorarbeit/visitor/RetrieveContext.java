@@ -32,6 +32,7 @@ import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.ProgramNameContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.RelationArithmeticComparisonContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.RelationConditionContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SelectClauseContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SetToContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SimpleConditionContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SubtractFromGivingStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SubtractFromStatementContext;
@@ -41,6 +42,17 @@ import org.antlr.v4.runtime.ParserRuleContext;
 
 public class RetrieveContext {
 
+
+  public SetToContext getSetToContext(ParserRuleContext ctx)
+      throws ContextNotFoundException {
+    for (int i = 0; i < ctx.children.size(); i++){
+      if (ctx.children.get(i) instanceof SetToContext) {
+        return (SetToContext) ctx.children.get(i);
+      }
+    }
+
+    throw new ContextNotFoundException("setToContext is null");
+  }
   public ProcedureNameContext getProcedureNameContext(ParserRuleContext ctx)
       throws ContextNotFoundException {
     for (int i = 0; i < ctx.children.size(); i++){
