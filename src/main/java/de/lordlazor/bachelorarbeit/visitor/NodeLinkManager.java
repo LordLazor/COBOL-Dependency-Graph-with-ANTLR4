@@ -72,7 +72,7 @@ public class NodeLinkManager {
         return node.get("id").toString();
       }
     }
-    return null;
+    return name;
   }
 
 }

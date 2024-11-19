@@ -74,6 +74,7 @@ import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SubtractMinuendContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SubtractMinuendGivingContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SubtractStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SubtractSubtrahendContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.TableCallContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.WorkingStorageSectionContext;
 import de.lordlazor.bachelorarbeit.utils.JsonUtilities;
 import de.lordlazor.bachelorarbeit.utils.VisitorUtilites;
@@ -310,17 +311,34 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
 
 
   private String extractVariableWithLevelNumber(IdentifierContext identifierContext) {
-    QualifiedDataNameContext qualifiedDataNameContext = (QualifiedDataNameContext) identifierContext.children.get(0);
+    if(identifierContext.children.get(0) instanceof QualifiedDataNameContext){
+      QualifiedDataNameContext qualifiedDataNameContext = (QualifiedDataNameContext) identifierContext.children.get(0);
 
-    QualifiedDataNameFormat1Context qualifiedDataNameFormat1Context = (QualifiedDataNameFormat1Context) qualifiedDataNameContext.children.get(0);
+      QualifiedDataNameFormat1Context qualifiedDataNameFormat1Context = (QualifiedDataNameFormat1Context) qualifiedDataNameContext.children.get(0);
 
-    DataNameContext dataNameContext = (DataNameContext) qualifiedDataNameFormat1Context.children.get(0);
+      DataNameContext dataNameContext = (DataNameContext) qualifiedDataNameFormat1Context.children.get(0);
 
-    CobolWordContext cobolWordContext = (CobolWordContext) dataNameContext.children.get(0);
+      CobolWordContext cobolWordContext = (CobolWordContext) dataNameContext.children.get(0);
 
-    String variableNameWithoutLevelNumber = cobolWordContext.children.get(0).getText();
+      String variableNameWithoutLevelNumber = cobolWordContext.children.get(0).getText();
 
-    return nodeLinkManager.searchNodeContainsName(variableNameWithoutLevelNumber);
+      return nodeLinkManager.searchNodeContainsName(variableNameWithoutLevelNumber);
+    } else if(identifierContext.children.get(0) instanceof TableCallContext tableCallContext){
+      QualifiedDataNameContext qualifiedDataNameContext = (QualifiedDataNameContext) tableCallContext.children.get(0);
+
+      QualifiedDataNameFormat1Context qualifiedDataNameFormat1Context = (QualifiedDataNameFormat1Context) qualifiedDataNameContext.children.get(0);
+
+      DataNameContext dataNameContext = (DataNameContext) qualifiedDataNameFormat1Context.children.get(0);
+
+      CobolWordContext cobolWordContext = (CobolWordContext) dataNameContext.children.get(0);
+
+      String variableNameWithoutLevelNumber = cobolWordContext.children.get(0).getText();
+
+      return nodeLinkManager.searchNodeContainsName(variableNameWithoutLevelNumber);
+    }
+
+    return null;
+
   }
 
   @Override
@@ -444,6 +462,8 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
             String variableWithoutLevelNumber = cobolWordContext.children.get(0).getText();
 
             String variableWithLevelNumber = nodeLinkManager.searchNodeContainsName(variableWithoutLevelNumber);
+
+
 
             nodeLinkManager.addNodeWithoutRoot(currentIfNodeName, 19);
             nodeLinkManager.addLink(programName, currentIfNodeName);

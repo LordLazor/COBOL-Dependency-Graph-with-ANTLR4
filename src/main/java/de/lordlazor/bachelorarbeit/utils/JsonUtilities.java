@@ -69,6 +69,13 @@ public class JsonUtilities {
   public void createJsonFile(String filePath) throws IOException {
     addNode("Root", 0); // Root node
 
+    for (HashMap<String, Object> link : links) {
+      String source = (String) link.get("source");
+      String target = (String) link.get("target");
+      addNode(source, 21);
+      addNode(target, 21);
+    }
+
     jsonMap.put("nodes", nodes);
     jsonMap.put("links", links);
 
@@ -79,8 +86,9 @@ public class JsonUtilities {
   public static String readJsonFile(String filePath) throws IOException {
     ObjectMapper objectMapper = new ObjectMapper();
     File file = new File(filePath);
-    Object json = objectMapper.readValue(file, Object.class);
-    return objectMapper.writeValueAsString(json);
 
+    Object json = objectMapper.readValue(file, Object.class);
+
+    return objectMapper.writeValueAsString(json);
   }
 }
