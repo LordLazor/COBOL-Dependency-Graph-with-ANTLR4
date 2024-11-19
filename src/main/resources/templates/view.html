@@ -106,6 +106,24 @@
 
   <div class="mb-5" th:if="${jsonData != null}" style="height: 100%; width: 100%;">
     <p id="legend"></p>
+    <div id="accordionGroups" class="mb-5">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">
+            <button class="btn btn-link" data-toggle="collapse" data-target="#collapseGroups" aria-controls="collapseGroups" aria-expanded="false">
+              Enable or disable specific nodes
+            </button>
+          </h5>
+        </div>
+        <div id="collapseGroups" class="collapse" data-parent="#accordionGroups">
+          <div class="card-body">
+            <div id="legendGroups"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
 
     <form action="/view/updateGraph" method="post">
       <button id="updateGraphButton" class="btn btn-secondary mb-5">Update Graph</button>
@@ -180,6 +198,7 @@
         checkboxes.forEach(function(checkbox) {
           checkboxData[checkbox.id] = checkbox.checked;
         });
+        console.log(checkboxData)
 
         var filename = document.getElementById('options').value;
         checkboxData['filename'] = filename;
@@ -495,6 +514,77 @@
           document.getElementById("legend").appendChild(container);
         });
 
+        Object.entries(group_names).forEach(([key, name]) => {
+
+            var accordionGroups = document.createElement("div");
+            accordionGroups.id = "accordionGroups"+key;
+            accordionGroups.className = "mb-5";
+            accordionGroups.style.display = "none";
+
+            var card = document.createElement("div");
+            card.className = "card";
+
+            var cardHeader = document.createElement("div");
+            cardHeader.className = "card-header";
+
+            var h5 = document.createElement("h5");
+            h5.className = "mb-0";
+
+            var button = document.createElement("button");
+            button.className = "btn btn-link";
+            button.setAttribute("data-toggle", "collapse");
+            button.setAttribute("data-target", "#collapseGroup"+key);
+            button.setAttribute("aria-controls", "collapseGroup"+key);
+            button.setAttribute("aria-expanded", "false");
+            button.innerHTML = name;
+
+            h5.appendChild(button);
+
+            cardHeader.appendChild(h5);
+
+            card.appendChild(cardHeader);
+
+            var collapseDiv = document.createElement("div");
+            collapseDiv.id = "collapseGroup"+key;
+            collapseDiv.className = "collapse";
+            collapseDiv.setAttribute("data-parent", "#accordionGroups"+key);
+
+            var cardBody = document.createElement("div");
+            cardBody.className = "card-body";
+
+            var legendNodes = document.createElement("p");
+            legendNodes.id = "legendNodes"+key;
+
+            cardBody.appendChild(legendNodes);
+            collapseDiv.appendChild(cardBody);
+            card.appendChild(collapseDiv);
+            accordionGroups.appendChild(card);
+
+            document.getElementById('legendGroups').appendChild(accordionGroups);
+        });
+
+        graph.nodes.forEach(node => {
+          var color = group_colors[node.group];
+          var checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.id = node.id;
+          checkbox.checked = true;
+
+          var label = document.createElement("label");
+          label.htmlFor = checkbox.id;
+          label.innerHTML = node.id;
+          label.style.color = color;
+
+          var container = document.createElement("div");
+          container.appendChild(checkbox);
+          container.appendChild(label);
+
+          document.getElementById("legendNodes"+node.group).appendChild(container);
+
+          document.getElementById("accordionGroups"+node.group).style.display = "block";
+
+        });
+
         var link = svg.append("g")
         .attr("class", "links")
         .selectAll("line")
@@ -580,19 +670,19 @@
     </script>
     <hr>
 
-    <div id="accordion">
+    <div id="accordionProgramFiles">
       <p>Program files</p>
       <th:block th:each="entry, iter : ${programFiles}">
 
         <div class="card">
-          <div th:attr="id='heading' + ${iter.index}" class="card-header">
+          <div th:attr="id='headingProgramFiles' + ${iter.index}" class="card-header">
             <h5 class="mb-0">
-              <button class="btn btn-link" data-toggle="collapse" th:attr="data-target='#collapse' + ${iter.index}, aria-controls='collapse' + ${iter.index}" aria-expanded="false">
+              <button class="btn btn-link" data-toggle="collapse" th:attr="data-target='#collapseProgramFiles' + ${iter.index}, aria-controls='collapseProgramFiles' + ${iter.index}" aria-expanded="false">
                 <p th:text="${entry.key}"></p>
               </button>
             </h5>
           </div>
-          <div th:attr="id='collapse' + ${iter.index}, aria-labelledby='heading' + ${iter.index}" class="collapse" data-parent="#accordion">
+          <div th:attr="id='collapseProgramFiles' + ${iter.index}, aria-labelledby='headingProgramFiles' + ${iter.index}" class="collapse" data-parent="#accordionProgramFiles">
             <div class="card-body">
               <pre><code class="cobol" th:text="${entry.value}"></code></pre>
             </div>
@@ -601,19 +691,19 @@
       </th:block>
     </div>
     <hr>
-    <div th:if="${otherFiles != null}" id="accordion2">
+    <div th:if="${otherFiles != null}" id="accordionOtherFiles">
       <p>Other files</p>
       <th:block th:each="entry, iter : ${otherFiles}">
 
         <div class="card">
-          <div th:attr="id='heading2' + ${iter.index}" class="card-header">
+          <div th:attr="id='headingOtherFiles' + ${iter.index}" class="card-header">
             <h5 class="mb-0">
-              <button class="btn btn-link" data-toggle="collapse" th:attr="data-target='#collapse2' + ${iter.index}, aria-controls='collapse2' + ${iter.index}" aria-expanded="false">
+              <button class="btn btn-link" data-toggle="collapse" th:attr="data-target='#collapseOtherFiles' + ${iter.index}, aria-controls='collapseOtherFiles' + ${iter.index}" aria-expanded="false">
                 <p th:text="${entry.key}"></p>
               </button>
             </h5>
           </div>
-          <div th:attr="id='collapse2' + ${iter.index}, aria-labelledby='heading2' + ${iter.index}" class="collapse" data-parent="#accordion2">
+          <div th:attr="id='collapseOtherFiles' + ${iter.index}, aria-labelledby='headingOtherFiles' + ${iter.index}" class="collapse" data-parent="#accordionOtherFiles">
             <div class="card-body">
               <pre><code class="cobol" th:text="${entry.value}"></code></pre>
             </div>

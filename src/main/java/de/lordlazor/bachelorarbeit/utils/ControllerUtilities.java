@@ -34,17 +34,22 @@ public class ControllerUtilities {
     filename = getOutputFolder() + filename;
     String jsonData = JsonUtilities.readJsonFile(filename);
 
-    List<Integer> unselectedNodes = new ArrayList<>();
-    checkboxData.forEach((key, value) -> {
-      if (!((boolean) value)) {
-        unselectedNodes.add(Integer.parseInt(key));
-      }
-    });
-
     ObjectMapper objectMapper = new ObjectMapper();
     Map<String, Object> jsonMap = objectMapper.readValue(jsonData, Map.class);
     List<Map<String, Object>> nodes = (List<Map<String, Object>>) jsonMap.get("nodes");
     List<Map<String, Object>> links = (List<Map<String, Object>>) jsonMap.get("links");
+
+
+    List<Integer> unselectedNodes = new ArrayList<>();
+    checkboxData.forEach((key, value) -> {
+      try {
+        if (!((boolean) value)) {
+          unselectedNodes.add(Integer.valueOf(key));
+        }
+      } catch (NumberFormatException e) {
+        nodes.removeIf(node -> key.equals(node.get("id")));
+      }
+    });
 
     nodes.removeIf(node -> unselectedNodes.contains(node.get("group")));
 
