@@ -57,3 +57,11 @@ GO TO BeispielParagraph.
 
 SET WS-Zahl1 TO 10.
 
+EVALUATE WS-Zahl1
+  WHEN 1
+    ADD WS-Zahl2 TO WS-Zahl3 GIVING WS-Ergebnis
+END-EVALUATE.
+
+MOVE 1 TO WS-Zahl4.
+
+ACCEPT WS-Zahl4.

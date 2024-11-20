@@ -76,7 +76,7 @@
   <hr>
   <form action="/view/viewgraph" method="post">
     <div class="form-group">
-      <label for="options">Choose an option:</label>
+      <label for="options">Select below to generate dependency graph:</label>
       <select id="options" name="filename" class="form-control">
         <th:block th:each="filename : ${filenames}">
           <option th:value="${filename}" th:text="${filename}"></option>
