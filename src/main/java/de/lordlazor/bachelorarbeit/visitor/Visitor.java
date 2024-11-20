@@ -191,6 +191,51 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
                 }
                 VisitorUtilites.currentAdd  += 1;
               }
+
+              // Subtract Statement inside EVALUATE-WHEN
+              if (statementContext.getChild(0) instanceof SubtractStatementContext subtractStatementContext) {
+                if (subtractStatementContext.children.get(1) instanceof SubtractFromStatementContext subtractFromStatementContext) {
+                  String currentSubtractNodeName = "SUBTRACT:" + VisitorUtilites.currentSubtract;
+
+                  for (int l = 0; l < subtractFromStatementContext.children.size(); l++) {
+                    if (subtractFromStatementContext.children.get(l) instanceof SubtractSubtrahendContext
+                        || subtractFromStatementContext.children.get(l) instanceof SubtractMinuendContext) {
+
+                      if(subtractFromStatementContext.children.get(l).getChild(0) instanceof IdentifierContext identifierContext) {
+
+                        String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
+
+                        nodeLinkManager.addNodeWithoutRoot(currentSubtractNodeName, 16);
+                        nodeLinkManager.addLink(programName, currentSubtractNodeName);
+                        nodeLinkManager.addLink(currentSubtractNodeName, variableWithLevelNumber);
+                        nodeLinkManager.addLink(currentEvaluateNodeName, currentSubtractNodeName);
+                      }
+                    }
+                  }
+                } else if (subtractStatementContext.children.get(1) instanceof SubtractFromGivingStatementContext subtractFromGivingStatementContext) {
+
+                  String currentSubtractNodeName = "SUBTRACT:" + VisitorUtilites.currentSubtract;
+
+                  for (int l = 0; l < subtractFromGivingStatementContext.children.size(); l++) {
+                    if (subtractFromGivingStatementContext.children.get(l) instanceof SubtractSubtrahendContext
+                        || subtractFromGivingStatementContext.children.get(l) instanceof SubtractMinuendGivingContext
+                        || subtractFromGivingStatementContext.children.get(l) instanceof SubtractGivingContext) {
+                      if(subtractFromGivingStatementContext.children.get(l).getChild(0) instanceof IdentifierContext identifierContext) {
+
+                        String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
+
+                        nodeLinkManager.addNodeWithoutRoot(currentSubtractNodeName, 16);
+                        nodeLinkManager.addLink(programName, currentSubtractNodeName);
+                        nodeLinkManager.addLink(currentSubtractNodeName, variableWithLevelNumber);
+                        nodeLinkManager.addLink(currentEvaluateNodeName, currentSubtractNodeName);
+                      }
+                    }
+                  }
+                }
+                VisitorUtilites.currentSubtract  += 1;
+
+
+              }
             }
           }
         }
@@ -271,6 +316,10 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
   @Override
   public Object visitSubtractStatement(SubtractStatementContext ctx){
     try{
+      if (isEvaluateStatement(ctx)) {
+        return super.visitSubtractStatement(ctx);
+      }
+
       String programName = retrieveProgramName.getProgramName(ctx);
       if (ctx.children.get(1) instanceof SubtractFromStatementContext) {
 
@@ -281,13 +330,15 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
         for (int i = 0; i < subtractFromStatementContext.children.size(); i++) {
           if (subtractFromStatementContext.children.get(i) instanceof SubtractSubtrahendContext
               || subtractFromStatementContext.children.get(i) instanceof SubtractMinuendContext) {
-            IdentifierContext identifierContext = retrieveContext.getIdentifierContext((ParserRuleContext) subtractFromStatementContext.children.get(i));
 
-            String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
+            if(subtractFromStatementContext.children.get(i).getChild(0) instanceof IdentifierContext identifierContext) {
 
-            nodeLinkManager.addNodeWithoutRoot(currentSubtractNodeName, 16);
-            nodeLinkManager.addLink(programName, currentSubtractNodeName);
-            nodeLinkManager.addLink(currentSubtractNodeName, variableWithLevelNumber);
+              String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
+
+              nodeLinkManager.addNodeWithoutRoot(currentSubtractNodeName, 16);
+              nodeLinkManager.addLink(programName, currentSubtractNodeName);
+              nodeLinkManager.addLink(currentSubtractNodeName, variableWithLevelNumber);
+            }
           }
         }
       } else if (ctx.children.get(1) instanceof SubtractFromGivingStatementContext) {
@@ -299,13 +350,14 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
           if (subtractFromGivingStatementContext.children.get(i) instanceof SubtractSubtrahendContext
               || subtractFromGivingStatementContext.children.get(i) instanceof SubtractMinuendGivingContext
               || subtractFromGivingStatementContext.children.get(i) instanceof SubtractGivingContext) {
-            IdentifierContext identifierContext = retrieveContext.getIdentifierContext((ParserRuleContext) subtractFromGivingStatementContext.children.get(i));
+            if(subtractFromGivingStatementContext.children.get(i).getChild(0) instanceof IdentifierContext identifierContext) {
 
             String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
 
             nodeLinkManager.addNodeWithoutRoot(currentSubtractNodeName, 16);
             nodeLinkManager.addLink(programName, currentSubtractNodeName);
             nodeLinkManager.addLink(currentSubtractNodeName, variableWithLevelNumber);
+            }
           }
         }
       }
