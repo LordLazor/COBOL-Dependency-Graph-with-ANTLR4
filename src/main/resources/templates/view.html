@@ -383,6 +383,10 @@
         .force("charge", d3.forceManyBody())
         .force("center", d3.forceCenter(width / 2, height / 2));
 
+        simulation
+          .force("forceX", d3.forceX(0))
+          .force("forceY", d3.forceY(0));
+
 
         var graph = JSON.parse(jsonString);
 
@@ -468,10 +472,15 @@
 
         var color = d3.scaleOrdinal(d3.schemeCategory20);
 
+
         var simulation = d3.forceSimulation()
         .force("link", d3.forceLink().id(function(d) { return d.id; }).distance(link_distance))
         .force("charge", d3.forceManyBody())
         .force("center", d3.forceCenter(width / 2, height / 2));
+
+        simulation
+          .force("forceX", d3.forceX(0))
+          .force("forceY", d3.forceY(0));
 
         svg.append("rect")
         .attr("width", "100%")
@@ -510,7 +519,9 @@
           21: "GO TO",
           22: "SET",
           23: "EVALUATE",
-          24: "Keine Zuordnung"
+          24: "MOVE",
+          25: "ACCEPT",
+          26: "Keine Zuordnung"
         };
 
         Object.keys(group_names).forEach(key => {

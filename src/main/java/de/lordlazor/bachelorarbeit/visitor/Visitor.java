@@ -5,6 +5,7 @@ import de.lordlazor.bachelorarbeit.exceptions.JsonNodeNotFoundException;
 import de.lordlazor.bachelorarbeit.exceptions.ProgramNameNotFoundException;
 import de.lordlazor.bachelorarbeit.exceptions.VisitorFileNotFoundException;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85BaseVisitor;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.AcceptStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.AddFromContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.AddGivingContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.AddStatementContext;
@@ -50,6 +51,8 @@ import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.IfStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.LinkageSectionContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.LiteralContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.LocalStorageSectionContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MoveStatementContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MoveToStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MultDivsContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MultiplyGivingContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MultiplyGivingOperandContext;
@@ -695,6 +698,66 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
       e.printStackTrace();
     }
     return super.visitPerformStatement(ctx);
+  }
+
+  @Override
+  public Object visitAcceptStatement(AcceptStatementContext ctx){
+    try {
+      String programName = retrieveProgramName.getProgramName(ctx);
+
+      String currentAcceptNodeName = "ACCEPT:" + VisitorUtilites.currentAccept;
+
+      for(int i = 0; i < ctx.children.size(); i++){
+        if(ctx.children.get(i) instanceof IdentifierContext identifierContext){
+          String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
+
+          nodeLinkManager.addNodeWithoutRoot(currentAcceptNodeName, 25);
+          nodeLinkManager.addLink(programName, currentAcceptNodeName);
+          nodeLinkManager.addLink(currentAcceptNodeName, variableWithLevelNumber);
+        }
+      }
+
+
+
+    } catch (ProgramNameNotFoundException e) {
+      throw new RuntimeException(e);
+    } catch (ContextNotFoundException e) {
+      throw new RuntimeException(e);
+    }
+
+    return super.visitAcceptStatement(ctx);
+  }
+
+  @Override
+  public Object visitMoveStatement(MoveStatementContext ctx) {
+    try {
+      String programName = retrieveProgramName.getProgramName(ctx);
+
+      String currentMoveNodeName = "MOVE:" + VisitorUtilites.currentMove;
+
+      for(int i = 0; i < ctx.children.size(); i++) {
+        if(ctx.children.get(i) instanceof MoveToStatementContext moveToStatementContext) {
+          for (int j = 0; j < moveToStatementContext.children.size(); j++) {
+            if (moveToStatementContext.children.get(j) instanceof IdentifierContext identifierContext) {
+              String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
+
+              nodeLinkManager.addNodeWithoutRoot(currentMoveNodeName, 24);
+              nodeLinkManager.addLink(programName, currentMoveNodeName);
+              nodeLinkManager.addLink(currentMoveNodeName, variableWithLevelNumber);
+            }
+          }
+        }
+      }
+
+      VisitorUtilites.currentMove += 1;
+
+    } catch (ProgramNameNotFoundException e) {
+      throw new RuntimeException(e);
+    } catch (ContextNotFoundException e) {
+      throw new RuntimeException(e);
+    }
+
+    return super.visitMoveStatement(ctx);
   }
 
   @Override

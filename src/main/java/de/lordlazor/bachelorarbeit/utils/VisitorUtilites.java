@@ -11,6 +11,8 @@ public class VisitorUtilites {
   public static int currentGoTo = 0;
   public static int currentSet = 0;
 public static int currentEvaluate = 0;
+public static int currentMove = 0;
+public static int currentAccept = 0;
 
   public static void resetCounters() {
     currentAdd = 0;
@@ -22,6 +24,8 @@ public static int currentEvaluate = 0;
     currentGoTo = 0;
     currentSet = 0;
     currentEvaluate = 0;
+    currentMove = 0;
+    currentAccept = 0;
   }
 
 }
