@@ -154,6 +154,9 @@
         <div class="col">
           <p>Save svg:</p>
         </div>
+        <div class="col">
+          <p>Toggle Nodes Center Force</p>
+        </div>
       </div>
       <div class="row">
         <div class="col">
@@ -166,6 +169,12 @@
         </div>
         <div class="col">
           <button id="saveAsPNG" class="btn btn-info">Save as png</button>
+        </div>
+        <div class="col">
+          <div class="form-group">
+            <input type="checkbox" id="toggleForce" checked>
+            <label for="toggleForce" id="toggleForceLabel">Enabled</label>
+          </div>
         </div>
       </div>
     </div>
@@ -213,7 +222,6 @@
         checkboxes.forEach(function(checkbox) {
           checkboxData[checkbox.id] = checkbox.checked;
         });
-        console.log(checkboxData)
 
         var filename = document.getElementById('options').value;
         checkboxData['filename'] = filename;
@@ -224,11 +232,10 @@
           contentType: 'application/json',
           data: JSON.stringify(checkboxData),
           success: function(response) {
-            console.log('Daten erfolgreich gesendet:', response);
-            updateGraph(response);
+            updateGraph(response, checkboxData['toggleForce']);
           },
           error: function(error) {
-            console.error('Fehler beim Senden der Daten:', error);
+            console.error('Error sending data:', error);
           }
         });
       });
@@ -252,7 +259,6 @@
           contentType: 'application/json',
           data: JSON.stringify(checkboxData),
           success: function(response) {
-            console.log('Daten erfolgreich gesendet:', response);
             circle_radius += 1;
             label_font_size += 1;
             updateGraph(response);
@@ -284,7 +290,6 @@
           contentType: 'application/json',
           data: JSON.stringify(checkboxData),
           success: function(response) {
-            console.log('Daten erfolgreich gesendet:', response);
             circle_radius -= 1;
             label_font_size -= 1;
             updateGraph(response);
@@ -313,7 +318,6 @@
           contentType: 'application/json',
           data: JSON.stringify(checkboxData),
           success: function(response) {
-            console.log('Daten erfolgreich gesendet:', response);
             link_distance += 10;
             updateGraph(response);
           },
@@ -341,7 +345,6 @@
           contentType: 'application/json',
           data: JSON.stringify(checkboxData),
           success: function(response) {
-            console.log('Daten erfolgreich gesendet:', response);
             link_distance -= 10;
             updateGraph(response);
           },
@@ -366,7 +369,7 @@
       var width = 1200;
       var height = 1200;
 
-      function updateGraph(jsonString){
+      function updateGraph(jsonString, enableForce){
         var svg = d3.select("svg")
         .attr("viewBox", `0 0 `+ width + ` ` + height);
 
@@ -383,9 +386,14 @@
         .force("charge", d3.forceManyBody())
         .force("center", d3.forceCenter(width / 2, height / 2));
 
-        simulation
+        if (enableForce) {
+          simulation
           .force("forceX", d3.forceX(0))
           .force("forceY", d3.forceY(0));
+          document.getElementById("toggleForceLabel").textContent = "Enabled";
+        } else {
+          document.getElementById("toggleForceLabel").textContent = "Disabled";
+        }
 
 
         var graph = JSON.parse(jsonString);
@@ -479,8 +487,8 @@
         .force("center", d3.forceCenter(width / 2, height / 2));
 
         simulation
-          .force("forceX", d3.forceX(0))
-          .force("forceY", d3.forceY(0));
+        .force("forceX", d3.forceX(0))
+        .force("forceY", d3.forceY(0));
 
         svg.append("rect")
         .attr("width", "100%")
