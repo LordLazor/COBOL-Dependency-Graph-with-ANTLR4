@@ -791,8 +791,7 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
         node.add(variableNodeNumber);
       } else if (currentLevelNumber == 66) {
         node.add(
-            variables.get(i).get(0) + ": " + variables.get(i).get(1) + " RENAMES " + variables.get(
-                i).get(2));
+            variables.get(i).get(0) + ": " + variables.get(i).get(1) + " RENAMES " + variables.get(i).get(2) + " THROUGH " + variables.get(i).get(3));
         node.add(variableNodeNumber);
 
       } else {
@@ -832,8 +831,7 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
         List<String> link = new ArrayList<>();
         link.add(programName);
         link.add(
-            variables.get(i).get(0) + ": " + variables.get(i).get(1) + " RENAMES " + variables.get(
-                i).get(2));
+            variables.get(i).get(0) + ": " + variables.get(i).get(1) + " RENAMES " + variables.get(i).get(2) + " THROUGH " + variables.get(i).get(3));
         links.add(link);
       } else if (currentLevelNumber == 88) {
         String linkName88 = variables.get(i).get(0) + ": " + variables.get(i).get(1);
@@ -899,6 +897,12 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
           QualifiedDataNameContext qualifiedDataNameContext = (QualifiedDataNameContext) dataRenamesClauseContext.children.get(1);
           String renamedName = qualifiedDataNameContext.children.get(0).getChild(0).getChild(0).getChild(0).getText();
           variable.add(renamedName);
+        }
+
+        if (dataRenamesClauseContext.children.get(3) instanceof QualifiedDataNameContext) {
+          QualifiedDataNameContext qualifiedDataNameContext = (QualifiedDataNameContext) dataRenamesClauseContext.children.get(3);
+          String throughName = qualifiedDataNameContext.children.get(0).getChild(0).getChild(0).getChild(0).getText();
+          variable.add(throughName);
         }
       }
 
