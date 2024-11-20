@@ -58,6 +58,7 @@ public class ViewController {
   public String updateGraph(@RequestBody Map<String, Object> checkboxData) throws IOException {
     String filename = (String) checkboxData.get("filename");
     checkboxData.remove("filename");
+    checkboxData.remove("toggleForce");
 
 
     ObjectMapper objectMapper = new ObjectMapper();

@@ -281,7 +281,48 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
               }
 
               // Multiply Statement inside EVALUATE-WHEN
+              if (statementContext.getChild(0) instanceof MultiplyStatementContext multiplyStatementContext){
+                String currentMultiplyNodeName = "MULTIPLY:" + VisitorUtilites.currentMultiply;
 
+                for (int l = 0; l < multiplyStatementContext.children.size(); l++) {
+                  if (multiplyStatementContext.children.get(l) instanceof IdentifierContext) {
+                    String variableWithLevelNumber = extractVariableWithLevelNumber((IdentifierContext) multiplyStatementContext.children.get(l));
+
+                    nodeLinkManager.addNodeWithoutRoot(currentMultiplyNodeName, 17);
+                    nodeLinkManager.addLink(programName, currentMultiplyNodeName);
+                    nodeLinkManager.addLink(currentMultiplyNodeName, variableWithLevelNumber);
+                    nodeLinkManager.addLink(currentEvaluateNodeName, currentMultiplyNodeName);
+                  } else if (multiplyStatementContext.children.get(l) instanceof MultiplyRegularContext) {
+                    MultiplyRegularOperandContext multiplyRegularOperandContext = retrieveContext.getMultiplyRegularOperandContext((MultiplyRegularContext) multiplyStatementContext.children.get(l));
+
+                    IdentifierContext identifierContext = retrieveContext.getIdentifierContext(multiplyRegularOperandContext);
+
+                    String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
+
+                    nodeLinkManager.addNodeWithoutRoot(currentMultiplyNodeName, 17);
+                    nodeLinkManager.addLink(programName, currentMultiplyNodeName);
+                    nodeLinkManager.addLink(currentMultiplyNodeName, variableWithLevelNumber);
+                    nodeLinkManager.addLink(currentEvaluateNodeName, currentMultiplyNodeName);
+                  } else if (multiplyStatementContext.children.get(l) instanceof MultiplyGivingContext multiplyGivingContext){
+                    for(int k = 0; k < multiplyGivingContext.children.size(); k++){
+                      if (multiplyGivingContext.children.get(k) instanceof MultiplyGivingOperandContext
+                          || multiplyGivingContext.children.get(k) instanceof MultiplyGivingResultContext) {
+
+                        if(multiplyGivingContext.children.get(k).getChild(0) instanceof IdentifierContext identifierContext){
+                          String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
+
+                          nodeLinkManager.addNodeWithoutRoot(currentMultiplyNodeName, 17);
+                          nodeLinkManager.addLink(programName, currentMultiplyNodeName);
+                          nodeLinkManager.addLink(currentMultiplyNodeName, variableWithLevelNumber);
+                          nodeLinkManager.addLink(currentEvaluateNodeName, currentMultiplyNodeName);
+                        }
+                      }
+                    }
+
+                  }
+                }
+                VisitorUtilites.currentMultiply  += 1;
+              }
             }
           }
         }

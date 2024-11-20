@@ -4,16 +4,17 @@ DATA DIVISION.
 WORKING-STORAGE SECTION.
 01 Zahl1 PIC 9.
 01 Ergebnis PIC 99.
-01 Sinnlos PIC 99.
 PROCEDURE DIVISION.
 
-
-       MULTIPLY Zahl1 BY Zahl1 GIVING Ergebnis.
-
-        MULTIPLY 1 BY Zahl2 GIVING Ergebnis.
-
-        MULTIPLY Zahl3 BY Zahl3.
-
-        MULTIPLY 3 BY Zahl4.
-        MULTIPLY Zahl6 BY 2 GIVING Ergebnis.
-
+EVALUATE Sinnlos
+WHEN 1
+       MULTIPLY Zahl1 BY Zahl1 GIVING Ergebnis
+WHEN 1
+        MULTIPLY 1 BY Zahl2 GIVING Ergebnis
+WHEN 1
+        MULTIPLY Zahl3 BY Zahl3
+WHEN 1
+        MULTIPLY 3 BY Zahl4
+WHEN 1
+        MULTIPLY Zahl6 BY 2 GIVING Ergebnis
+END-EVALUATE.
