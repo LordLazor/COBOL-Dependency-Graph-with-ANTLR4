@@ -60,7 +60,6 @@ public class ViewController {
     checkboxData.remove("filename");
     checkboxData.remove("toggleForce");
 
-
     ObjectMapper objectMapper = new ObjectMapper();
 
     Map<String, Object> jsonMap = controllerUtilities.updateJson(filename, checkboxData);
