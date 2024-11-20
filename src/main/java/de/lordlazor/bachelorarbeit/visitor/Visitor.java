@@ -91,6 +91,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.swing.plaf.nimbus.State;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 public class Visitor extends Cobol85BaseVisitor<Object> {
@@ -103,6 +104,17 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
 
     this.retrieveProgramName = new RetrieveProgramName();
     this.retrieveContext = new RetrieveContext();
+  }
+
+  // Any parent of context instance of EvaluateStatementContext (true/false)
+  public boolean isEvaluateStatement(ParserRuleContext ctx) {
+    while (ctx != null) {
+      if (ctx instanceof EvaluateStatementContext) {
+        return true;
+      }
+      ctx = ctx.getParent();
+    }
+    return false;
   }
 
 
@@ -131,6 +143,56 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
           nodeLinkManager.addLink(programName, currentEvaluateNodeName);
           nodeLinkManager.addLink(currentEvaluateNodeName, variableWithLevelNumber);
 
+        } else if(ctx.children.get(i) instanceof EvaluateWhenPhraseContext evaluateWhenPhraseContext) {
+          for(int j = 0; j < evaluateWhenPhraseContext.children.size(); j++) {
+            if(evaluateWhenPhraseContext.children.get(j) instanceof StatementContext statementContext) {
+
+              // Add Statement inside EVALUATE-WHEN
+
+              if (statementContext.getChild(0) instanceof AddStatementContext addStatementContext) {
+                if (addStatementContext.children.get(1) instanceof  AddToStatementContext addToStatementContext) {
+
+                  String currentAddNodeName = "ADD:" + VisitorUtilites.currentAdd;
+
+                  for (int l = 0; l < addToStatementContext.children.size(); l++) {
+                    if (addToStatementContext.children.get(l) instanceof AddFromContext
+                        || addToStatementContext.children.get(l) instanceof AddToContext) {
+                      if (addToStatementContext.children.get(l).getChild(0) instanceof IdentifierContext identifierContext) {
+
+                        String variableWithLevelNumber = extractVariableWithLevelNumber(
+                            identifierContext);
+
+                        nodeLinkManager.addNodeWithoutRoot(currentAddNodeName, 15);
+                        nodeLinkManager.addLink(programName, currentAddNodeName);
+                        nodeLinkManager.addLink(currentAddNodeName, variableWithLevelNumber);
+                        nodeLinkManager.addLink(currentEvaluateNodeName, currentAddNodeName);
+                      }
+                    }
+                  }
+                } else if (addStatementContext.children.get(1) instanceof AddToGivingStatementContext addToGivingStatementContext) {
+                  String currentAddNodeName = "ADD:" + VisitorUtilites.currentAdd;
+
+                  for (int l = 0; l < addToGivingStatementContext.children.size(); l++) {
+                    if (addToGivingStatementContext.children.get(l) instanceof AddFromContext
+                        || addToGivingStatementContext.children.get(l) instanceof AddToGivingContext
+                        || addToGivingStatementContext.children.get(l) instanceof AddGivingContext) {
+                      if (addToGivingStatementContext.children.get(l).getChild(0) instanceof IdentifierContext identifierContext) {
+
+                        String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
+
+                        nodeLinkManager.addNodeWithoutRoot(currentAddNodeName, 15);
+                        nodeLinkManager.addLink(programName, currentAddNodeName);
+                        nodeLinkManager.addLink(currentAddNodeName, variableWithLevelNumber);
+                        nodeLinkManager.addLink(currentEvaluateNodeName, currentAddNodeName);
+                      }
+                    }
+                  }
+
+                }
+                VisitorUtilites.currentAdd  += 1;
+              }
+            }
+          }
         }
       }
 
@@ -149,6 +211,10 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
   @Override
   public Object visitAddStatement(AddStatementContext ctx) {
     try{
+      if (isEvaluateStatement(ctx)) {
+        return super.visitAddStatement(ctx);
+      }
+
       String programName = retrieveProgramName.getProgramName(ctx);
 
       if (ctx.children.get(1) instanceof  AddToStatementContext) {
@@ -160,14 +226,13 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
         for (int i = 0; i < addToStatementContext.children.size(); i++) {
           if (addToStatementContext.children.get(i) instanceof AddFromContext
               || addToStatementContext.children.get(i) instanceof AddToContext) {
-            IdentifierContext identifierContext = retrieveContext.getIdentifierContext(
-                (ParserRuleContext) addToStatementContext.children.get(i));
+            if (addToStatementContext.children.get(i).getChild(0) instanceof IdentifierContext identifierContext) {
+              String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
 
-            String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
-
-            nodeLinkManager.addNodeWithoutRoot(currentAddNodeName, 15);
-            nodeLinkManager.addLink(programName, currentAddNodeName);
-            nodeLinkManager.addLink(currentAddNodeName, variableWithLevelNumber);
+              nodeLinkManager.addNodeWithoutRoot(currentAddNodeName, 15);
+              nodeLinkManager.addLink(programName, currentAddNodeName);
+              nodeLinkManager.addLink(currentAddNodeName, variableWithLevelNumber);
+            }
           }
         }
       } else if (ctx.children.get(1) instanceof AddToGivingStatementContext) {
@@ -180,13 +245,14 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
           if (addToGivingStatementContext.children.get(i) instanceof AddFromContext
               || addToGivingStatementContext.children.get(i) instanceof AddToGivingContext
               || addToGivingStatementContext.children.get(i) instanceof AddGivingContext) {
-            IdentifierContext identifierContext = retrieveContext.getIdentifierContext((ParserRuleContext) addToGivingStatementContext.children.get(i));
+            if (addToGivingStatementContext.children.get(i).getChild(0) instanceof IdentifierContext identifierContext) {
 
-            String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
+              String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
 
-            nodeLinkManager.addNodeWithoutRoot(currentAddNodeName, 15);
-            nodeLinkManager.addLink(programName, currentAddNodeName);
-            nodeLinkManager.addLink(currentAddNodeName, variableWithLevelNumber);
+              nodeLinkManager.addNodeWithoutRoot(currentAddNodeName, 15);
+              nodeLinkManager.addLink(programName, currentAddNodeName);
+              nodeLinkManager.addLink(currentAddNodeName, variableWithLevelNumber);
+            }
           }
         }
 
