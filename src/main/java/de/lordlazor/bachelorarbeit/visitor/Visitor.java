@@ -134,15 +134,15 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
       for (int i = 0; i < ctx.children.size(); i++) {
         // Get Evaluate Select Context
         if (ctx.children.get(i) instanceof EvaluateSelectContext evaluateSelectContext) {
-          IdentifierContext identifierContext = retrieveContext.getIdentifierContext(
-              evaluateSelectContext);
+          for(int j = 0; j < evaluateSelectContext.children.size(); j++) {
+            if(evaluateSelectContext.children.get(j) instanceof IdentifierContext identifierContext) {
+              String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
 
-          String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
-
-          nodeLinkManager.addNodeWithoutRoot(currentEvaluateNodeName, 23);
-          nodeLinkManager.addLink(programName, currentEvaluateNodeName);
-          nodeLinkManager.addLink(currentEvaluateNodeName, variableWithLevelNumber);
-
+              nodeLinkManager.addNodeWithoutRoot(currentEvaluateNodeName, 23);
+              nodeLinkManager.addLink(programName, currentEvaluateNodeName);
+              nodeLinkManager.addLink(currentEvaluateNodeName, variableWithLevelNumber);
+            }
+          }
         } else if(ctx.children.get(i) instanceof EvaluateWhenPhraseContext evaluateWhenPhraseContext) {
           for(int j = 0; j < evaluateWhenPhraseContext.children.size(); j++) {
             if(evaluateWhenPhraseContext.children.get(j) instanceof StatementContext statementContext) {
@@ -236,6 +236,49 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
 
 
               }
+
+              // Divide Statement inside EVALUATE-WHEN
+              if (statementContext.getChild(0) instanceof DivideStatementContext divideStatementContext) {
+                String currentDivideNodeName = "DIVIDE:" + VisitorUtilites.currentDivide;
+
+                for (int l = 0; l < divideStatementContext.children.size(); l++) {
+                  if (divideStatementContext.children.get(l) instanceof IdentifierContext) {
+                    String variableWithLevelNumber = extractVariableWithLevelNumber((IdentifierContext) divideStatementContext.children.get(l));
+
+                    nodeLinkManager.addNodeWithoutRoot(currentDivideNodeName, 18);
+                    nodeLinkManager.addLink(programName, currentDivideNodeName);
+                    nodeLinkManager.addLink(currentDivideNodeName, variableWithLevelNumber);
+                    nodeLinkManager.addLink(currentEvaluateNodeName, currentDivideNodeName);
+                  } else if (divideStatementContext.children.get(l) instanceof DivideByGivingStatementContext divideByGivingStatementContext) {
+                    for(int k = 0; k < divideByGivingStatementContext.children.size(); k++){
+                      if (divideByGivingStatementContext.children.get(k) instanceof IdentifierContext identifierContext) {
+                        String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
+
+                        nodeLinkManager.addNodeWithoutRoot(currentDivideNodeName, 18);
+                        nodeLinkManager.addLink(programName, currentDivideNodeName);
+                        nodeLinkManager.addLink(currentDivideNodeName, variableWithLevelNumber);
+                        nodeLinkManager.addLink(currentEvaluateNodeName, currentDivideNodeName);
+                      } else if(divideByGivingStatementContext.children.get(k) instanceof DivideGivingPhraseContext divideGivingPhraseContext){
+                        IdentifierContext identifierContext = retrieveContext.getIdentifierContext((ParserRuleContext) divideGivingPhraseContext.children.get(1));
+
+                        String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
+
+                        nodeLinkManager.addNodeWithoutRoot(currentDivideNodeName, 18);
+                        nodeLinkManager.addLink(programName, currentDivideNodeName);
+                        nodeLinkManager.addLink(currentDivideNodeName, variableWithLevelNumber);
+                        nodeLinkManager.addLink(currentEvaluateNodeName, currentDivideNodeName);
+                      }
+                    }
+
+
+                  }
+                }
+                VisitorUtilites.currentDivide  += 1;
+
+              }
+
+              // Multiply Statement inside EVALUATE-WHEN
+
             }
           }
         }
@@ -375,6 +418,11 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
   @Override
   public Object visitMultiplyStatement(MultiplyStatementContext ctx){
     try{
+
+      if (isEvaluateStatement(ctx)) {
+        return super.visitMultiplyStatement(ctx);
+      }
+
       String programName = retrieveProgramName.getProgramName(ctx);
 
       String currentMultiplyNodeName = "MULTIPLY:" + VisitorUtilites.currentMultiply;
@@ -401,13 +449,13 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
             if (multiplyGivingContext.children.get(j) instanceof MultiplyGivingOperandContext
                 || multiplyGivingContext.children.get(j) instanceof MultiplyGivingResultContext) {
 
-              IdentifierContext identifierContext = retrieveContext.getIdentifierContext((ParserRuleContext) multiplyGivingContext.children.get(j));
+              if(multiplyGivingContext.children.get(j).getChild(0) instanceof IdentifierContext identifierContext){
+                String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
 
-              String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
-
-              nodeLinkManager.addNodeWithoutRoot(currentMultiplyNodeName, 17);
-              nodeLinkManager.addLink(programName, currentMultiplyNodeName);
-              nodeLinkManager.addLink(currentMultiplyNodeName, variableWithLevelNumber);
+                nodeLinkManager.addNodeWithoutRoot(currentMultiplyNodeName, 17);
+                nodeLinkManager.addLink(programName, currentMultiplyNodeName);
+                nodeLinkManager.addLink(currentMultiplyNodeName, variableWithLevelNumber);
+            }
             }
           }
 
@@ -427,6 +475,11 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
   @Override
   public Object visitDivideStatement(DivideStatementContext ctx){
     try{
+
+      if (isEvaluateStatement(ctx)) {
+        return super.visitDivideStatement(ctx);
+      }
+
       String programName = retrieveProgramName.getProgramName(ctx);
 
       String currentDivideNodeName = "DIVIDE:" + VisitorUtilites.currentDivide;
@@ -499,7 +552,7 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
       return nodeLinkManager.searchNodeMatchesName(variableNameWithoutLevelNumber);
     }
 
-    return null;
+    return "Not found";
 
   }
 
@@ -667,15 +720,15 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
                     arithmeticExpressionContext);
                 PowersContext powersContext = retrieveContext.getPowersContext(multDivsContext);
                 BasisContext basisContext = retrieveContext.getBasisContext(powersContext);
-                IdentifierContext identifierContext = retrieveContext.getIdentifierContext(
-                    basisContext);
+                if (basisContext.children.get(0) instanceof IdentifierContext identifierContext) {
 
-                String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
+                  String variableWithLevelNumber = extractVariableWithLevelNumber(
+                      identifierContext);
 
-                nodeLinkManager.addNodeWithoutRoot(currentIfNodeName, 19);
-                nodeLinkManager.addLink(programName, currentIfNodeName);
-                nodeLinkManager.addLink(currentIfNodeName, variableWithLevelNumber);
-
+                  nodeLinkManager.addNodeWithoutRoot(currentIfNodeName, 19);
+                  nodeLinkManager.addLink(programName, currentIfNodeName);
+                  nodeLinkManager.addLink(currentIfNodeName, variableWithLevelNumber);
+                }
               }
             }
           } else if(simpleConditionContext.children.get(0) instanceof  ConditionNameReferenceContext conditionNameReferenceContext){
@@ -694,23 +747,25 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
           for(int j = 0; j < andOrConditionContext.children.size(); j++){
             if(andOrConditionContext.children.get(j) instanceof CombinableConditionContext combinableConditionContext){
               SimpleConditionContext simpleConditionContext = retrieveContext.getSimpleConditionContext(combinableConditionContext);
-              RelationConditionContext relationConditionContext = retrieveContext.getRelationConditionContext(simpleConditionContext);
-              RelationArithmeticComparisonContext relationArithmeticComparisonContext = retrieveContext.getRelationArithmeticComparisonContext(relationConditionContext);
+              if(simpleConditionContext.children.get(0) instanceof RelationConditionContext relationConditionContext){
 
-              for(int k = 0; k < relationArithmeticComparisonContext.children.size(); k++){
-                if (relationArithmeticComparisonContext.children.get(k) instanceof ArithmeticExpressionContext arithmeticExpressionContext) {
-                  MultDivsContext multDivsContext = retrieveContext.getMultDivsContext(arithmeticExpressionContext);
-                  PowersContext powersContext = retrieveContext.getPowersContext(multDivsContext);
-                  BasisContext basisContext = retrieveContext.getBasisContext(powersContext);
-                  IdentifierContext identifierContext = retrieveContext.getIdentifierContext(basisContext);
+                RelationArithmeticComparisonContext relationArithmeticComparisonContext = retrieveContext.getRelationArithmeticComparisonContext(relationConditionContext);
 
-                  String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
+                for(int k = 0; k < relationArithmeticComparisonContext.children.size(); k++){
+                  if (relationArithmeticComparisonContext.children.get(k) instanceof ArithmeticExpressionContext arithmeticExpressionContext) {
+                    MultDivsContext multDivsContext = retrieveContext.getMultDivsContext(arithmeticExpressionContext);
+                    PowersContext powersContext = retrieveContext.getPowersContext(multDivsContext);
+                    BasisContext basisContext = retrieveContext.getBasisContext(powersContext);
+                    if (basisContext.children.get(0) instanceof IdentifierContext identifierContext) {
 
+                      String variableWithLevelNumber = extractVariableWithLevelNumber(
+                          identifierContext);
 
-                  nodeLinkManager.addNodeWithoutRoot(currentIfNodeName, 19);
-                  nodeLinkManager.addLink(programName, currentIfNodeName);
-                  nodeLinkManager.addLink(currentIfNodeName, variableWithLevelNumber);
-
+                      nodeLinkManager.addNodeWithoutRoot(currentIfNodeName, 19);
+                      nodeLinkManager.addLink(programName, currentIfNodeName);
+                      nodeLinkManager.addLink(currentIfNodeName, variableWithLevelNumber);
+                    }
+                  }
                 }
               }
             }
