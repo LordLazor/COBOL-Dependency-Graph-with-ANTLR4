@@ -35,6 +35,9 @@ import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DataRenamesClauseContex
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DivideByGivingStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DivideGivingPhraseContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.DivideStatementContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.EvaluateSelectContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.EvaluateStatementContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.EvaluateWhenPhraseContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.FileControlClauseContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.FileControlEntryContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.FileDescriptionEntryContext;
@@ -71,6 +74,8 @@ import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SetStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SetToContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SetToStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SimpleConditionContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SpecialRegisterContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.StatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SubtractFromGivingStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SubtractFromStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SubtractGivingContext;
@@ -104,6 +109,41 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
   /**
    * Get the program name from the program unit context by traversing through the parents of the current context.
    */
+
+
+  @Override
+  public Object visitEvaluateStatement(EvaluateStatementContext ctx) {
+    try {
+      String programName = retrieveProgramName.getProgramName(ctx);
+
+      String currentEvaluateNodeName = "EVALUATE:" + VisitorUtilites.currentEvaluate;
+
+
+      for (int i = 0; i < ctx.children.size(); i++) {
+        // Get Evaluate Select Context
+        if (ctx.children.get(i) instanceof EvaluateSelectContext evaluateSelectContext) {
+          IdentifierContext identifierContext = retrieveContext.getIdentifierContext(
+              evaluateSelectContext);
+
+          String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
+
+          nodeLinkManager.addNodeWithoutRoot(currentEvaluateNodeName, 23);
+          nodeLinkManager.addLink(programName, currentEvaluateNodeName);
+          nodeLinkManager.addLink(currentEvaluateNodeName, variableWithLevelNumber);
+
+        }
+      }
+
+
+      VisitorUtilites.currentEvaluate += 1;
+
+    } catch (ProgramNameNotFoundException | ContextNotFoundException e) {
+      throw new RuntimeException(e);
+    }
+
+    return super.visitEvaluateStatement(ctx);
+  }
+
 
 
   @Override

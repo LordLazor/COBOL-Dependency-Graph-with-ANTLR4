@@ -72,8 +72,8 @@ public class JsonUtilities {
     for (HashMap<String, Object> link : links) {
       String source = (String) link.get("source");
       String target = (String) link.get("target");
-      addNode(source, 23);
-      addNode(target, 23);
+      addNode(source, 24);
+      addNode(target, 24);
     }
 
     jsonMap.put("nodes", nodes);

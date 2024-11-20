@@ -34,6 +34,7 @@ import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.RelationConditionContex
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SelectClauseContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SetToContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SimpleConditionContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SpecialRegisterContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SubtractFromGivingStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SubtractFromStatementContext;
 import java.util.List;
