@@ -354,6 +354,11 @@
     <svg style="border: 1px solid black;"></svg>
     <script src="https://d3js.org/d3.v4.min.js"></script>
 
+
+    <label id="totalNodes"></label>
+
+    <label id="totalLinks"></label>
+
     <script th:inline="javascript">
 
       var group_colors = {};
@@ -392,6 +397,9 @@
 
 
         var graph = JSON.parse(jsonString);
+
+        document.getElementById("totalNodes").textContent = "Total Nodes: " + graph.nodes.length + ";";
+        document.getElementById("totalLinks").textContent = "Total Links: " + graph.links.length;
 
         var link = svg.append("g")
         .attr("class", "links")
@@ -491,6 +499,9 @@
         .attr("fill", "white");
 
         var graph = JSON.parse(jsonString);
+
+        document.getElementById("totalNodes").textContent = "Total Nodes: " + graph.nodes.length + ";";
+        document.getElementById("totalLinks").textContent = "Total Links: " + graph.links.length;
 
         graph.nodes.forEach(function(node) {
           var groupColor = color(node.group);
