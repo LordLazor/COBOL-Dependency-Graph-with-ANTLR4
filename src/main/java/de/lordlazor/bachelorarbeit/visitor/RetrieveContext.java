@@ -20,6 +20,7 @@ import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.FileDescriptionEntryCon
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.FileNameContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.IdentificationDivisionContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.IdentifierContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.IfThenContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.LiteralContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MultDivsContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MultiplyGivingContext;
@@ -43,6 +44,17 @@ import org.antlr.v4.runtime.ParserRuleContext;
 
 public class RetrieveContext {
 
+
+  public IfThenContext getIfThenContext(ParserRuleContext ctx)
+      throws ContextNotFoundException {
+    for (int i = 0; i < ctx.children.size(); i++){
+      if (ctx.children.get(i) instanceof IfThenContext) {
+        return (IfThenContext) ctx.children.get(i);
+      }
+    }
+
+    throw new ContextNotFoundException("ifThenContext is null");
+  }
 
   public SetToContext getSetToContext(ParserRuleContext ctx)
       throws ContextNotFoundException {

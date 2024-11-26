@@ -48,6 +48,7 @@ import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.GoToStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.GoToStatementSimpleContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.IdentifierContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.IfStatementContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.IfThenContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.LinkageSectionContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.LiteralContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.LocalStorageSectionContext;
@@ -113,6 +114,17 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
   public boolean isEvaluateStatement(ParserRuleContext ctx) {
     while (ctx != null) {
       if (ctx instanceof EvaluateStatementContext) {
+        return true;
+      }
+      ctx = ctx.getParent();
+    }
+    return false;
+  }
+
+  // Any parent of context instance of IfStatementContext (true/false)
+  public boolean isIfStatement(ParserRuleContext ctx) {
+    while (ctx != null) {
+      if (ctx instanceof IfStatementContext) {
         return true;
       }
       ctx = ctx.getParent();
@@ -347,6 +359,10 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
         return super.visitAddStatement(ctx);
       }
 
+      if (isIfStatement(ctx)) {
+        return super.visitAddStatement(ctx);
+      }
+
       String programName = retrieveProgramName.getProgramName(ctx);
 
       if (ctx.children.get(1) instanceof  AddToStatementContext) {
@@ -404,6 +420,10 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
   public Object visitSubtractStatement(SubtractStatementContext ctx){
     try{
       if (isEvaluateStatement(ctx)) {
+        return super.visitSubtractStatement(ctx);
+      }
+
+      if (isIfStatement(ctx)) {
         return super.visitSubtractStatement(ctx);
       }
 
@@ -467,6 +487,10 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
         return super.visitMultiplyStatement(ctx);
       }
 
+      if (isIfStatement(ctx)) {
+        return super.visitMultiplyStatement(ctx);
+      }
+
       String programName = retrieveProgramName.getProgramName(ctx);
 
       String currentMultiplyNodeName = "MULTIPLY:" + VisitorUtilites.currentMultiply;
@@ -521,6 +545,10 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
     try{
 
       if (isEvaluateStatement(ctx)) {
+        return super.visitDivideStatement(ctx);
+      }
+
+      if (isIfStatement(ctx)) {
         return super.visitDivideStatement(ctx);
       }
 
@@ -872,6 +900,223 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
                   }
                 }
               }
+            }
+          }
+        }
+      }
+
+      // Then Part of If
+      IfThenContext ifThenContext = retrieveContext.getIfThenContext(ctx);
+      if(ifThenContext.children != null) {
+        for (int i = 0; i < ifThenContext.children.size(); i++) {
+          if (ifThenContext.children.get(i) instanceof StatementContext statementContext) {
+            if (statementContext.getChild(0) instanceof AddStatementContext addStatementContext) {
+              // Add Statement inside IF
+              if (addStatementContext.children.get(
+                  1) instanceof AddToStatementContext addToStatementContext) {
+
+                String currentAddNodeName = "ADD:" + VisitorUtilites.currentAdd;
+
+                for (int l = 0; l < addToStatementContext.children.size(); l++) {
+                  if (addToStatementContext.children.get(l) instanceof AddFromContext
+                      || addToStatementContext.children.get(l) instanceof AddToContext) {
+                    if (addToStatementContext.children.get(l)
+                        .getChild(0) instanceof IdentifierContext identifierContext) {
+
+                      String variableWithLevelNumber = extractVariableWithLevelNumber(
+                          identifierContext);
+
+                      nodeLinkManager.addNodeWithoutRoot(currentAddNodeName, 15);
+                      nodeLinkManager.addLink(programName, currentAddNodeName);
+                      nodeLinkManager.addLink(currentAddNodeName, variableWithLevelNumber);
+                      nodeLinkManager.addLink(currentIfNodeName, currentAddNodeName);
+                    }
+                  }
+                }
+              } else if (addStatementContext.children.get(
+                  1) instanceof AddToGivingStatementContext addToGivingStatementContext) {
+                String currentAddNodeName = "ADD:" + VisitorUtilites.currentAdd;
+
+                for (int l = 0; l < addToGivingStatementContext.children.size(); l++) {
+                  if (addToGivingStatementContext.children.get(l) instanceof AddFromContext
+                      || addToGivingStatementContext.children.get(l) instanceof AddToGivingContext
+                      || addToGivingStatementContext.children.get(l) instanceof AddGivingContext) {
+                    if (addToGivingStatementContext.children.get(l)
+                        .getChild(0) instanceof IdentifierContext identifierContext) {
+
+                      String variableWithLevelNumber = extractVariableWithLevelNumber(
+                          identifierContext);
+
+                      nodeLinkManager.addNodeWithoutRoot(currentAddNodeName, 15);
+                      nodeLinkManager.addLink(programName, currentAddNodeName);
+                      nodeLinkManager.addLink(currentAddNodeName, variableWithLevelNumber);
+                      nodeLinkManager.addLink(currentIfNodeName, currentAddNodeName);
+                    }
+                  }
+
+
+                }
+                VisitorUtilites.currentAdd += 1;
+              }
+
+            }
+            // Subtract Statement inside IF
+            if (statementContext.getChild(
+                0) instanceof SubtractStatementContext subtractStatementContext) {
+              if (subtractStatementContext.children.get(
+                  1) instanceof SubtractFromStatementContext subtractFromStatementContext) {
+                String currentSubtractNodeName = "SUBTRACT:" + VisitorUtilites.currentSubtract;
+
+                for (int l = 0; l < subtractFromStatementContext.children.size(); l++) {
+                  if (subtractFromStatementContext.children.get(
+                      l) instanceof SubtractSubtrahendContext
+                      || subtractFromStatementContext.children.get(
+                      l) instanceof SubtractMinuendContext) {
+
+                    if (subtractFromStatementContext.children.get(l)
+                        .getChild(0) instanceof IdentifierContext identifierContext) {
+
+                      String variableWithLevelNumber = extractVariableWithLevelNumber(
+                          identifierContext);
+
+                      nodeLinkManager.addNodeWithoutRoot(currentSubtractNodeName, 16);
+                      nodeLinkManager.addLink(programName, currentSubtractNodeName);
+                      nodeLinkManager.addLink(currentSubtractNodeName, variableWithLevelNumber);
+                      nodeLinkManager.addLink(currentIfNodeName, currentSubtractNodeName);
+                    }
+                  }
+                }
+              } else if (subtractStatementContext.children.get(
+                  1) instanceof SubtractFromGivingStatementContext subtractFromGivingStatementContext) {
+
+                String currentSubtractNodeName = "SUBTRACT:" + VisitorUtilites.currentSubtract;
+
+                for (int l = 0; l < subtractFromGivingStatementContext.children.size(); l++) {
+                  if (subtractFromGivingStatementContext.children.get(
+                      l) instanceof SubtractSubtrahendContext
+                      || subtractFromGivingStatementContext.children.get(
+                      l) instanceof SubtractMinuendGivingContext
+                      || subtractFromGivingStatementContext.children.get(
+                      l) instanceof SubtractGivingContext) {
+                    if (subtractFromGivingStatementContext.children.get(l)
+                        .getChild(0) instanceof IdentifierContext identifierContext) {
+
+                      String variableWithLevelNumber = extractVariableWithLevelNumber(
+                          identifierContext);
+
+                      nodeLinkManager.addNodeWithoutRoot(currentSubtractNodeName, 16);
+                      nodeLinkManager.addLink(programName, currentSubtractNodeName);
+                      nodeLinkManager.addLink(currentSubtractNodeName, variableWithLevelNumber);
+                      nodeLinkManager.addLink(currentIfNodeName, currentSubtractNodeName);
+                    }
+                  }
+                }
+              }
+              VisitorUtilites.currentSubtract += 1;
+
+
+            }
+            // Divide Statement inside IF
+            if (statementContext.getChild(
+                0) instanceof DivideStatementContext divideStatementContext) {
+              String currentDivideNodeName = "DIVIDE:" + VisitorUtilites.currentDivide;
+
+              for (int l = 0; l < divideStatementContext.children.size(); l++) {
+                if (divideStatementContext.children.get(l) instanceof IdentifierContext) {
+                  String variableWithLevelNumber = extractVariableWithLevelNumber(
+                      (IdentifierContext) divideStatementContext.children.get(l));
+
+                  nodeLinkManager.addNodeWithoutRoot(currentDivideNodeName, 18);
+                  nodeLinkManager.addLink(programName, currentDivideNodeName);
+                  nodeLinkManager.addLink(currentDivideNodeName, variableWithLevelNumber);
+                  nodeLinkManager.addLink(currentIfNodeName, currentDivideNodeName);
+                } else if (divideStatementContext.children.get(
+                    l) instanceof DivideByGivingStatementContext divideByGivingStatementContext) {
+                  for (int k = 0; k < divideByGivingStatementContext.children.size(); k++) {
+                    if (divideByGivingStatementContext.children.get(
+                        k) instanceof IdentifierContext identifierContext) {
+                      String variableWithLevelNumber = extractVariableWithLevelNumber(
+                          identifierContext);
+
+                      nodeLinkManager.addNodeWithoutRoot(currentDivideNodeName, 18);
+                      nodeLinkManager.addLink(programName, currentDivideNodeName);
+                      nodeLinkManager.addLink(currentDivideNodeName, variableWithLevelNumber);
+                      nodeLinkManager.addLink(currentIfNodeName, currentDivideNodeName);
+                    } else if (divideByGivingStatementContext.children.get(
+                        k) instanceof DivideGivingPhraseContext divideGivingPhraseContext) {
+                      IdentifierContext identifierContext = retrieveContext.getIdentifierContext(
+                          (ParserRuleContext) divideGivingPhraseContext.children.get(1));
+
+                      String variableWithLevelNumber = extractVariableWithLevelNumber(
+                          identifierContext);
+
+                      nodeLinkManager.addNodeWithoutRoot(currentDivideNodeName, 18);
+                      nodeLinkManager.addLink(programName, currentDivideNodeName);
+                      nodeLinkManager.addLink(currentDivideNodeName, variableWithLevelNumber);
+                      nodeLinkManager.addLink(currentIfNodeName, currentDivideNodeName);
+                    }
+                  }
+
+
+                }
+              }
+              VisitorUtilites.currentDivide += 1;
+
+            }
+
+            // Multiply Statement inside IF
+            if (statementContext.getChild(
+                0) instanceof MultiplyStatementContext multiplyStatementContext) {
+              String currentMultiplyNodeName = "MULTIPLY:" + VisitorUtilites.currentMultiply;
+
+              for (int l = 0; l < multiplyStatementContext.children.size(); l++) {
+                if (multiplyStatementContext.children.get(l) instanceof IdentifierContext) {
+                  String variableWithLevelNumber = extractVariableWithLevelNumber(
+                      (IdentifierContext) multiplyStatementContext.children.get(l));
+
+                  nodeLinkManager.addNodeWithoutRoot(currentMultiplyNodeName, 17);
+                  nodeLinkManager.addLink(programName, currentMultiplyNodeName);
+                  nodeLinkManager.addLink(currentMultiplyNodeName, variableWithLevelNumber);
+                  nodeLinkManager.addLink(currentIfNodeName, currentMultiplyNodeName);
+                } else if (multiplyStatementContext.children.get(
+                    l) instanceof MultiplyRegularContext) {
+                  MultiplyRegularOperandContext multiplyRegularOperandContext = retrieveContext.getMultiplyRegularOperandContext(
+                      (MultiplyRegularContext) multiplyStatementContext.children.get(l));
+
+                  IdentifierContext identifierContext = retrieveContext.getIdentifierContext(
+                      multiplyRegularOperandContext);
+
+                  String variableWithLevelNumber = extractVariableWithLevelNumber(
+                      identifierContext);
+
+                  nodeLinkManager.addNodeWithoutRoot(currentMultiplyNodeName, 17);
+                  nodeLinkManager.addLink(programName, currentMultiplyNodeName);
+                  nodeLinkManager.addLink(currentMultiplyNodeName, variableWithLevelNumber);
+                  nodeLinkManager.addLink(currentIfNodeName, currentMultiplyNodeName);
+                } else if (multiplyStatementContext.children.get(
+                    l) instanceof MultiplyGivingContext multiplyGivingContext) {
+                  for (int k = 0; k < multiplyGivingContext.children.size(); k++) {
+                    if (multiplyGivingContext.children.get(
+                        k) instanceof MultiplyGivingOperandContext
+                        || multiplyGivingContext.children.get(
+                        k) instanceof MultiplyGivingResultContext) {
+
+                      if (multiplyGivingContext.children.get(k)
+                          .getChild(0) instanceof IdentifierContext identifierContext) {
+                        String variableWithLevelNumber = extractVariableWithLevelNumber(
+                            identifierContext);
+
+                        nodeLinkManager.addNodeWithoutRoot(currentMultiplyNodeName, 17);
+                        nodeLinkManager.addLink(programName, currentMultiplyNodeName);
+                        nodeLinkManager.addLink(currentMultiplyNodeName, variableWithLevelNumber);
+                        nodeLinkManager.addLink(currentIfNodeName, currentMultiplyNodeName);
+                      }
+                    }
+                  }
+
+                }
+              }
+              VisitorUtilites.currentMultiply += 1;
             }
           }
         }
