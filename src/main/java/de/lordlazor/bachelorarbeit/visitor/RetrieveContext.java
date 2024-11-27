@@ -44,6 +44,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 
 public class RetrieveContext {
 
+  // This class is used to retrieve the context of the nodes in the parse tree
 
   public IfThenContext getIfThenContext(ParserRuleContext ctx)
       throws ContextNotFoundException {

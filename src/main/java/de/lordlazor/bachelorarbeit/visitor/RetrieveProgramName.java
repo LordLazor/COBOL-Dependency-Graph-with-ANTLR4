@@ -10,6 +10,8 @@ import org.antlr.v4.runtime.ParserRuleContext;
 
 public class RetrieveProgramName {
 
+  // This class is used to retrieve the program name of a given program by traversing the parse tree upwards until the program name is found
+
   private RetrieveContext retrieveContext = new RetrieveContext();
 
   public String getProgramName(ParserRuleContext ctx)

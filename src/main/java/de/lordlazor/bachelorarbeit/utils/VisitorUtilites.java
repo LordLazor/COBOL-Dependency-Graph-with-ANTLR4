@@ -2,6 +2,8 @@ package de.lordlazor.bachelorarbeit.utils;
 
 public class VisitorUtilites {
 
+  // This class is used to add a count to nodes that are used more than once in the program and need a unique id to be displayed multiple times
+
   public static int currentAdd = 0;
   public static int currentSubtract = 0;
   public static int currentMultiply = 0;

@@ -1,0 +1,1 @@
+{"nodes":[{"id":"BeispielProgramm","group":1},{"id":"Root","group":0},{"id":"05: WS-Name","group":8},{"id":"01: WS-Stadt","group":7}],"links":[{"source":"Root","target":"BeispielProgramm"},{"source":"01: WS-Stadt","target":"05: WS-Name"},{"source":"BeispielProgramm","target":"01: WS-Stadt"}]}

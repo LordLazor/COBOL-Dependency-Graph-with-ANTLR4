@@ -8,6 +8,8 @@ import java.util.HashMap;
 
 public class JsonUtilities {
 
+  // This class is used to create a JSON file that is used to create the graph in the frontend
+
   private HashMap<String, Object> jsonMap = new HashMap<>();
   private ArrayList<HashMap<String, Object>> nodes = new ArrayList<>();
   private ArrayList<HashMap<String, Object>> links = new ArrayList<>();

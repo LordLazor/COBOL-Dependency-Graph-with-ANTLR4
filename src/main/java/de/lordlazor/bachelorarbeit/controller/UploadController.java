@@ -30,6 +30,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 public class UploadController {
 
+  // Controller for the POST requests of /upload/...
+
   private final ControllerUtilities controllerUtilities;
 
   public UploadController(ControllerUtilities controllerUtilities) {
@@ -44,33 +46,34 @@ public class UploadController {
       return "redirect:/upload/folder";
     }
 
-    try {
-      VisitorUtilites.resetCounters();
+      try {
+        VisitorUtilites.resetCounters();
 
-      List<CharStream> streams = new ArrayList<>();
-      String folderName = null;
+        List<CharStream> streams = new ArrayList<>();
+        String folderName = null;
 
-      for (MultipartFile file : files) {
-        if (folderName == null) {
-          Path path = Paths.get(file.getOriginalFilename());
-          folderName = path.getParent().toString();
+        for (MultipartFile file : files) {
+          if (folderName == null) {
+            Path path = Paths.get(file.getOriginalFilename());
+            folderName = path.getParent().toString();
+          }
+
+          if (!file.getOriginalFilename().endsWith(".cbl") && !file.getOriginalFilename()
+              .endsWith(".cob")) {
+            continue;
+          }
+
+          InputStream inputStream = file.getInputStream();
+          streams.add(CharStreams.fromStream(inputStream));
         }
 
-        if (!file.getOriginalFilename().endsWith(".cbl") && !file.getOriginalFilename().endsWith(".cob")) {
-          continue;
-        }
+        processFiles(streams, textInput, files, redirectAttributes, folderName, "folder");
 
-        InputStream inputStream = file.getInputStream();
-        streams.add(CharStreams.fromStream(inputStream));
+      } catch (IOException e) {
+        e.printStackTrace();
+        redirectAttributes.addFlashAttribute("message", "Folder upload failed: " + e.getMessage());
+        redirectAttributes.addFlashAttribute("error", true);
       }
-
-      processFiles(streams, textInput, files, redirectAttributes, folderName, "folder");
-
-    } catch (IOException e) {
-      e.printStackTrace();
-      redirectAttributes.addFlashAttribute("message", "Folder upload failed: " + e.getMessage());
-      redirectAttributes.addFlashAttribute("error", true);
-    }
 
     return "redirect:/upload/folder";
   }
@@ -82,22 +85,22 @@ public class UploadController {
       redirectAttributes.addFlashAttribute("message", "Please select a file to upload");
       return "redirect:/upload/file";
     }
+      try {
+        VisitorUtilites.resetCounters();
 
-    try {
-      VisitorUtilites.resetCounters();
+        InputStream inputStream = file.getInputStream();
+        CharStream stream = CharStreams.fromStream(inputStream);
+        List<CharStream> streams = new ArrayList<>();
+        streams.add(stream);
 
-      InputStream inputStream = file.getInputStream();
-      CharStream stream = CharStreams.fromStream(inputStream);
-      List<CharStream> streams = new ArrayList<>();
-      streams.add(stream);
+        processFiles(streams, textInput, new MultipartFile[]{file}, redirectAttributes,
+            file.getOriginalFilename(), "file");
 
-      processFiles(streams, textInput, new MultipartFile[]{file}, redirectAttributes, file.getOriginalFilename(), "file");
-
-    } catch (IOException e) {
-      e.printStackTrace();
-      redirectAttributes.addFlashAttribute("message", "File upload failed: " + e.getMessage());
-      redirectAttributes.addFlashAttribute("error", true);
-    }
+      } catch (IOException e) {
+        e.printStackTrace();
+        redirectAttributes.addFlashAttribute("message", "File upload failed: " + e.getMessage());
+        redirectAttributes.addFlashAttribute("error", true);
+      }
 
     return "redirect:/upload/file";
   }

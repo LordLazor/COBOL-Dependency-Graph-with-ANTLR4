@@ -1,0 +1,12 @@
+IDENTIFICATION DIVISION. 
+PROGRAM-ID. BeispielProgramm.
+DATA DIVISION.
+WORKING-STORAGE SECTION.
+01 WS-Zahl1 PIC 9.
+01 WS-Zahl2 PIC 9.
+01 WS-Zahl3 PIC 9.
+01 WS-Zahl4 PIC 9.
+01 WS-Ergebnis PIC 9.
+procedure division.
+ADD WS-Zahl1 TO WS-Zahl2.
+ADD WS-Zahl3 TO WS-Zahl4 GIVING WS-Ergebnis.

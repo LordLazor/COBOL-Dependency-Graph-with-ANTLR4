@@ -15,6 +15,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 public class ViewController {
 
+  // Controller for the POST requests of /view/...
 
   private final ControllerUtilities controllerUtilities;
 

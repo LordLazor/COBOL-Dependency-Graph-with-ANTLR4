@@ -78,7 +78,6 @@ import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SetStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SetToContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SetToStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SimpleConditionContext;
-import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SpecialRegisterContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.StatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SubtractFromGivingStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.SubtractFromStatementContext;
@@ -95,10 +94,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.swing.plaf.nimbus.State;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 public class Visitor extends Cobol85BaseVisitor<Object> {
+  /*
+  This class is used to visit the parse tree and extract information from it to create a JSON file that can be used to visualize the program as a graph
+  Each visitXXX-Method is called when the visitor encounters a node of the parse tree that matches the corresponding rule in the grammar
+  After visiting a node, the visitor extracts information from the nodes children and adds it to the JSON file
+  */
+
   private final RetrieveProgramName retrieveProgramName;
   private final RetrieveContext retrieveContext;
   private final NodeLinkManager nodeLinkManager;
@@ -133,9 +137,6 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
   }
 
 
-  /**
-   * Get the program name from the program unit context by traversing through the parents of the current context.
-   */
 
 
   @Override

@@ -18,7 +18,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ControllerUtilities {
-
   private final String OUTPUT_FOLDER = "src/main/resources/out/";
   private final String OTHER_FILES_FOLDER = "other_files/";
 

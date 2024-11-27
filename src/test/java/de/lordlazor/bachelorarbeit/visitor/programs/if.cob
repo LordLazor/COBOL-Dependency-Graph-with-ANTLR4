@@ -1,0 +1,15 @@
+IDENTIFICATION DIVISION. 
+PROGRAM-ID. BeispielProgramm.
+DATA DIVISION.
+WORKING-STORAGE SECTION.
+01 WS-Zahl1 PIC 9.
+01 WS-Zahl2 PIC 9.
+01 WS-Zahl3 PIC 9.
+01 WS-Zahl4 PIC 9.
+01 WS-Ergebnis PIC 9.
+procedure division.
+IF WS-Zahl1 = WS-Zahl2 AND WS-Zahl3 > WS-Zahl4
+  DISPLAY ""
+ELSE IF WS-Zahl3
+  DISPLAY ""
+END-IF.

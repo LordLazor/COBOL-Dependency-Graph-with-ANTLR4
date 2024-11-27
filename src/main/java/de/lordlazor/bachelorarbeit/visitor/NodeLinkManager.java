@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 
 public class NodeLinkManager {
+
+  // This class is used to manage the nodes and links of the JSON file that is used to create the graph.
+
   private JsonUtilities jsonUtilities;
 
 

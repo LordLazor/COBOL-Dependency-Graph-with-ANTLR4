@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class GetController {
-
+  // Controller for the GET requests
 
   private final ControllerUtilities controllerUtilities;
 
