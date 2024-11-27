@@ -494,6 +494,14 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
   @Override
   public Object visitSetStatement(SetStatementContext ctx) {
     try {
+      if (isEvaluateStatement(ctx)) {
+        return super.visitSetStatement(ctx);
+      }
+
+      if (isIfStatement(ctx)) {
+        return super.visitSetStatement(ctx);
+      }
+
       String programName = retrieveProgramName.getProgramName(ctx);
 
       String currentSetNodeName = "SET:" + VisitorUtilites.currentSet;
@@ -522,6 +530,14 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
   @Override
   public Object visitGoToStatement(GoToStatementContext ctx) {
     try {
+      if (isEvaluateStatement(ctx)) {
+        return super.visitGoToStatement(ctx);
+      }
+
+      if (isIfStatement(ctx)) {
+        return super.visitGoToStatement(ctx);
+      }
+
       String programName = retrieveProgramName.getProgramName(ctx);
 
       String currentGoToNodeName = "GOTO:" + VisitorUtilites.currentGoTo;
@@ -553,6 +569,14 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
   @Override
   public Object visitProcedureCopyStatement(ProcedureCopyStatementContext ctx) {
     try {
+      if (isEvaluateStatement(ctx)) {
+        return super.visitProcedureCopyStatement(ctx);
+      }
+
+      if (isIfStatement(ctx)) {
+        return super.visitProcedureCopyStatement(ctx);
+      }
+
       String programName = retrieveProgramName.getProgramName(ctx);
       String copyName = ctx.children.get(1).getText();
       nodeLinkManager.addNodeAndLink(programName, copyName, 3);
@@ -577,6 +601,14 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
   @Override
   public Object visitPerformStatement(PerformStatementContext ctx) {
     try {
+      if (isEvaluateStatement(ctx)) {
+        return super.visitPerformStatement(ctx);
+      }
+
+      if (isIfStatement(ctx)) {
+        return super.visitPerformStatement(ctx);
+      }
+
       String programName = retrieveProgramName.getProgramName(ctx);
 
       String currentPerformNodeName = "PERFORM:" + VisitorUtilites.currentPerform;
@@ -606,6 +638,14 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
   @Override
   public Object visitAcceptStatement(AcceptStatementContext ctx){
     try {
+      if (isEvaluateStatement(ctx)) {
+        return super.visitAcceptStatement(ctx);
+      }
+
+      if (isIfStatement(ctx)) {
+        return super.visitAcceptStatement(ctx);
+      }
+
       String programName = retrieveProgramName.getProgramName(ctx);
 
       String currentAcceptNodeName = "ACCEPT:" + VisitorUtilites.currentAccept;
@@ -620,7 +660,7 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
         }
       }
 
-
+      VisitorUtilites.currentAccept += 1;
 
     } catch (ProgramNameNotFoundException | ContextNotFoundException e) {
       throw new RuntimeException(e);
@@ -632,6 +672,14 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
   @Override
   public Object visitMoveStatement(MoveStatementContext ctx) {
     try {
+      if (isEvaluateStatement(ctx)) {
+        return super.visitMoveStatement(ctx);
+      }
+
+      if (isIfStatement(ctx)) {
+        return super.visitMoveStatement(ctx);
+      }
+
       String programName = retrieveProgramName.getProgramName(ctx);
 
       String currentMoveNodeName = "MOVE:" + VisitorUtilites.currentMove;
@@ -681,6 +729,138 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
 
   private void extractInsideControlStructure(StatementContext statementContext, String programName, String currentUsedNodeName)
       throws ContextNotFoundException {
+
+    if (statementContext.getChild(0) instanceof ProcedureCopyStatementContext procedureCopyStatementContext) {
+      String copyName = procedureCopyStatementContext.children.get(1).getText();
+      nodeLinkManager.addNodeAndLink(programName, copyName, 3);
+      nodeLinkManager.addLink(currentUsedNodeName, copyName);
+    }
+
+    if (statementContext.getChild(0) instanceof CallStatementContext callStatementContext) {
+      String calledProgramName = callStatementContext.children.get(1).getText().replace("'", "").replace("\"", "");
+      nodeLinkManager.addNodeAndLink(programName, calledProgramName, 4);
+      nodeLinkManager.addLink(currentUsedNodeName, calledProgramName);
+
+      CallUsingPhraseContext callUsingPhraseContext = retrieveContext.getCallUsingPhraseContext(callStatementContext);
+
+      if (callUsingPhraseContext != null) {
+        CallUsingParameterContext callUsingParameterContext = retrieveContext.getCallUsingParameterContext(callUsingPhraseContext);
+
+        CallByReferencePhraseContext callByReferencePhraseContext = retrieveContext.getCallByReferencePhraseContext(callUsingParameterContext);
+
+        for (int i = 0; i < callByReferencePhraseContext.children.size(); i++) {
+          CallByReferenceContext callByReferenceContext = (CallByReferenceContext) callByReferencePhraseContext.children.get(i);
+
+          IdentifierContext identifierContext = (IdentifierContext) callByReferenceContext.children.get(0);
+
+          String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
+
+          nodeLinkManager.addLink(calledProgramName, variableWithLevelNumber);
+        }
+      }
+    }
+
+    if(statementContext.getChild(0) instanceof AcceptStatementContext acceptStatementContext) {
+      String currentAcceptNodeName = "ACCEPT:" + VisitorUtilites.currentAccept;
+
+      for(int i = 0; i < acceptStatementContext.children.size(); i++){
+        if(acceptStatementContext.children.get(i) instanceof IdentifierContext identifierContext){
+          String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
+
+          nodeLinkManager.addNodeWithoutRoot(currentAcceptNodeName, 25);
+          nodeLinkManager.addLink(programName, currentAcceptNodeName);
+          nodeLinkManager.addLink(currentAcceptNodeName, variableWithLevelNumber);
+          nodeLinkManager.addLink(currentUsedNodeName, currentAcceptNodeName);
+        }
+      }
+
+      VisitorUtilites.currentAccept += 1;
+    }
+
+    if(statementContext.getChild(0) instanceof PerformStatementContext performStatementContext){
+      String currentPerformNodeName = "PERFORM:" + VisitorUtilites.currentPerform;
+
+      for(int i = 0; i < performStatementContext.children.size(); i++){
+        if(performStatementContext.children.get(i) instanceof PerformProcedureStatementContext performProcedureStatementContext){
+          ProcedureNameContext procedureNameContext = retrieveContext.getProcedureNameContext(performProcedureStatementContext);
+          ParagraphNameContext paragraphNameContext = retrieveContext.getParagraphNameContext(procedureNameContext);
+          CobolWordContext cobolWordContext = retrieveContext.getCobolWordContext(paragraphNameContext);
+
+          String paragraphName = cobolWordContext.children.get(0).getText();
+
+          nodeLinkManager.addNodeWithoutRoot(currentPerformNodeName, 20);
+          nodeLinkManager.addLink(programName, currentPerformNodeName);
+          nodeLinkManager.addLink(currentPerformNodeName, paragraphName);
+          nodeLinkManager.addLink(currentUsedNodeName, currentPerformNodeName);
+        }
+      }
+
+      VisitorUtilites.currentPerform += 1;
+    }
+
+    if(statementContext.getChild(0) instanceof GoToStatementContext goToStatementContext){
+      String currentGoToNodeName = "GOTO:" + VisitorUtilites.currentGoTo;
+
+      for (int i = 0; i < goToStatementContext.children.size(); i++) {
+        if (goToStatementContext.children.get(i) instanceof GoToStatementSimpleContext goToStatementSimpleContext) {
+          ProcedureNameContext procedureNameContext = retrieveContext.getProcedureNameContext(goToStatementSimpleContext);
+          ParagraphNameContext paragraphNameContext = retrieveContext.getParagraphNameContext(procedureNameContext);
+          CobolWordContext cobolWordContext = retrieveContext.getCobolWordContext(paragraphNameContext);
+
+          String paragraphName = cobolWordContext.children.get(0).getText();
+
+          nodeLinkManager.addNodeWithoutRoot(currentGoToNodeName, 21);
+          nodeLinkManager.addLink(programName, currentGoToNodeName);
+          nodeLinkManager.addLink(currentGoToNodeName, paragraphName);
+          nodeLinkManager.addNodeWithoutRoot(paragraphName, 2);
+          nodeLinkManager.addLink(currentUsedNodeName, currentGoToNodeName);
+        }
+      }
+
+      VisitorUtilites.currentGoTo += 1;
+    }
+
+    if (statementContext.getChild(0) instanceof SetStatementContext setStatementContext){
+      String currentSetNodeName = "SET:" + VisitorUtilites.currentSet;
+
+      for (int i = 0; i < setStatementContext.children.size(); i++) {
+        if (setStatementContext.children.get(i) instanceof SetToStatementContext setToStatementContext) {
+          SetToContext setToContext = retrieveContext.getSetToContext(setToStatementContext);
+          IdentifierContext identifierContext = retrieveContext.getIdentifierContext(setToContext);
+
+          String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
+
+          nodeLinkManager.addNodeWithoutRoot(currentSetNodeName, 22);
+          nodeLinkManager.addLink(programName, currentSetNodeName);
+          nodeLinkManager.addLink(currentSetNodeName, variableWithLevelNumber);
+          nodeLinkManager.addLink(currentUsedNodeName, currentSetNodeName);
+        }
+      }
+
+      VisitorUtilites.currentSet += 1;
+    }
+
+    if(statementContext.getChild(0) instanceof MoveStatementContext moveStatementContext){
+      String currentMoveNodeName = "MOVE:" + VisitorUtilites.currentMove;
+
+      for(int i = 0; i < moveStatementContext.children.size(); i++) {
+        if(moveStatementContext.children.get(i) instanceof MoveToStatementContext moveToStatementContext) {
+          for (int j = 0; j < moveToStatementContext.children.size(); j++) {
+            if (moveToStatementContext.children.get(j) instanceof IdentifierContext identifierContext) {
+              String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
+
+              nodeLinkManager.addNodeWithoutRoot(currentMoveNodeName, 24);
+              nodeLinkManager.addLink(programName, currentMoveNodeName);
+              nodeLinkManager.addLink(currentMoveNodeName, variableWithLevelNumber);
+              nodeLinkManager.addLink(currentUsedNodeName, currentMoveNodeName);
+            }
+          }
+        }
+      }
+
+      VisitorUtilites.currentMove += 1;
+    }
+
     if (statementContext.getChild(0) instanceof AddStatementContext addStatementContext) {
       if (addStatementContext.children.get(1) instanceof  AddToStatementContext addToStatementContext) {
 
@@ -922,6 +1102,13 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
   @Override
   public Object visitCallStatement(CallStatementContext ctx) {
     try {
+      if (isEvaluateStatement(ctx)) {
+        return super.visitCallStatement(ctx);
+      }
+
+      if (isIfStatement(ctx)) {
+        return super.visitCallStatement(ctx);
+      }
 
       // Get the called program
       String programName = retrieveProgramName.getProgramName(ctx);

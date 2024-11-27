@@ -749,4 +749,385 @@ public class VisitorTests {
 
     VisitorUtilites.resetCounters();
   }
+
+  // Test for: MOVE within IF
+  @Test
+  public void testIfMoveProgram() throws IOException {
+    String name = "if_move";
+
+    CharStream paragraphStream = CharStreams.fromFileName(programsPath + name + ".cob");
+
+    Cobol85Lexer lexer = new Cobol85Lexer(paragraphStream);
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    Cobol85Parser parser = new Cobol85Parser(tokens);
+
+    JsonUtilities jsonUtilities = new JsonUtilities();
+    Visitor visitor = new Visitor(jsonUtilities);
+
+    ParseTree tree = parser.startRule();
+
+    visitor.visit(tree);
+    Map<String, Object> map = new ObjectMapper().readValue(JsonUtilities.readJsonFile(jsonsPath + name + ".json"), new TypeReference<Map<String, Object>>() {});
+
+    assertThat(jsonUtilities.getNodes()).isNotNull();
+    assertThat(jsonUtilities.getLinks()).isNotNull();
+    assertThat(jsonUtilities.getNodes()).isEqualTo(map.get("nodes"));
+    assertThat(jsonUtilities.getLinks()).isEqualTo(map.get("links"));
+
+    VisitorUtilites.resetCounters();
+  }
+
+  // Test for: MOVE within EVALUATE
+  @Test
+  public void testEvaluateMoveProgram() throws IOException {
+    String name = "evaluate_move";
+
+    CharStream paragraphStream = CharStreams.fromFileName(programsPath + name + ".cob");
+
+    Cobol85Lexer lexer = new Cobol85Lexer(paragraphStream);
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    Cobol85Parser parser = new Cobol85Parser(tokens);
+
+    JsonUtilities jsonUtilities = new JsonUtilities();
+    Visitor visitor = new Visitor(jsonUtilities);
+
+    ParseTree tree = parser.startRule();
+
+    visitor.visit(tree);
+    Map<String, Object> map = new ObjectMapper().readValue(JsonUtilities.readJsonFile(jsonsPath + name + ".json"), new TypeReference<Map<String, Object>>() {});
+
+    assertThat(jsonUtilities.getNodes()).isNotNull();
+    assertThat(jsonUtilities.getLinks()).isNotNull();
+    assertThat(jsonUtilities.getNodes()).isEqualTo(map.get("nodes"));
+    assertThat(jsonUtilities.getLinks()).isEqualTo(map.get("links"));
+
+    VisitorUtilites.resetCounters();
+  }
+
+  // Test for: SET within IF
+  @Test
+  public void testIfSetProgram() throws IOException {
+    String name = "if_set";
+
+    CharStream paragraphStream = CharStreams.fromFileName(programsPath + name + ".cob");
+
+    Cobol85Lexer lexer = new Cobol85Lexer(paragraphStream);
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    Cobol85Parser parser = new Cobol85Parser(tokens);
+
+    JsonUtilities jsonUtilities = new JsonUtilities();
+    Visitor visitor = new Visitor(jsonUtilities);
+
+    ParseTree tree = parser.startRule();
+
+    visitor.visit(tree);
+    Map<String, Object> map = new ObjectMapper().readValue(JsonUtilities.readJsonFile(jsonsPath + name + ".json"), new TypeReference<Map<String, Object>>() {});
+
+    assertThat(jsonUtilities.getNodes()).isNotNull();
+    assertThat(jsonUtilities.getLinks()).isNotNull();
+    assertThat(jsonUtilities.getNodes()).isEqualTo(map.get("nodes"));
+    assertThat(jsonUtilities.getLinks()).isEqualTo(map.get("links"));
+
+    VisitorUtilites.resetCounters();
+  }
+
+  // Test for: SET within EVALUATE
+  @Test
+  public void testEvaluateSetProgram() throws IOException {
+    String name = "evaluate_set";
+
+    CharStream paragraphStream = CharStreams.fromFileName(programsPath + name + ".cob");
+
+    Cobol85Lexer lexer = new Cobol85Lexer(paragraphStream);
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    Cobol85Parser parser = new Cobol85Parser(tokens);
+
+    JsonUtilities jsonUtilities = new JsonUtilities();
+    Visitor visitor = new Visitor(jsonUtilities);
+
+    ParseTree tree = parser.startRule();
+
+    visitor.visit(tree);
+    Map<String, Object> map = new ObjectMapper().readValue(JsonUtilities.readJsonFile(jsonsPath + name + ".json"), new TypeReference<Map<String, Object>>() {});
+
+    assertThat(jsonUtilities.getNodes()).isNotNull();
+    assertThat(jsonUtilities.getLinks()).isNotNull();
+    assertThat(jsonUtilities.getNodes()).isEqualTo(map.get("nodes"));
+    assertThat(jsonUtilities.getLinks()).isEqualTo(map.get("links"));
+
+    VisitorUtilites.resetCounters();
+  }
+
+  // Test for: GO TO within IF
+  @Test
+  public void testIfGoToProgram() throws IOException {
+    String name = "if_goto";
+
+    CharStream paragraphStream = CharStreams.fromFileName(programsPath + name + ".cob");
+
+    Cobol85Lexer lexer = new Cobol85Lexer(paragraphStream);
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    Cobol85Parser parser = new Cobol85Parser(tokens);
+
+    JsonUtilities jsonUtilities = new JsonUtilities();
+    Visitor visitor = new Visitor(jsonUtilities);
+
+    ParseTree tree = parser.startRule();
+
+    visitor.visit(tree);
+    Map<String, Object> map = new ObjectMapper().readValue(JsonUtilities.readJsonFile(jsonsPath + name + ".json"), new TypeReference<Map<String, Object>>() {});
+
+    assertThat(jsonUtilities.getNodes()).isNotNull();
+    assertThat(jsonUtilities.getLinks()).isNotNull();
+    assertThat(jsonUtilities.getNodes()).isEqualTo(map.get("nodes"));
+    assertThat(jsonUtilities.getLinks()).isEqualTo(map.get("links"));
+
+    VisitorUtilites.resetCounters();
+  }
+
+  // Test for: GO TO within EVALUATE
+  @Test
+  public void testEvaluateGoToProgram() throws IOException {
+    String name = "evaluate_goto";
+
+    CharStream paragraphStream = CharStreams.fromFileName(programsPath + name + ".cob");
+
+    Cobol85Lexer lexer = new Cobol85Lexer(paragraphStream);
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    Cobol85Parser parser = new Cobol85Parser(tokens);
+
+    JsonUtilities jsonUtilities = new JsonUtilities();
+    Visitor visitor = new Visitor(jsonUtilities);
+
+    ParseTree tree = parser.startRule();
+
+    visitor.visit(tree);
+    Map<String, Object> map = new ObjectMapper().readValue(JsonUtilities.readJsonFile(jsonsPath + name + ".json"), new TypeReference<Map<String, Object>>() {});
+
+    assertThat(jsonUtilities.getNodes()).isNotNull();
+    assertThat(jsonUtilities.getLinks()).isNotNull();
+    assertThat(jsonUtilities.getNodes()).isEqualTo(map.get("nodes"));
+    assertThat(jsonUtilities.getLinks()).isEqualTo(map.get("links"));
+
+    VisitorUtilites.resetCounters();
+  }
+
+  // Test for: PERFORM within IF
+  @Test
+  public void testIfPerformProgram() throws IOException {
+    String name = "if_perform";
+
+    CharStream paragraphStream = CharStreams.fromFileName(programsPath + name + ".cob");
+
+    Cobol85Lexer lexer = new Cobol85Lexer(paragraphStream);
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    Cobol85Parser parser = new Cobol85Parser(tokens);
+
+    JsonUtilities jsonUtilities = new JsonUtilities();
+    Visitor visitor = new Visitor(jsonUtilities);
+
+    ParseTree tree = parser.startRule();
+
+    visitor.visit(tree);
+    Map<String, Object> map = new ObjectMapper().readValue(JsonUtilities.readJsonFile(jsonsPath + name + ".json"), new TypeReference<Map<String, Object>>() {});
+
+    assertThat(jsonUtilities.getNodes()).isNotNull();
+    assertThat(jsonUtilities.getLinks()).isNotNull();
+    assertThat(jsonUtilities.getNodes()).isEqualTo(map.get("nodes"));
+    assertThat(jsonUtilities.getLinks()).isEqualTo(map.get("links"));
+
+    VisitorUtilites.resetCounters();
+  }
+
+  // Test for: PERFORM within EVALUATE
+  @Test
+  public void testEvaluatePerformProgram() throws IOException {
+    String name = "evaluate_perform";
+
+    CharStream paragraphStream = CharStreams.fromFileName(programsPath + name + ".cob");
+
+    Cobol85Lexer lexer = new Cobol85Lexer(paragraphStream);
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    Cobol85Parser parser = new Cobol85Parser(tokens);
+
+    JsonUtilities jsonUtilities = new JsonUtilities();
+    Visitor visitor = new Visitor(jsonUtilities);
+
+    ParseTree tree = parser.startRule();
+
+    visitor.visit(tree);
+    Map<String, Object> map = new ObjectMapper().readValue(JsonUtilities.readJsonFile(jsonsPath + name + ".json"), new TypeReference<Map<String, Object>>() {});
+
+    assertThat(jsonUtilities.getNodes()).isNotNull();
+    assertThat(jsonUtilities.getLinks()).isNotNull();
+    assertThat(jsonUtilities.getNodes()).isEqualTo(map.get("nodes"));
+    assertThat(jsonUtilities.getLinks()).isEqualTo(map.get("links"));
+
+    VisitorUtilites.resetCounters();
+  }
+
+  // Test for: ACCEPT within IF
+  @Test
+  public void testIfAcceptProgram() throws IOException {
+    String name = "if_accept";
+
+    CharStream paragraphStream = CharStreams.fromFileName(programsPath + name + ".cob");
+
+    Cobol85Lexer lexer = new Cobol85Lexer(paragraphStream);
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    Cobol85Parser parser = new Cobol85Parser(tokens);
+
+    JsonUtilities jsonUtilities = new JsonUtilities();
+    Visitor visitor = new Visitor(jsonUtilities);
+
+    ParseTree tree = parser.startRule();
+
+    visitor.visit(tree);
+    Map<String, Object> map = new ObjectMapper().readValue(JsonUtilities.readJsonFile(jsonsPath + name + ".json"), new TypeReference<Map<String, Object>>() {});
+
+    assertThat(jsonUtilities.getNodes()).isNotNull();
+    assertThat(jsonUtilities.getLinks()).isNotNull();
+    assertThat(jsonUtilities.getNodes()).isEqualTo(map.get("nodes"));
+    assertThat(jsonUtilities.getLinks()).isEqualTo(map.get("links"));
+
+    VisitorUtilites.resetCounters();
+  }
+
+  // Test for: ACCEPT within EVALUATE
+  @Test
+  public void testEvaluateAcceptProgram() throws IOException {
+    String name = "evaluate_accept";
+
+    CharStream paragraphStream = CharStreams.fromFileName(programsPath + name + ".cob");
+
+    Cobol85Lexer lexer = new Cobol85Lexer(paragraphStream);
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    Cobol85Parser parser = new Cobol85Parser(tokens);
+
+    JsonUtilities jsonUtilities = new JsonUtilities();
+    Visitor visitor = new Visitor(jsonUtilities);
+
+    ParseTree tree = parser.startRule();
+
+    visitor.visit(tree);
+    Map<String, Object> map = new ObjectMapper().readValue(JsonUtilities.readJsonFile(jsonsPath + name + ".json"), new TypeReference<Map<String, Object>>() {});
+
+    assertThat(jsonUtilities.getNodes()).isNotNull();
+    assertThat(jsonUtilities.getLinks()).isNotNull();
+    assertThat(jsonUtilities.getNodes()).isEqualTo(map.get("nodes"));
+    assertThat(jsonUtilities.getLinks()).isEqualTo(map.get("links"));
+
+    VisitorUtilites.resetCounters();
+  }
+
+  // Test for: CALL within IF
+  @Test
+  public void testIfCallProgram() throws IOException {
+    String name = "if_call";
+
+    CharStream paragraphStream = CharStreams.fromFileName(programsPath + name + ".cob");
+
+    Cobol85Lexer lexer = new Cobol85Lexer(paragraphStream);
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    Cobol85Parser parser = new Cobol85Parser(tokens);
+
+    JsonUtilities jsonUtilities = new JsonUtilities();
+    Visitor visitor = new Visitor(jsonUtilities);
+
+    ParseTree tree = parser.startRule();
+
+    visitor.visit(tree);
+    Map<String, Object> map = new ObjectMapper().readValue(JsonUtilities.readJsonFile(jsonsPath + name + ".json"), new TypeReference<Map<String, Object>>() {});
+
+    assertThat(jsonUtilities.getNodes()).isNotNull();
+    assertThat(jsonUtilities.getLinks()).isNotNull();
+    assertThat(jsonUtilities.getNodes()).isEqualTo(map.get("nodes"));
+    assertThat(jsonUtilities.getLinks()).isEqualTo(map.get("links"));
+
+    VisitorUtilites.resetCounters();
+  }
+
+  // Test for: CALL within EVALUATE
+  @Test
+  public void testEvaluateCallProgram() throws IOException {
+    String name = "evaluate_call";
+
+    CharStream paragraphStream = CharStreams.fromFileName(programsPath + name + ".cob");
+
+    Cobol85Lexer lexer = new Cobol85Lexer(paragraphStream);
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    Cobol85Parser parser = new Cobol85Parser(tokens);
+
+    JsonUtilities jsonUtilities = new JsonUtilities();
+    Visitor visitor = new Visitor(jsonUtilities);
+
+    ParseTree tree = parser.startRule();
+
+    visitor.visit(tree);
+    Map<String, Object> map = new ObjectMapper().readValue(JsonUtilities.readJsonFile(jsonsPath + name + ".json"), new TypeReference<Map<String, Object>>() {});
+
+    assertThat(jsonUtilities.getNodes()).isNotNull();
+    assertThat(jsonUtilities.getLinks()).isNotNull();
+    assertThat(jsonUtilities.getNodes()).isEqualTo(map.get("nodes"));
+    assertThat(jsonUtilities.getLinks()).isEqualTo(map.get("links"));
+
+    VisitorUtilites.resetCounters();
+  }
+
+  // Test for: COPY within IF
+  @Test
+  public void testIfCopyProgram() throws IOException {
+    String name = "if_copy";
+
+    CharStream paragraphStream = CharStreams.fromFileName(programsPath + name + ".cob");
+
+    Cobol85Lexer lexer = new Cobol85Lexer(paragraphStream);
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    Cobol85Parser parser = new Cobol85Parser(tokens);
+
+    JsonUtilities jsonUtilities = new JsonUtilities();
+    Visitor visitor = new Visitor(jsonUtilities);
+
+    ParseTree tree = parser.startRule();
+
+    visitor.visit(tree);
+    Map<String, Object> map = new ObjectMapper().readValue(JsonUtilities.readJsonFile(jsonsPath + name + ".json"), new TypeReference<Map<String, Object>>() {});
+
+    assertThat(jsonUtilities.getNodes()).isNotNull();
+    assertThat(jsonUtilities.getLinks()).isNotNull();
+    assertThat(jsonUtilities.getNodes()).isEqualTo(map.get("nodes"));
+    assertThat(jsonUtilities.getLinks()).isEqualTo(map.get("links"));
+
+    VisitorUtilites.resetCounters();
+  }
+
+  // Test for: COPY within EVALUATE
+  @Test
+  public void testEvaluateCopyProgram() throws IOException {
+    String name = "evaluate_copy";
+
+    CharStream paragraphStream = CharStreams.fromFileName(programsPath + name + ".cob");
+
+    Cobol85Lexer lexer = new Cobol85Lexer(paragraphStream);
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    Cobol85Parser parser = new Cobol85Parser(tokens);
+
+    JsonUtilities jsonUtilities = new JsonUtilities();
+    Visitor visitor = new Visitor(jsonUtilities);
+
+    ParseTree tree = parser.startRule();
+
+    visitor.visit(tree);
+    Map<String, Object> map = new ObjectMapper().readValue(
+        JsonUtilities.readJsonFile(jsonsPath + name + ".json"),
+        new TypeReference<Map<String, Object>>() {
+        });
+
+    assertThat(jsonUtilities.getNodes()).isNotNull();
+    assertThat(jsonUtilities.getLinks()).isNotNull();
+    assertThat(jsonUtilities.getNodes()).isEqualTo(map.get("nodes"));
+    assertThat(jsonUtilities.getLinks()).isEqualTo(map.get("links"));
+
+    VisitorUtilites.resetCounters();
+  }
 }
