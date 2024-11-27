@@ -19,14 +19,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class ControllerUtilities {
   private final String OUTPUT_FOLDER = "src/main/resources/out/";
-  private final String OTHER_FILES_FOLDER = "other_files/";
 
   public String getOutputFolder() {
     return OUTPUT_FOLDER;
   }
 
   public String getOtherFilesFolder() {
-    return OTHER_FILES_FOLDER;
+      return "other_files/";
   }
 
   public Map<String, Object> updateJson(String filename, Map<String, Object> checkboxData) throws IOException {
@@ -91,12 +90,21 @@ public class ControllerUtilities {
   }
 
 
-  public Map<String, String> getProgramFiles(String fileDataFolder) {
+  public Map<String, String> getProgramFiles(String fileDataFolder, boolean areProgramFiles) {
     Map<String, String> programFiles = new HashMap<>();
     File folder = new File(fileDataFolder);
     File[] listOfFiles = folder.listFiles();
 
-    assert listOfFiles != null;
+    // Is necessary because when pushing a project with an empty "otherFiles" folder, the list of files is null
+    // This is because git does not track empty folders thus it won't be there
+    if (areProgramFiles) {
+      assert listOfFiles != null;
+    } else {
+      if (listOfFiles == null) {
+        return programFiles;
+      }
+    }
+
     for (File file : listOfFiles) {
       if (file.isFile()) {
         try {

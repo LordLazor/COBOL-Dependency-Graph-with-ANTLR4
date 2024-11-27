@@ -37,9 +37,9 @@ public class ViewController {
     String jsonData = JsonUtilities.readJsonFile(filename);
 
     String fileDataFolder = controllerUtilities.getOutputFolder()  + jsonFileName;
-    Map<String, String> programFiles = controllerUtilities.getProgramFiles(fileDataFolder);
+    Map<String, String> programFiles = controllerUtilities.getProgramFiles(fileDataFolder, true);
     String otherFilesFolder = controllerUtilities.getOutputFolder() + jsonFileName + "/" + controllerUtilities.getOtherFilesFolder();
-    Map<String, String> otherFiles = controllerUtilities.getProgramFiles(otherFilesFolder);
+    Map<String, String> otherFiles = controllerUtilities.getProgramFiles(otherFilesFolder, false);
 
     if(otherFiles.isEmpty()){
       otherFiles = null;
