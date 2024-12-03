@@ -1,7 +1,7 @@
 # COBOL Dependency Graph with ANTLR4 and Spring Boot
 
 ## Installing Maven
-You need to install maven to start the project
+Please install Maven to run the programm locally
 [Maven download link](https://maven.apache.org/download.cgi)
 
 ## Run Program with Maven installed locally
@@ -26,7 +26,7 @@ When clicking on `Upload file`, a new page opens up where you can upload a file.
 
 ![browse_file](./readMeImages/browse_file.png)
 
-If you click on `Durchsuchen`, which would be `Browse` if your PC is set to English, you can browse one file on your local machine. When clicking on `Upload`, the file will be uploaded to the project where it will be parsed and visited by ANTLR.
+If you click on `Browse`, you can browse one file on your local machine. When clicking on `Upload`, the file will be uploaded to the project where it will be parsed and visited by ANTLR.
 
 #### Folder
 
