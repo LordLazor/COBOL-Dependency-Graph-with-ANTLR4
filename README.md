@@ -110,7 +110,7 @@ Program files are all files with a .cbl or .cob ending. Other files are all othe
 * SUBTRACT
 * MULTIPLY
 * DIVIDE
-* IF
+* IF + ADD, SUBTRACT, etc. is marked as within IF with an edge
 * PERFORM
 * GO TO
 * SET

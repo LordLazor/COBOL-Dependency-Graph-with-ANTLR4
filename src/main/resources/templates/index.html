@@ -44,17 +44,43 @@
   </nav>
 
   <hr>
-  <h2>Information</h2>
-  <p>Due to the incompleteness of the COBOL85 ANTLR4 Grammar, sometimes terms are not supported.
-  <p>Please keep in mind that it's a COBOL<strong>85</strong> Dependency Graph tool.</p>
-  <ul>
-    <li><strong>EXEC</strong> can't be used because the grammar is incomplete and there is no time right now to complete the COBOL95 ANTLR4 Grammar.</li>
-    <li>There is a possibility that file(s) can't be correctly uploaded. Please ensure that each .cbl or .cob file has an IDENTIFICATION DIVISION with a corresponding PROGRAM-ID.</li>
-  </ul>
-  </p>
+  <h2>How to</h2>
+  <h3>Upload a file/folder</h3>
+  <p>Click <u><a th:href="@{/upload/file}">here</a></u> to upload a <strong>file</strong></p>
+  <p>Or click <u><a th:href="@{/upload/folder}">here</a></u> to upload a <strong>folder</strong></p>
 
-  <h2>Future Work</h2>
-  <p>Update the grammar and visualize Execute Statements</p>
+  <h3>View the generated dependency graph</h3>
+  <p>Click <u><a th:href="@{/view}">here</a></u> to <strong>view</strong> the generated dependency graph</p>
+
+  <hr>
+
+  <p>You can alternatively use the navigation bar</p>
+
+  <hr>
+  <h2>Features of visualization</h2>
+  <ul>
+    <li>Program </li>
+    <li>Paragraph</li>
+    <li> COPY</li>
+    <li> CALL</li>
+    <li> FILE-CONTROL and the corresponding Filename</li>
+    <li> WORKING-STORAGE SECTION</li>
+    <li> LOCAL-STORAGE SECTION</li>
+    <li> FILE SECTION</li>
+    <li> LINKAGE SECTION</li>
+    <li> Information about RENAMES</li>
+    <li> ADD</li>
+    <li> SUBTRACT</li>
+    <li> MULTIPLY</li>
+    <li> DIVIDE</li>
+    <li> IF + ADD, SUBTRACT, etc. is marked as within IF with an edge</li>
+    <li> PERFORM</li>
+    <li> GO TO</li>
+    <li> SET</li>
+    <li> EVALUATE + ADD, SUBTRACT, etc. is marked as within EVALUATE with an edge</li>
+    <li> MOVE</li>
+    <li> ACCEPT</li>
+  </ul>
 
 </div>
 
