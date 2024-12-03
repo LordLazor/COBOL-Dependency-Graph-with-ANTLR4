@@ -1388,8 +1388,8 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
         }
 
         List<String> link = new ArrayList<>();
-        link.add(variables.get(i).get(0) + ": " + variables.get(i).get(1));
         link.add(levelNumber + ": " + variableName);
+        link.add(variables.get(i).get(0) + ": " + variables.get(i).get(1));
         links.add(link);
 
       } else {
