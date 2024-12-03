@@ -375,6 +375,19 @@
 
         svg.selectAll("*").remove();
 
+        svg.append('defs').append('marker')
+        .attr("id", 'arrow')
+        .attr('viewBox', '-0 -5 10 10')
+        .attr('refX', circle_radius + 11)
+        .attr('refY', 0)
+        .attr('orient', 'auto')
+        .attr('markerWidth', 10)
+        .attr('markerHeight', 10)
+        .attr('xoverflow', 'visible')
+        .append('path')
+        .attr('d', 'M 0,-5 L 10 ,0 L 0,5')
+        .attr('fill', '#999')
+        .style('stroke', 'none');
 
         svg.append("rect")
         .attr("width", "100%")
@@ -406,6 +419,7 @@
         .selectAll("line")
         .data(graph.links)
         .enter().append("line")
+        .attr('marker-end','url(#arrow)')
         .attr("stroke", "#999")
         .attr("stroke-width", function(d) { return Math.sqrt(d.value); });
 
@@ -480,6 +494,22 @@
       function createGraph(jsonString){
         var svg = d3.select("svg")
         .attr("viewBox", `0 0 `+ width + ` ` + height);
+
+
+        svg.append('defs').append('marker')
+        .attr("id", 'arrow')
+        .attr('viewBox', '-0 -5 10 10')
+        .attr('refX', circle_radius + 11)
+        .attr('refY', 0)
+        .attr('orient', 'auto')
+        .attr('markerWidth', 10)
+        .attr('markerHeight', 10)
+        .attr('xoverflow', 'visible')
+        .append('path')
+        .attr('d', 'M 0,-5 L 10 ,0 L 0,5')
+        .attr('fill', '#999')
+        .style('stroke', 'none');
+
 
         var color = d3.scaleOrdinal(d3.schemeCategory20);
 
@@ -631,6 +661,7 @@
         .data(graph.links)
         .enter().append("line")
         .attr("stroke", "#000000")
+        .attr('marker-end','url(#arrow)')
         .attr("stroke-width", function(d) { return Math.sqrt(d.value); });
 
         var node = svg.append("g")
