@@ -1,21 +1,13 @@
 # COBOL Dependency Graph with ANTLR4 and Spring Boot
 
 ## Installing Maven
-You don't need to install maven to start the project
+You need to install maven to start the project
 [Maven download link](https://maven.apache.org/download.cgi)
 
 ## Run Program with Maven installed locally
 1. Navigate to the root folder of the application
 2. Open a shell in that directory
 3. Write `mvn spring-boot:run`
-4. Wait for the Spring Boot ASCII-Art to pop up
-5. Open your browser and type `localhost:8080`
-6. You are ready to use the tool
-
-# Run Program with Maven not installed locally
-1. Navigate to the root folder of the application
-2. Open a shell in that directory
-3. Write `mvnw spring-boot:run`
 4. Wait for the Spring Boot ASCII-Art to pop up
 5. Open your browser and type `localhost:8080`
 6. You are ready to use the tool
