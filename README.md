@@ -1,4 +1,4 @@
-# COBOL Dependency Graph with ANTLR4 and Spring Boot
+# COBOL Dependency Graph with ANTLR4, D3.js and Spring Boot
 
 ## Installing Maven
 Please install Maven to run the programm locally
