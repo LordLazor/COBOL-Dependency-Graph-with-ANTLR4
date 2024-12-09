@@ -1,0 +1,16 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. BeispielProgramm.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01 WS-Zahl1 PIC 9.
+       01 WS-Zahl2 PIC 9.
+       PROCEDURE DIVISION.
+       IF WS-Zahl1 > WS-Zahl2
+       	DISPLAY ""
+       ELSE
+       	DISPLAY ""
+       END-IF.
+       EVALUATE WS-Zahl1
+       	WHEN 1
+           DISPLAY ""
+       END-EVALUATE.

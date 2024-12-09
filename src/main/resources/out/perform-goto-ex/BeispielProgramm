@@ -1,0 +1,8 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. BeispielProgramm.
+       PROCEDURE DIVISION.
+       Beispiel-Paragraph.
+       	   DISPLAY "".
+       	
+       PERFORM Beispiel-Paragraph.
+       GO TO Beispiel-Paragraph.

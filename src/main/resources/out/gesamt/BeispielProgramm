@@ -1,0 +1,67 @@
+IDENTIFICATION DIVISION. 
+PROGRAM-ID. BeispielProgramm.
+ENVIRONMENT DIVISION.
+INPUT-OUTPUT SECTION.
+FILE-CONTROL.
+    SELECT BeispielDatei ASSIGN TO 'beispieldatei.txt'.
+DATA DIVISION.
+WORKING-STORAGE SECTION.
+01 WS-Mathematik.
+    05 WS-Ergebnis PIC 99.
+    05 WS-Zahl1 PIC 9.
+    05 WS-Zahl2 PIC 9.
+    05 WS-Zahl3 PIC 9.
+    05 WS-Zahl4 PIC 9.
+01 WS-Ist-Student.
+    88 WS-Ist-Student-Wahr VALUE "Y".
+    88 WS-Ist-Student-Falsch VALUE "N".
+FILE SECTION.
+FD BeispielDatei.
+01 FS-BeispielRecord.
+    05 FS-Adresse PIC X(10).
+    05 FS-Postleitzahl PIC X(10).
+linkage section.
+01 LK-Customer.
+    05 LK-KundeId PIC 9(10).
+    05 LK-KundeName PIC X(20).
+    05 LK-KundeAdresse PIC X(30).
+
+66 CustomerData RENAMES LS-CustomerName THROUGH LS-CustomerAddress.
+local-storage section.
+01 LS-Adresse.
+    05 LS-Vorname PIC X(11).
+    05 LS-Nachname PIC X(10).
+77 LS-Stadt PIC X(11) VALUE "Duesseldorf".
+
+PROCEDURE DIVISION.
+BeispielParagraph.
+    DISPLAY "Ein Paragraph".
+
+ADD WS-Zahl1 TO WS-Zahl2 GIVING WS-Ergebnis.
+SUBTRACT WS-Zahl1 FROM WS-Zahl2 GIVING WS-Ergebnis.
+MULTIPLY WS-Zahl1 BY WS-Zahl2 GIVING WS-Ergebnis.
+DIVIDE WS-Zahl1 BY WS-Zahl2 GIVING WS-Ergebnis.
+
+COPY ProcedureBook.cpy.
+CALL 'SubProgramm' USING WS-Mathematik.
+
+IF WS-Zahl1 = WS-Zahl2 AND WS-Zahl3 > WS-Zahl4
+  DISPLAY ""
+ELSE IF Ergebnis
+  DISPLAY ""
+END-IF.
+
+PERFORM BeispielParagraph.
+
+GO TO BeispielParagraph.
+
+SET WS-Zahl1 TO 10.
+
+EVALUATE WS-Zahl1
+  WHEN 1
+    ADD WS-Zahl2 TO WS-Zahl3 GIVING WS-Ergebnis
+END-EVALUATE.
+
+MOVE 1 TO WS-Zahl4.
+
+ACCEPT WS-Zahl4.

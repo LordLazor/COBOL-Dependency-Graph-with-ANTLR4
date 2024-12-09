@@ -254,7 +254,6 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
     String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
 
     nodeLinkManager.addNodeWithoutRoot(currentMultiplyNodeName, 17);
-    nodeLinkManager.addLink(programName, currentMultiplyNodeName);
     nodeLinkManager.addLink(currentMultiplyNodeName, variableWithLevelNumber);
   }
 
@@ -712,7 +711,6 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
     String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
 
     nodeLinkManager.addNodeWithoutRoot(currentAddNodeName, 15);
-    nodeLinkManager.addLink(programName, currentAddNodeName);
     nodeLinkManager.addLink(currentAddNodeName, variableWithLevelNumber);
     nodeLinkManager.addLink(currentUsedNodeName, currentAddNodeName);
   }
@@ -722,7 +720,6 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
         identifierContext);
 
     nodeLinkManager.addNodeWithoutRoot(currentSubtractNodeName, 16);
-    nodeLinkManager.addLink(programName, currentSubtractNodeName);
     nodeLinkManager.addLink(currentSubtractNodeName, variableWithLevelNumber);
     nodeLinkManager.addLink(currentUsedNodeName, currentSubtractNodeName);
   }
@@ -732,13 +729,13 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
 
     if (statementContext.getChild(0) instanceof ProcedureCopyStatementContext procedureCopyStatementContext) {
       String copyName = procedureCopyStatementContext.children.get(1).getText();
-      nodeLinkManager.addNodeAndLink(programName, copyName, 3);
+      nodeLinkManager.addNodeWithoutRoot(copyName, 3);
       nodeLinkManager.addLink(currentUsedNodeName, copyName);
     }
 
     if (statementContext.getChild(0) instanceof CallStatementContext callStatementContext) {
       String calledProgramName = callStatementContext.children.get(1).getText().replace("'", "").replace("\"", "");
-      nodeLinkManager.addNodeAndLink(programName, calledProgramName, 4);
+      nodeLinkManager.addNodeWithoutRoot(calledProgramName, 4);
       nodeLinkManager.addLink(currentUsedNodeName, calledProgramName);
 
       CallUsingPhraseContext callUsingPhraseContext = retrieveContext.getCallUsingPhraseContext(callStatementContext);
@@ -768,7 +765,6 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
           String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
 
           nodeLinkManager.addNodeWithoutRoot(currentAcceptNodeName, 25);
-          nodeLinkManager.addLink(programName, currentAcceptNodeName);
           nodeLinkManager.addLink(currentAcceptNodeName, variableWithLevelNumber);
           nodeLinkManager.addLink(currentUsedNodeName, currentAcceptNodeName);
         }
@@ -789,7 +785,6 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
           String paragraphName = cobolWordContext.children.get(0).getText();
 
           nodeLinkManager.addNodeWithoutRoot(currentPerformNodeName, 20);
-          nodeLinkManager.addLink(programName, currentPerformNodeName);
           nodeLinkManager.addLink(currentPerformNodeName, paragraphName);
           nodeLinkManager.addLink(currentUsedNodeName, currentPerformNodeName);
         }
@@ -810,7 +805,6 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
           String paragraphName = cobolWordContext.children.get(0).getText();
 
           nodeLinkManager.addNodeWithoutRoot(currentGoToNodeName, 21);
-          nodeLinkManager.addLink(programName, currentGoToNodeName);
           nodeLinkManager.addLink(currentGoToNodeName, paragraphName);
           nodeLinkManager.addNodeWithoutRoot(paragraphName, 2);
           nodeLinkManager.addLink(currentUsedNodeName, currentGoToNodeName);
@@ -831,7 +825,6 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
           String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
 
           nodeLinkManager.addNodeWithoutRoot(currentSetNodeName, 22);
-          nodeLinkManager.addLink(programName, currentSetNodeName);
           nodeLinkManager.addLink(currentSetNodeName, variableWithLevelNumber);
           nodeLinkManager.addLink(currentUsedNodeName, currentSetNodeName);
         }
@@ -850,7 +843,6 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
               String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
 
               nodeLinkManager.addNodeWithoutRoot(currentMoveNodeName, 24);
-              nodeLinkManager.addLink(programName, currentMoveNodeName);
               nodeLinkManager.addLink(currentMoveNodeName, variableWithLevelNumber);
               nodeLinkManager.addLink(currentUsedNodeName, currentMoveNodeName);
             }
@@ -941,7 +933,6 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
               (IdentifierContext) divideStatementContext.children.get(l));
 
           nodeLinkManager.addNodeWithoutRoot(currentDivideNodeName, 18);
-          nodeLinkManager.addLink(programName, currentDivideNodeName);
           nodeLinkManager.addLink(currentDivideNodeName, variableWithLevelNumber);
           nodeLinkManager.addLink(currentUsedNodeName, currentDivideNodeName);
         } else if (divideStatementContext.children.get(
@@ -953,7 +944,6 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
                   identifierContext);
 
               nodeLinkManager.addNodeWithoutRoot(currentDivideNodeName, 18);
-              nodeLinkManager.addLink(programName, currentDivideNodeName);
               nodeLinkManager.addLink(currentDivideNodeName, variableWithLevelNumber);
               nodeLinkManager.addLink(currentUsedNodeName, currentDivideNodeName);
             } else if (divideByGivingStatementContext.children.get(
@@ -965,7 +955,6 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
                   identifierContext);
 
               nodeLinkManager.addNodeWithoutRoot(currentDivideNodeName, 18);
-              nodeLinkManager.addLink(programName, currentDivideNodeName);
               nodeLinkManager.addLink(currentDivideNodeName, variableWithLevelNumber);
               nodeLinkManager.addLink(currentUsedNodeName, currentDivideNodeName);
             }
@@ -989,7 +978,6 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
               (IdentifierContext) multiplyStatementContext.children.get(l));
 
           nodeLinkManager.addNodeWithoutRoot(currentMultiplyNodeName, 17);
-          nodeLinkManager.addLink(programName, currentMultiplyNodeName);
           nodeLinkManager.addLink(currentMultiplyNodeName, variableWithLevelNumber);
           nodeLinkManager.addLink(currentUsedNodeName, currentMultiplyNodeName);
         } else if (multiplyStatementContext.children.get(l) instanceof MultiplyRegularContext multiplyRegularContext) {
@@ -1009,7 +997,6 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
                     identifierContext);
 
                 nodeLinkManager.addNodeWithoutRoot(currentMultiplyNodeName, 17);
-                nodeLinkManager.addLink(programName, currentMultiplyNodeName);
                 nodeLinkManager.addLink(currentMultiplyNodeName, variableWithLevelNumber);
                 nodeLinkManager.addLink(currentUsedNodeName, currentMultiplyNodeName);
               }

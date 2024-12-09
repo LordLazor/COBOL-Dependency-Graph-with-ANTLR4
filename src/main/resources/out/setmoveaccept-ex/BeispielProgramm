@@ -1,0 +1,12 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. BeispielProgramm.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01 WS-Zahl1 PIC 9.
+       01 IsStudent PIC X(1).
+       	88 Student VALUE "Y".
+       	88 NoStudent VALUE "N".
+       PROCEDURE DIVISION.
+       SET NoStudent TO TRUE.
+       MOVE 1 TO WS-Zahl1.
+       ACCEPT WS-Zahl1.
