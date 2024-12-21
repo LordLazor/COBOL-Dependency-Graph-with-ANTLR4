@@ -54,7 +54,7 @@ public class ViewController {
   }
 
 
-  @PostMapping("/view/updateGraph")
+  @PostMapping("/view/updategraph")
   @ResponseBody
   public String updateGraph(@RequestBody Map<String, Object> checkboxData) throws IOException {
     String filename = (String) checkboxData.get("filename");
