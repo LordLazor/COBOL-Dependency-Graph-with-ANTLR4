@@ -76,7 +76,7 @@ Sometimes if the graph is too big, nodes will fly out of the SVG where the graph
 
 #### Dependency Graph
 
-Below is an example of a graph
+Below is an example of a huge graph
 
 ![dependency_graph](./readMeImages/graph_ex.png)
 
