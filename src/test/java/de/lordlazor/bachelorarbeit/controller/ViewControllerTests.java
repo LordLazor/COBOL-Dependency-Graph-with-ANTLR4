@@ -39,7 +39,7 @@ public class ViewControllerTests {
     ObjectMapper objectMapper = new ObjectMapper();
     String json = objectMapper.writeValueAsString(checkboxData);
 
-    mockMvc.perform(post("/view/updateGraph")
+    mockMvc.perform(post("/view/updategraph")
             .contentType(MediaType.APPLICATION_JSON)
             .content(json))
         .andExpect(status().isOk());

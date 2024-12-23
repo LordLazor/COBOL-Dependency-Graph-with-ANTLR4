@@ -53,6 +53,7 @@ import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.LinkageSectionContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.LiteralContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.LocalStorageSectionContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MoveStatementContext;
+import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MoveToSendingAreaContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MoveToStatementContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MultDivsContext;
 import de.lordlazor.bachelorarbeit.grammar.Cobol85Parser.MultiplyGivingContext;
@@ -693,6 +694,15 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
               nodeLinkManager.addLink(programName, currentMoveNodeName);
               nodeLinkManager.addLink(currentMoveNodeName, variableWithLevelNumber);
             }
+            else if(moveToStatementContext.children.get(j) instanceof MoveToSendingAreaContext moveToSendingAreaContext) {
+              if(moveToSendingAreaContext.children.get(0) instanceof IdentifierContext identifierContext){
+                String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
+
+                nodeLinkManager.addNodeWithoutRoot(currentMoveNodeName, 24);
+                nodeLinkManager.addLink(programName, currentMoveNodeName);
+                nodeLinkManager.addLink(currentMoveNodeName, variableWithLevelNumber);
+              }
+            }
           }
         }
       }
@@ -845,6 +855,15 @@ public class Visitor extends Cobol85BaseVisitor<Object> {
               nodeLinkManager.addNodeWithoutRoot(currentMoveNodeName, 24);
               nodeLinkManager.addLink(currentMoveNodeName, variableWithLevelNumber);
               nodeLinkManager.addLink(currentUsedNodeName, currentMoveNodeName);
+            }
+            else if(moveToStatementContext.children.get(j) instanceof MoveToSendingAreaContext moveToSendingAreaContext) {
+              if(moveToSendingAreaContext.children.get(0) instanceof IdentifierContext identifierContext){
+                String variableWithLevelNumber = extractVariableWithLevelNumber(identifierContext);
+
+                nodeLinkManager.addNodeWithoutRoot(currentMoveNodeName, 24);
+                nodeLinkManager.addLink(currentMoveNodeName, variableWithLevelNumber);
+                nodeLinkManager.addLink(currentUsedNodeName, currentMoveNodeName);
+              }
             }
           }
         }
